@@ -4,14 +4,14 @@
 
 - frontend/: frontend application and user interface
 - backend/: server-side application, API and business logic
-- infraestructure/: docker and deployment configuration
+- infrastructure/: docker and deployment configuration
 - README.md project overview and setup instructions
 - CONTRIBUTING.md: contribution guidelines
 - .gitignore: files excluded from Git
 
 ## Branching strategy
 
-Two important branches:
+The project uses two main branches:
 
 - main: stable and deliverable versions
 - develop: integration branch for completed features
@@ -24,6 +24,8 @@ From this point, the following branches should be created from **develop** and m
 - docs/<description>: documentation changes
 - refactor/<description>: code refactoring
 
+When a release is ready, changes can be merged from **develop** into **main** after a team review
+
 
 ## Commit message conventions
 
@@ -35,10 +37,11 @@ The commit messages follow Conventional Commits:
 - test: test changes
 - chore: maintenance tasks
 
-A few examples:
+Examples:
 - feat: add user authentication
 - fix: handle invalid credentials
 - docs: document repository workflow
+- chore: add gitignore rules
 
 ## Pull Request and code review procedure
 
@@ -61,6 +64,12 @@ Reviewers should check:
 - Unnecessary files or unrelated changes
 
 Reviews should be constructive and focused on improving the code
+
+## .gitignore and Secrets
+
+- Do not commit environment files containing real secrets, such as .env
+- Never commit passwords, API keys, tokens or other credentials
+- If any environment template is needed, use ``.env.example`` with placeholder values only
 
 
 ## General Guidelines
