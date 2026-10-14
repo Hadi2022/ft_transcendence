@@ -22,4 +22,3 @@
 - [ ] My changes follow the project guidelines.
 - [ ] I have reviewed my own changes.
 - [ ] I have not included secrets or unnecessary files.
-- [ ] I have requested a review from a teammate.
