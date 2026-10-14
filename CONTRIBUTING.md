@@ -24,6 +24,13 @@ From this point, the following branches should be created from **develop** and m
 - docs/<description>: documentation changes
 - refactor/<description>: code refactoring
 
+Examples:
+
+- feature/user-authentication
+- fix/login-validation
+- docs/update-contributing
+- refactor/database-service
+
 When a release is ready, changes can be merged from **develop** into **main** after a team review
 
 
@@ -50,9 +57,10 @@ Examples:
 3. Push the branch to the remote repository
 4. Open a Pull Request targeting **develop** branch
 5. Describe the changes and explain how to test them
-6. Request a review from at least one teammate
-7. Address review comments and ensure relevant checks pass
-8. Merge only after approval
+6. Each Pull Request require approval from at least one team member other than the auhor
+7. All review comments must be resolved before merging
+8. Direct commits to both main and develop are not allowed.
+9. All changes must be integrated through Pull Requests.
 
 Direct commits to **main** are not allowed
 
