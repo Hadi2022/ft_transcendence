@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by iherman-, apestana, aortigos, ...*
+*This project has been created as part of the 42 curriculum by iherman-, apestana, aortigos, manuelfe...*
 
 ## Description
 
@@ -14,7 +14,7 @@ Defines the priorities, maintains the backlog, and validates completed work.
 Defines the architecture and technical stack, sets code standards, and reviews critical changes.
 - **Scrum Master**: apestana
 Organizes meetings and planning, tracks progress and deadlines, and helps remove blockers.
-- **Developers**: aortigos, iherman-, apestana
+- **Developers**: aortigos, iherman-, apestana, manuelfe
 Write code for features and modules, take part in code reviews, test their work, and document it.
 
 ## Project Management
