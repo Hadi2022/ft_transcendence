@@ -1,0 +1,44 @@
+
+openapi: 3.1.2
+
+info:
+  title: Transcendence API
+  version: 0.1.0
+  description: REST API for the ft_transcendence project
+
+servers:
+  - url: /api
+    description: API base path
+
+paths:
+  /status:
+    get:
+      tags:
+        - System
+      summary: Get API status
+      description: Returns the current availability status of the API
+      operationId: getApiStatus
+      security: []
+
+      responses:
+        '200':
+          description: API is operational
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: object
+                    required:
+                      - status
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - ok
+              example:
+                data:
+                  status: ok
