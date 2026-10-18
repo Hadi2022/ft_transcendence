@@ -24,7 +24,6 @@ export class ApiRequestError extends Error {
   }
 }
 
-
 type ApiSuccess<T> = {
   data: T
 }
@@ -34,12 +33,32 @@ type ApiFailure = {
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
-  const response = await fetch(`/api${path}`)
+  let response: Response
 
-  const body: ApiSuccess<T> | ApiFailure = await response.json()
+  try {
+    response = await fetch(`/api${path}`)
+  } catch {
+    throw new ApiRequestError(
+      0,
+      'NETWORK_ERROR',
+      'Unable to connect to the backend'
+    )
+  }
+
+  let body: ApiSuccess<T> | ApiFailure
+
+  try {
+    body = await response.json()
+  } catch {
+    throw new ApiRequestError(
+      response.status,
+      'INVALID_RESPONSE',
+      'The backend returned an invalid JSON response'
+    )
+  }
 
   if (!response.ok) {
-    if ('error' in body) {
+    if ('error' in body && body.error) {
       throw new ApiRequestError(
         response.status,
         body.error.code,
@@ -50,13 +69,17 @@ export async function apiGet<T>(path: string): Promise<T> {
 
     throw new ApiRequestError(
       response.status,
-      'UNEXPECTED_ERROR',
+      'HTTP_ERROR',
       `HTTP error ${response.status}`
     )
   }
 
   if (!('data' in body)) {
-    throw new Error('Invalid API response: missing data field')
+    throw new ApiRequestError(
+      response.status,
+      'INVALID_RESPONSE',
+      'The API response is missing the data field'
+    )
   }
 
   return body.data
