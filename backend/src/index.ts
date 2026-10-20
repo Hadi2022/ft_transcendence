@@ -1,12 +1,12 @@
 const process = require("process");
 const express = require ("express");
 
-const healthRoutes = require('./routes/api/health.ts');
+const apiRoutes = require('./routes/apiRoutes.ts');
 // const connectDB = require('./db/connectDB.ts');
 
 const app = express();
 
-app.use('/health', healthRoutes);
+app.use('/', apiRoutes);
 
 const port = process.env.PORT || 3000;
 const start = async () => {
