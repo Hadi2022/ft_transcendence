@@ -1,11 +1,11 @@
 import type { Request, Response } from 'express'
 
 const { validateRegisterInput } = require('../services/userValidation.ts')
-const { hashPassword } = require('../services/passwordService.ts')
+const { prepareUser } = require('../services/userService.ts')
 
 async function registerUser(req: Request, res: Response): Promise<void> {
-    const { username, password } = validateRegisterInput(req.body)
-    const passwordHash = await hashPassword(password)
+    const input = validateRegisterInput(req.body)
+    const userData = await prepareUser(input)
 
 	// Not implemented yet: Persist the user with Prisma.
     // Never store or return plaintext passwords.
