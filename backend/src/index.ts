@@ -1,14 +1,17 @@
 const process = require("process");
 const express = require ("express");
+const cookieParser = require('cookie-parser')
 
 const apiRoutes = require('./routes/apiRoutes.ts');
 // const connectDB = require('./db/connectDB.ts');
 
 const app = express();
 
-app.use('/', apiRoutes);
+app.use(cookieParser())
 
-const port = process.env.PORT || 3000;
+app.use('/', apiRoutes)
+
+const port = process.env.PORT || 3000
 const start = async () => {
 	
 	// await connectDB();
