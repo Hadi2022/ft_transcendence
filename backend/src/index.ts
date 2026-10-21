@@ -6,6 +6,7 @@ const apiRoutes = require('./routes/apiRoutes.ts');
 
 const app = express();
 
+app.use(express.json()); // Parse incoming JSON request bodies
 app.use('/', apiRoutes);
 
 const port = process.env.PORT || 3000;
