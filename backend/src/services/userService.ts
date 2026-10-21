@@ -1,13 +1,10 @@
+import type { NewUserData } from '../types/user.ts'
+
 const { hashPassword } = require('./passwordService.ts')
 
 type CreateUserInput = {
     username: string
     password: string
-}
-
-type NewUserData = {
-    username: string
-    passwordHash: string
 }
 
 async function prepareUser(input: CreateUserInput): Promise<NewUserData> {

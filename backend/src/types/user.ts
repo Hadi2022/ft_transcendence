@@ -1,0 +1,8 @@
+export type NewUserData = {
+    username: string
+    passwordHash: string
+}
+
+export type User = NewUserData & {
+    id: string
+}
