@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express'
 
-const { validateRegisterInput } = require('../services/userValidation.ts');
-const { hashPassword } = require('../services/passwordService.ts');
+const { validateRegisterInput } = require('../services/userValidation.ts')
+const { hashPassword } = require('../services/passwordService.ts')
 
 async function registerUser(req: Request, res: Response): Promise<void> {
     const { username, password } = validateRegisterInput(req.body)
