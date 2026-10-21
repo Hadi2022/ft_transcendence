@@ -1,6 +1,7 @@
-import type { NewUserData } from '../types/user.ts'
+import type { NewUserData, User } from '../types/user.ts'
 
-const { hashPassword } = require('./passwordService.ts')
+const { hashPassword, verifyPassword } = require('./passwordService.ts')
+const userRepository = require('../repositories/userRepository.ts')
 
 type CreateUserInput = {
     username: string
@@ -16,6 +17,41 @@ async function prepareUser(input: CreateUserInput): Promise<NewUserData> {
     }
 }
 
+async function createUser(input: CreateUserInput): Promise<User> {
+    const existingUser = await userRepository.findUserByUsername(
+        input.username
+    )
+
+    if (existingUser) {
+        throw new Error('Username already exists')
+    }
+
+    const userData = await prepareUser(input)
+
+    return userRepository.createUser(userData)
+}
+
+async function isValidCredentials(
+    username: string,
+    password: string
+): Promise<User | null> {
+    const user = await userRepository.findUserByUsername(username)
+
+    if (!user) {
+        return null
+    }
+
+    const isValid = await verifyPassword(user.passwordHash, password)
+
+    if (!isValid) {
+        return null
+    }
+
+    return user
+}
+
 module.exports = {
-    prepareUser
+    prepareUser,
+    createUser,
+    isValidCredentials
 }
