@@ -10,7 +10,7 @@ export default function MainLayout() {
                 </nav>
             </header>
 
-            <main>
+            <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
                 <Outlet />
             </main>
 
