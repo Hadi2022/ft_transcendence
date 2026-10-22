@@ -2,7 +2,7 @@ import { NavLink, Outlet } from "react-router";
 
 export default function MainLayout() {
     return (
-        <div>
+        <div className="bg-fondo">
             <header className="flex flex-row justify-between">
                 <h1>Transcendence</h1>
                 <nav className="flex flex-row justify-between">
