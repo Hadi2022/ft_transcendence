@@ -1,12 +1,14 @@
 
 const argon2 = require('argon2')
 
-const sessionService = require('../services/sessionService')
-const userService = require('../services/userService')
+const sessionService = require('../services/sessionService.ts')
+const userService = require('../services/userService.ts')
 
-const openSession = async (req, res) => {
+import type { Request, Response } from 'express';
 
-	if (req.user)
+const openSession = async (req: Request, res: Response) => {
+
+	if (req.session)
 	{
 		// 409 conflict
 	}
@@ -17,8 +19,9 @@ const openSession = async (req, res) => {
 
 	const authcookie = await sessionService.generateSession(user)
 
-	res.cookie('auth', authcookie._id, {
+	res.cookie('session', authcookie._id, {
 		httpOnly: true,
+		// Will add more later, currently just for production and testing
 	})
 
 	res.status(201).json({
@@ -28,20 +31,30 @@ const openSession = async (req, res) => {
 	})
 }
 
-const closeSession = (req, res) => {
+const closeSession = (req: Request, res: Response) => {
 
-	if (!req.cookies.session)
+	sessionService.removeSession(req.params.id);
+
+	res.status(204).end();
+}
+
+const closeCurrentSession = (req: Request, res: Response) => {
+
+	const sessionID = req.cookies.session?.id
+
+	if (!sessionID)
 	{
 		res.status(204).end()
 		return ;
 	}
 
-	sessionService.removeSession(req.cookies.session.id);
+	sessionService.removeSession(sessionID);
 
 	res.status(204).end();
 }
 
 module.exports = {
 	openSession,
-	closeSession
+	closeSession,
+	closeCurrentSession,
 }
