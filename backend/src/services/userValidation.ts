@@ -50,7 +50,7 @@ function validateRegisterInput(input: unknown): RegisterInput {
         throw new UserValidationError('Password must contain between 6 and 128 characters')
     }
 
-	if (!/[^a-zA-Z0-9]/.test(password)) {
+	if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(password)) {
 		throw new UserValidationError('Password must contain at least one special character')
 	}
 
