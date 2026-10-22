@@ -2,19 +2,21 @@ import { NavLink, Outlet } from "react-router";
 
 export default function MainLayout() {
     return (
-        <div className="bg-fondo">
-            <header className="flex flex-row justify-between">
+        <div className="flex flex-col bg-fondo text-texto min-h-screen">
+            <header className="flex flex-row justify-between p-5">
                 <h1>Transcendence</h1>
                 <nav className="flex flex-row justify-between">
                     <NavLink to="#">Perfil</NavLink>
                 </nav>
             </header>
 
-            <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
+            <main className="mx-auto w-full
+                            max-w-5xl flex-1
+                            px-4 py-6">
                 <Outlet />
             </main>
 
-            <footer>
+            <footer className="py-10 px-5">
                 <p>@ {new Date().getFullYear()} Transcendence</p>
             </footer>
 
