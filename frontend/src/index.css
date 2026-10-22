@@ -1,1 +1,14 @@
-@import "tailwindcss"
+@import "tailwindcss";
+
+@theme {
+    --color-fondo: #0b0f19;        /* el 60%: fondo de la página */
+    --color-superficie: #151b2b;   /* tarjetas, modales, menús */
+    --color-texto: #e6e9f0;
+    --color-texto-suave: #8b93a7;  /* textos secundarios */
+    --color-primario: #22d3ee;     /* el acento: botones, enlaces */
+    --color-peligro: #f43f5e;      /* errores, "abandonar partida" */
+    --color-exito: #4ade80;        /* victoria, "conectado" */
+
+    --font-sans: "Space Grotesk Variable", sans-serif;
+    --font-mono: "JetBrains Mono Variable", monospace;
+}
