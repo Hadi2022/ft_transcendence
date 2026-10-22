@@ -1,5 +1,6 @@
 import type { NewUserData, User } from '../types/user.ts'
 
+const { UserConflictError } = require('../errors/userErrors.ts')
 const { hashPassword, verifyPassword } = require('./passwordService.ts')
 const userRepository = require('../repositories/userRepository.ts')
 
@@ -24,17 +25,17 @@ async function createUser(input: CreateUserInput): Promise<User> {
         input.username
     )
 
-    if (existingUser) {
-        throw new Error('Username already exists')
-    }
+	if (existingUser) {
+		throw new UserConflictError('Username already exists')
+	}
 
     const existingEmail = await userRepository.findUserByEmail(
         input.email
     )
 
-    if (existingEmail) {
-        throw new Error('Email already exists')
-    }
+	if (existingEmail) {
+		throw new UserConflictError('Email already exists')
+	}
 
     const userData = await prepareUser(input)
 
