@@ -1,5 +1,6 @@
 export type NewUserData = {
     username: string
+	email: string
     passwordHash: string
 }
 

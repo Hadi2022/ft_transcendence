@@ -1,5 +1,6 @@
 type RegisterInput = {
     username: string
+    email: string
     password: string
 }
 
@@ -11,7 +12,7 @@ function validateRegisterInput(input: unknown): RegisterInput {
     }
 
     const data = input as Record<string, unknown>
-    const { username, password } = data
+    const { username, email, password } = data
 
     if (typeof username !== 'string') {
         throw new Error('Username must be a string')
@@ -22,18 +23,40 @@ function validateRegisterInput(input: unknown): RegisterInput {
     }
 
     if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-        throw new Error('Username may only contain letters, numbers and underscores')
+        throw new Error(
+            'Username may only contain letters, numbers and underscores'
+        )
+    }
+
+    if (typeof email !== 'string') {
+        throw new Error('Email must be a string')
+    }
+
+    const normalizedEmail = email.trim().toLowerCase()
+
+    if (
+        normalizedEmail.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)
+    ) {
+        throw new Error('Invalid email address')
     }
 
     if (typeof password !== 'string') {
         throw new Error('Password must be a string')
     }
 
-    if (password.length < 12 || password.length > 128) {
+    if (password.length < 6 || password.length > 128) {
         throw new Error('Password must contain between 12 and 128 characters')
     }
 
-    return { username, password }
+	if (!/[^a-zA-Z0-9]/.test(password)) {
+		throw new Error('Password must contain at least one special character')
+	}
+
+    return {
+        username,
+        email: normalizedEmail,
+        password
+    }
 }
 
 module.exports = { validateRegisterInput }

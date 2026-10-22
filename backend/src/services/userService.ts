@@ -5,6 +5,7 @@ const userRepository = require('../repositories/userRepository.ts')
 
 type CreateUserInput = {
     username: string
+    email: string
     password: string
 }
 
@@ -13,6 +14,7 @@ async function prepareUser(input: CreateUserInput): Promise<NewUserData> {
 
     return {
         username: input.username,
+        email: input.email,
         passwordHash
     }
 }
@@ -24,6 +26,14 @@ async function createUser(input: CreateUserInput): Promise<User> {
 
     if (existingUser) {
         throw new Error('Username already exists')
+    }
+
+    const existingEmail = await userRepository.findUserByEmail(
+        input.email
+    )
+
+    if (existingEmail) {
+        throw new Error('Email already exists')
     }
 
     const userData = await prepareUser(input)
