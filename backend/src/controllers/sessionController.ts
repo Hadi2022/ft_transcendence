@@ -17,9 +17,9 @@ const openSession = async (req: Request, res: Response) => {
 
 	const user = await userService.isValidCredentials(username, password) /* Somthing like this */
 
-	const authcookie = await sessionService.generateSession(user)
+	const session = await sessionService.generateSession(user)
 
-	res.cookie('session', authcookie._id, {
+	res.cookie('sessionID', session.id, {
 		httpOnly: true,
 		// Will add more later, currently just for production and testing
 	})
@@ -40,7 +40,7 @@ const closeSession = (req: Request, res: Response) => {
 
 const closeCurrentSession = (req: Request, res: Response) => {
 
-	const sessionID = req.cookies.session?.id
+	const sessionID = req.session?.id
 
 	if (!sessionID)
 	{
