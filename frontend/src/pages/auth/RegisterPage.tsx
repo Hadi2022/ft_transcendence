@@ -42,7 +42,7 @@ export default function RegisterPage() {
                                 placeholder="joaquin42"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                minLength={3} maxLength={33}
+                                minLength={3} maxLength={30}
                                 required />
 
                 { /* Email input*/ }
@@ -50,7 +50,7 @@ export default function RegisterPage() {
                                 placeholder="your@email.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                minLength={6} maxLength={33}
+                                minLength={6} maxLength={254}
                                 required />
             
                 { /* Password input */ }
@@ -58,7 +58,7 @@ export default function RegisterPage() {
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                minLength={3} maxLength={33}
+                                minLength={6} maxLength={128}
                                 required />
 
                 { /* Confirm password input */ }
@@ -66,7 +66,7 @@ export default function RegisterPage() {
                                 placeholder="••••••••"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                minLength={3} maxLength={33}
+                                minLength={6} maxLength={128}
                                 required />
                 
                 { /* Register button */ }
