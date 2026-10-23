@@ -28,7 +28,7 @@ export default function RegisterPage() {
     }
     
     return (
-        <div className="text-texto">
+        <div className="text-text">
             <div className="mb-10">
                 <h1 className="text-2xl font-bold tracking-tight">Create your account</h1>
                 <p className="text-sm text-zinc-500">It will only take a minute</p>

@@ -22,7 +22,7 @@ export default function LoginPage() {
     }
     
     return (
-        <div className="text-texto">
+        <div className="text-text">
             <div className="mb-10">
                 <h1 className="text-2xl font-bold tracking-tight">Log In</h1>
                 <p className="text-sm text-zinc-500">Discover a new world</p>
