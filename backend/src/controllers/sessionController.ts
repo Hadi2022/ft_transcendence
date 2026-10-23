@@ -1,17 +1,16 @@
 
-const argon2 = require('argon2')
-
 const sessionService = require('../services/sessionService.ts')
 const userService = require('../services/userService.ts')
+
+const sessionConstants = require('../constants/session.ts')
 
 import type { Request, Response } from 'express';
 
 const openSession = async (req: Request, res: Response) => {
 
-	if (req.session)
-	{
-		// 409 conflict
-	}
+	// if (req.session)
+		// throw new ConflictError('Session already exists') // will be implemented with /types/errors.ts
+
 
 	const {username, password} = req.body
 
@@ -19,8 +18,9 @@ const openSession = async (req: Request, res: Response) => {
 
 	const session = await sessionService.generateSession(user)
 
-	res.cookie('sessionID', session.id, {
+	res.cookie(sessionConstants.COOKIE_NAME, session.id, {
 		httpOnly: true,
+		expires: session.expiresAt,
 		// Will add more later, currently just for production and testing
 	})
 
@@ -40,7 +40,7 @@ const closeSession = async (req: Request, res: Response) => {
 
 const closeCurrentSession = async (req: Request, res: Response) => {
 
-	const sessionID = req.session?.id
+	const sessionID = req.session?.userId
 
 	if (!sessionID)
 	{
