@@ -31,14 +31,14 @@ const openSession = async (req: Request, res: Response) => {
 	})
 }
 
-const closeSession = (req: Request, res: Response) => {
+const closeSession = async (req: Request, res: Response) => {
 
-	sessionService.removeSession(req.params.id);
+	await sessionService.removeSession(req.params.id);
 
 	res.status(204).end();
 }
 
-const closeCurrentSession = (req: Request, res: Response) => {
+const closeCurrentSession = async (req: Request, res: Response) => {
 
 	const sessionID = req.session?.id
 
@@ -48,7 +48,7 @@ const closeCurrentSession = (req: Request, res: Response) => {
 		return ;
 	}
 
-	sessionService.removeSession(sessionID);
+	await sessionService.removeSession(sessionID);
 
 	res.status(204).end();
 }
