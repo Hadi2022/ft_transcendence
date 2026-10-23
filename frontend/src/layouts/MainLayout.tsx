@@ -2,7 +2,7 @@ import { NavLink, Outlet } from "react-router";
 
 export default function MainLayout() {
     return (
-        <div className="flex flex-col bg-transcendence text-texto min-h-screen">
+        <div className="flex flex-col bg-transcendence text-text min-h-screen">
             <header className="flex flex-row justify-between p-5">
                 <h1>Transcendence</h1>
                 <nav className="flex flex-row justify-between">
