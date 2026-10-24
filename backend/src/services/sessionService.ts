@@ -27,6 +27,6 @@ export const closeSessionById = async (id: string) => {
 	return await sessionRepository.deleteById(id)
 }
 
-export const closeSessionByToken = async (id: string) => {
-	return await sessionRepository.deleteById(id)
+export const closeSessionByTokenHash = async (tokenHash: string) => {
+	return await sessionRepository.deleteByTokenHash(tokenHash)
 }

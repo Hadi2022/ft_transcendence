@@ -39,7 +39,7 @@ const closeSession = async (req: Request, res: Response) => {
 
 const closeCurrentSession = async (req: Request, res: Response) => {
 
-	const sessionID = req.session
+	const sessionID = req.session.id
 
 	if (!sessionID)
 	{

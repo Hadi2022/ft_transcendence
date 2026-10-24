@@ -20,3 +20,7 @@ export const findById = async (id: string)=> {
 export const deleteById = async (id: string) => {
 	return prisma.session.where({ id: id }).delete()
 }
+
+export const deleteByTokenHash = async (tokenHash: string) => {
+	return prisma.session.where({ tokenHash: tokenHash }).delete()
+}
