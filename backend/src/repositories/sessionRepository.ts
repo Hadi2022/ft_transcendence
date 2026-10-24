@@ -1,18 +1,22 @@
 
-const findSessionById = async (id: string) => {
-	return 
+import { prisma } from '../db/prisma.ts'
+
+type CreateSessionData = {
+	userID: string
+	tokenHash: string
+	expiresAt: Date
+	ipOrigin?: string
+	userAgent?: string
 }
 
-const saveSession = async (session: object) => {
-	return 
+export const create = async (data: CreateSessionData) => {
+	return prisma.session.create({ data })
 }
 
-const deleteSessionById = async (id: string) => {
-	return 
+export const findById = async (id: string)=> {
+	return prisma.session.where({ id: id })
 }
 
-module.exports = {
-	findSessionById,
-	saveSession,
-	deleteSessionById,
+export const deleteById = async (id: string) => {
+	return prisma.session.where({ id: id }).delete()
 }

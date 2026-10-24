@@ -1,33 +1,32 @@
-const nodeCrypto = require("node:crypto")
-const sessionRepository = require('../repositories/sessionRepository.ts')
+import crypto from "node:crypto"
+import { Session } from '@prisma/client'
 
-const sessionConstants = require('../constants/session.ts')
+import * as sessionRepository from '../repositories/sessionRepository.ts'
+import * as sessionConstants from '../constants/session.ts'
 
-const findSessionById = async (id: string) => {
-	return await sessionRepository.findSessionById(id)
+export const findSessionById = async (id: string): Promise<Session> => {
+	return await sessionRepository.findById(id)
 }
 
-const generateSession = async (userID: string /*Should be User later*/) => {
+export const openSession = async (userID: string) => {
 
-	const id = nodeCrypto.randomUUID()
-
+	const token = crypto.randomBytes(32).toString('hex')
+	const tokenHash = crypto.createHash('sha256').update(token).digest("hex")
 	const expiresAt = new Date(Date.now() + sessionConstants.SESSION_DURATION_MS)
 
-	const session = await sessionRepository.saveSession({
-		id,
+	await sessionRepository.create({
 		userID,
+		tokenHash,
 		expiresAt,
 	})
 
-	return session
+	return { token, expiresAt }
 }
 
-const removeSession = async (id: string) => {
-	await sessionRepository.deleteSessionById(id)
+export const closeSessionById = async (id: string) => {
+	return await sessionRepository.deleteById(id)
 }
 
-module.exports = {
-	findSessionById,
-	generateSession,
-	removeSession,
+export const closeSessionByToken = async (id: string) => {
+	return await sessionRepository.deleteById(id)
 }

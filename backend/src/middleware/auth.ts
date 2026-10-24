@@ -1,7 +1,7 @@
 
-const sessionService = require('../services/sessionService.ts')
+import * as sessionService from '../services/sessionService.ts'
 
-const sessionConstants = require('../constants/session.ts')
+import * as sessionConstants from '../constants/session.ts'
 
 import type { Request, Response, NextFunction } from 'express';
 
