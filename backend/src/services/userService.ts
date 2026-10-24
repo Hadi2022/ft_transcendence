@@ -1,8 +1,8 @@
 import type { NewUserData, User } from '../types/user.ts'
 
-const { UserConflictError } = require('../errors/userErrors.ts')
-const { hashPassword, verifyPassword } = require('./passwordService.ts')
-const userRepository = require('../repositories/userRepository.ts')
+import { UserConflictError } from '../errors/userErrors.ts'
+import { hashPassword, verifyPassword } from './passwordService.ts'
+import * as userRepository from '../repositories/userRepository.ts'
 
 type CreateUserInput = {
     username: string
@@ -61,7 +61,7 @@ async function isValidCredentials(
     return user
 }
 
-module.exports = {
+export {
     prepareUser,
     createUser,
     isValidCredentials

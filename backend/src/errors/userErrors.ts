@@ -12,7 +12,7 @@ class UserConflictError extends Error {
     }
 }
 
-module.exports = {
+export {
     UserValidationError,
     UserConflictError
 }

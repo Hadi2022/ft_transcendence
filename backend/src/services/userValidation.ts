@@ -1,4 +1,4 @@
-const { UserValidationError } = require('../errors/userErrors.ts')
+import { UserValidationError } from '../errors/userErrors.ts'
 
 type RegisterInput = {
     username: string
@@ -61,4 +61,4 @@ function validateRegisterInput(input: unknown): RegisterInput {
     }
 }
 
-module.exports = { validateRegisterInput }
+export { validateRegisterInput }

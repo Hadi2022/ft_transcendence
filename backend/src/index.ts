@@ -1,8 +1,8 @@
-const process = require("process");
-const express = require ("express");
+import process from 'node:process';
+import express from 'express';
 
-const apiRoutes = require('./routes/apiRoutes.ts');
-// const connectDB = require('./db/connectDB.ts');
+import apiRoutes from './routes/apiRoutes.ts';
+// import connectDB from './db/connectDB.ts';
 
 const app = express();
 

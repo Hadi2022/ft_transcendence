@@ -21,7 +21,7 @@ async function createUser(
     throw new Error('User repository is not implemented yet')
 }
 
-module.exports = {
+export {
     findUserByUsername,
 	findUserByEmail,
     createUser

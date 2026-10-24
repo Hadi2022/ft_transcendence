@@ -1,4 +1,4 @@
-const argon2 = require('argon2')
+import * as argon2 from 'argon2'
 
 async function hashPassword(password: string): Promise<string> {
     return argon2.hash(password, {
@@ -13,7 +13,7 @@ async function verifyPassword(
     return argon2.verify(hash, password)
 }
 
-module.exports = {
+export {
     hashPassword,
     verifyPassword
 }
