@@ -1,14 +1,18 @@
 {
   "name": "backend",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "db:seed": "npx prisma db seed",
     "typecheck": "tsc --noEmit"
+  },
+  "prisma": {
+    "seed": "npx tsx src/db/seed.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",
