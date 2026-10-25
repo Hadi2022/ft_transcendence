@@ -26,11 +26,7 @@ export const openSession = async (req: Request, res: Response) => {
 		// Will add more later, currently just for production and testing
 	})
 
-	res.status(201).json({
-		"data": {
-			"authenticated": true
-		}
-	})
+	res.status(201).end()
 }
 
 export const closeSession = async (req: Request, res: Response) => {

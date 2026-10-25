@@ -45,10 +45,52 @@ paths:
     post:
       summary: User login endpoint
       description: Creates and returns a new session as cookie
-      operationId: createSession
+      operationId: openSession
       security: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                  format: password
 
       responses:
         '201': 
-          description: Session was created
-          # TBD
+          description: Session was created, Set-Cookie header has been returned
+        '401':
+          description: To be implemented
+        '409':
+          description: To be implemented
+  
+  /sessions/current:
+    delete:
+      summary: Close the current session
+      operationId: closeCurrentSession
+      responses:
+        '204':
+          description: Session closed, or no current session exists.
+
+  /sessions/{id}:
+    delete:
+      summary: Close a session by ID
+      operationId: closeSession
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the session to close.
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Session successfully closed.
