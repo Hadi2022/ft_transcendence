@@ -6,7 +6,7 @@ import * as sessionConstants from '../constants/session.ts'
 
 import type { Request, Response } from 'express';
 
-const openSession = async (req: Request, res: Response) => {
+export const openSession = async (req: Request, res: Response) => {
 
 	// if (req.session)
 		// throw new ConflictError('Session already exists') // will be implemented with /types/errors.ts
@@ -30,14 +30,14 @@ const openSession = async (req: Request, res: Response) => {
 	})
 }
 
-const closeSession = async (req: Request, res: Response) => {
+export const closeSession = async (req: Request, res: Response) => {
 
 	await sessionService.closeSessionById(req.params.id);
 
 	res.status(204).end();
 }
 
-const closeCurrentSession = async (req: Request, res: Response) => {
+export const closeCurrentSession = async (req: Request, res: Response) => {
 
 	const sessionID = req.session.id
 
@@ -50,10 +50,4 @@ const closeCurrentSession = async (req: Request, res: Response) => {
 	await sessionService.closeSessionById(sessionID);
 
 	res.status(204).end();
-}
-
-module.exports = {
-	openSession,
-	closeSession,
-	closeCurrentSession,
 }

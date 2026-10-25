@@ -1,10 +1,12 @@
-const process = require("process");
-const express = require ("express");
+import * as process from "process";
+import express from "express";
 
-const apiRoutes = require('./routes/apiRoutes.ts');
+import apiRoutes from './routes/apiRoutes.ts';
 // const connectDB = require('./db/connectDB.ts');
 
 const app = express();
+
+app.use(express.json())
 
 app.use('/', apiRoutes);
 

@@ -1,8 +1,8 @@
 
-import { prisma } from '../db/prisma.ts'
+import { prisma } from '../db/prisma/prisma.ts'
 
 type CreateSessionData = {
-	userID: string
+	userId: string
 	tokenHash: string
 	expiresAt: Date
 	ipOrigin?: string

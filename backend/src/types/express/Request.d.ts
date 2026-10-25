@@ -1,5 +1,5 @@
 import "express";
-import { Session } from '@prisma/client'
+import type { Session } from '@prisma/client'
 
 declare global {
   namespace Express {
