@@ -1,10 +1,11 @@
 
+import { serialize } from 'cookie-es'
+import type { Request, Response } from 'express';
+
 import * as sessionService from '../services/sessionService.ts'
 import * as userService from '../services/userService.ts'
 
 import * as sessionConstants from '../constants/session.ts'
-
-import type { Request, Response } from 'express';
 
 export const openSession = async (req: Request, res: Response) => {
 
@@ -20,11 +21,12 @@ export const openSession = async (req: Request, res: Response) => {
 
 	const session = await sessionService.openSession(user.id)
 
-	res.cookie(sessionConstants.COOKIE_NAME, session.token, {
+	res.setHeader('Set-Cookie', serialize(sessionConstants.COOKIE_NAME, session.token, {
 		httpOnly: true,
 		expires: session.expiresAt,
+		path: '/'
 		// Will add more later, currently just for production and testing
-	})
+	}))
 
 	res.status(201).end()
 }

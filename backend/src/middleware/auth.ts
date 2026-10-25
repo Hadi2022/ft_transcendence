@@ -18,3 +18,8 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
 
 	next();
 }
+
+export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
+	if (!req.session)
+		throw new Error('Unauthorized')// will be new Unauthorized()
+}
