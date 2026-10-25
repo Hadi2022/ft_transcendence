@@ -1,4 +1,4 @@
-import crypto from "node:crypto"
+import { hashToken, generateToken } from "../utils/hash.ts"
 import type { Session } from '@prisma/client'
 
 import * as sessionRepository from '../repositories/sessionRepository.ts'
@@ -8,10 +8,16 @@ export const findSessionById = async (id: string): Promise<Session> => {
 	return await sessionRepository.findById(id)
 }
 
+export const findSessionByToken = async (token: string): Promise<Session> => {
+	const tokenHash = hashToken(token)
+	
+	return await sessionRepository.findByTokenHash(tokenHash)
+}
+
 export const openSession = async (userId: string) => {
 
-	const token = crypto.randomBytes(32).toString('hex')
-	const tokenHash = crypto.createHash('sha256').update(token).digest("hex")
+	const token = generateToken()
+	const tokenHash = hashToken(token)
 	const expiresAt = new Date(Date.now() + sessionConstants.SESSION_DURATION_MS)
 
 	await sessionRepository.create({
@@ -27,6 +33,8 @@ export const closeSessionById = async (id: string) => {
 	return await sessionRepository.deleteById(id)
 }
 
-export const closeSessionByTokenHash = async (tokenHash: string) => {
+export const closeSessionByToken = async (token: string) => {
+	const tokenHash = hashToken(token)
+	
 	return await sessionRepository.deleteByTokenHash(tokenHash)
 }

@@ -8,12 +8,15 @@ import type { Request, Response } from 'express';
 
 export const openSession = async (req: Request, res: Response) => {
 
-	// if (req.session)
-		// throw new ConflictError('Session already exists') // will be implemented with /types/errors.ts
+	if (req.session)
+		throw new Error('Session already exists') // will be implemented with /types/errors.ts
 
 	const {username, password} = req.body
 
-	const user = await userService.isValidCredentials(username, password) /* Somthing like this */
+	const user = await userService.isValidCredentials(username, password)
+
+	if (!user)
+		throw new Error('Invalid credentials') // will be new InvalidCredentials('Invalid credentials')
 
 	const session = await sessionService.openSession(user.id)
 
