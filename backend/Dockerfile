@@ -9,6 +9,6 @@ RUN npm ci
 
 COPY . .
 
-# RUN npx prisma generate
+RUN npx prisma generate
 
 CMD ["node", "./src/index.ts"]
