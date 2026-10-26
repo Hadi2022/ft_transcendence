@@ -1,0 +1,20 @@
+{
+    "auth": {
+
+        "email": "Correo electrónico",
+        "emailPlaceholder": "tu@correo.es",
+        "password": "Contraseña",
+        "username": "Nombre de usuario",
+
+        "loginTitle": "Inicia Sesión",
+        "loginSubtitle": "Descubre un mundo nuevo",
+        "loginButton": "Iniciar Sesión",
+        "dontHaveAccount": "¿No tienes cuenta?",
+
+        "registerTitle": "Crea una cuenta",
+        "registerSubtitle": "Solo te llevará 1 minuto",
+        "registerButton": "Registrarse",
+        "registerConfirmPassword": "Confirmar contraseña",
+        "haveAccount": "¿Ya tienes cuenta?"
+    }
+}
