@@ -1,4 +1,4 @@
-import { Translation, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { NavLink, Outlet } from "react-router";
 import LanguageSelector from "../components/LanguageSelector";
 
