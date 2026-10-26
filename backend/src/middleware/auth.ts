@@ -6,20 +6,21 @@ import * as sessionConstants from '../constants/session.ts'
 
 import type { Request, Response, NextFunction } from 'express';
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const loadSession = async (req: Request, res: Response, next: NextFunction) => {
 
 	const token = req.cookies[sessionConstants.COOKIE_NAME]
 
 	if (token)
-		req.session = sessionService.findSessionByToken(token)
+		req.session = await sessionService.findActiveSessionByToken(token)
 
 	if (req.session)
-		req.user = userService.findUserById(req.session.userId)
+		req.user = await userService.findUserById(req.session.userId)
 
 	next();
 }
 
 export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
-	if (!req.session)
+	if (!req.user)
 		throw new Error('Unauthorized')// will be new Unauthorized()
+	next()
 }

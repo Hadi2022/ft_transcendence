@@ -2,7 +2,7 @@ import * as process from "process";
 import express from "express";
 
 import parseCookies from './middleware/parseCookies.ts'
-import loadSession from "./middleware/auth.ts";
+import { loadSession } from "./middleware/auth.ts";
 
 import apiRoutes from './routes/apiRoutes.ts';
 // const connectDB = require('./db/connectDB.ts');

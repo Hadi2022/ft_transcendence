@@ -4,17 +4,26 @@ import type { Session } from '@prisma/client'
 import * as sessionRepository from '../repositories/sessionRepository.ts'
 import * as sessionConstants from '../constants/session.ts'
 
-export const findSessionById = async (id: string): Promise<Session> => {
-	return await sessionRepository.findById(id)
+type CreateSessionMeta = {
+	ipOrigin?: string
+	userAgent?: string
 }
 
-export const findSessionByToken = async (token: string): Promise<Session> => {
-	const tokenHash = hashToken(token)
+export const findActiveSessionByToken = async (token: string): Promise<Session> => {
 	
-	return await sessionRepository.findByTokenHash(tokenHash)
+	const session = await sessionRepository.findByTokenHash(hashToken(token))
+
+	if (!session || session.expiresAt < new Date())
+		return null
+
+	return session
 }
 
-export const openSession = async (userId: string) => {
+export const findUserSessions = async (userId: string) => {
+	return sessionRepository.findByUserId(userId)
+}
+
+export const openSession = async (userId: string, meta?: CreateSessionMeta) => {
 
 	const token = generateToken()
 	const tokenHash = hashToken(token)
@@ -24,17 +33,18 @@ export const openSession = async (userId: string) => {
 		userId,
 		tokenHash,
 		expiresAt,
+		...meta
 	})
 
 	return { token, expiresAt }
 }
 
-export const closeSessionById = async (id: string) => {
-	return await sessionRepository.deleteById(id)
+export const closeUserSessionById = async (sessionId: string, userId: string) => {
+	return await sessionRepository.deleteByIdAndUserId(sessionId, userId)
 }
 
-export const closeSessionByToken = async (token: string) => {
-	const tokenHash = hashToken(token)
-	
-	return await sessionRepository.deleteByTokenHash(tokenHash)
+export const closeAllUserSessions = async (userId: string) => {
+
+	await sessionRepository.deleteByUserId(userId)
+
 }

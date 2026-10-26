@@ -55,10 +55,11 @@ paths:
             schema:
               type: object
               required:
-                - username
+                - identifier
                 - password
               properties:
-                username:
+                identifier:
+                  description: Email or username
                   type: string
                 password:
                   type: string
