@@ -8,7 +8,10 @@ export default function MainLayout() {
 
     return (
         <div className="flex flex-col bg-transcendence text-text min-h-screen">
-            <header className="flex flex-row justify-between p-5">
+            <header className="flex flex-row justify-between p-5
+                    border-t border-soft-text/20
+                    bg-section items-center
+                    sticky top-0 z-50">
                 <h1>Transcendence</h1>
                 <nav className="flex flex-row gap-4 items-center">
                     <NavLink to="#">Perfil</NavLink>
@@ -22,7 +25,7 @@ export default function MainLayout() {
                 <Outlet />
             </main>
 
-            <footer className="py-10 px-5">
+            <footer className="bg-section py-10 px-5">
                 <p>@ {new Date().getFullYear()} Transcendence</p>
             </footer>
 
