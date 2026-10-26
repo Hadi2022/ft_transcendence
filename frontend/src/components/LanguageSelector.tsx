@@ -13,9 +13,9 @@ export default function LanguageSelector() {
 
             value={i18n.language}
             onChange={(e) => i18n.changeLanguage(e.target.value)} >
-            <option value="es">Español</option>
-            <option value="en">English</option>
-            <option value="nl">Nederlands</option>
+            <option value="es">Español 🇪🇸</option>
+            <option value="en">English 🇬🇧</option>
+            <option value="nl">Nederlands 🇳🇱</option>
         </select>
     )
 }
