@@ -45,7 +45,10 @@ export const listSessions = async (req: Request, res: Response) => {
 
 	const sessions = await sessionService.findUserSessions(req.user.id)
 	
-	res.status(200).json(sessions.map((s) => ({ ...s, current: s.id === req.session.id })))
+	res.status(200).json({
+		data:
+			sessions.map((s) => ({ ...s, current: s.id === req.session.id }))
+	})
 }
 
 export const closeSession = async (req: Request, res: Response) => {
