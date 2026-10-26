@@ -1,10 +1,19 @@
-const process = require("process");
-const express = require ("express");
+import * as process from "process";
+import express from "express";
 
-const apiRoutes = require('./routes/apiRoutes.ts');
+import parseCookies from './middleware/parseCookies.ts'
+import { loadSession } from "./middleware/auth.ts";
+
+import apiRoutes from './routes/apiRoutes.ts';
 // const connectDB = require('./db/connectDB.ts');
 
 const app = express();
+
+app.set('trust proxy', 1)
+
+app.use(express.json())
+app.use(parseCookies)
+app.use(loadSession)
 
 app.use('/', apiRoutes);
 
