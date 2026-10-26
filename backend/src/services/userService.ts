@@ -25,17 +25,17 @@ async function createUser(input: CreateUserInput): Promise<User> {
         input.username
     )
 
-	if (existingUser) {
-		throw new UserConflictError('Username already exists')
-	}
+    if (existingUser) {
+        throw new UserConflictError('Username already exists')
+    }
 
     const existingEmail = await userRepository.findUserByEmail(
         input.email
     )
 
-	if (existingEmail) {
-		throw new UserConflictError('Email already exists')
-	}
+    if (existingEmail) {
+        throw new UserConflictError('Email already exists')
+    }
 
     const userData = await prepareUser(input)
 
@@ -61,8 +61,13 @@ async function isValidCredentials(
     return user
 }
 
+async function findUserById(id: string): Promise<User | null> {
+    return userRepository.findUserById(id)
+}
+
 export {
     prepareUser,
     createUser,
-    isValidCredentials
+    isValidCredentials,
+    findUserById
 }

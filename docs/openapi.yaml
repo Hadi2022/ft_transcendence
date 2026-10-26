@@ -41,3 +41,136 @@ paths:
               example:
                 data:
                   status: ok
+
+  /sessions:
+    post:
+      summary: User login endpoint
+      description: Creates a new session and returns a cookie
+      operationId: openSession
+      security: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - identifier
+                - password
+              properties:
+                identifier:
+                  description: Email or username
+                  type: string
+                password:
+                  type: string
+                  format: password
+
+      responses:
+        '201':
+          description: Session created
+          headers:
+            Set-Cookie:
+              description: Session cookie
+              required: true
+              schema:
+                type: string
+        '400':
+          description: Bad request - will be implemented with error middleware, currently returns wrong error code
+        '401':
+          description: Invalid credentials - will be implemented with error middleware, currently returns wrong error code
+        '409':
+          description: Session already exists - will be implemented with error middleware, currently returns wrong error code
+
+    get:
+      summary: Get user sessions
+      description: Returns all sessions of the logged in user
+      operationId: getSessions
+      security:
+        - sessionCookie: []
+
+      responses:
+        '200':
+          description: Sessions returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - current
+                      properties:
+                        id:
+                          type: string
+                          description: Session ID
+                        current:
+                          type: boolean
+                          description: Whether this is the current session
+        '401':
+          description: Unauthorized - will be implemented with error middleware, currently returns wrong error code
+
+    delete:
+      summary: Close all user sessions
+      description: Closes all sessions of the logged in user
+      operationId: closeAllUserSessions
+      security:
+        - sessionCookie: []
+
+      responses:
+        '204':
+          description: All sessions closed
+        '401':
+          description: Unauthorized - will be implemented with error middleware, currently returns wrong error code
+
+  /sessions/current:
+    delete:
+      summary: Close the current session
+      description: Closes the current session and clears the cookie
+      operationId: closeCurrentSession
+      security:
+        - sessionCookie: []
+
+      responses:
+        '204':
+          description: Session closed
+        '401':
+          description: Unauthorized - will be implemented with error middleware, currently returns wrong error code
+
+  /sessions/{id}:
+    delete:
+      summary: Close a session by ID
+      description: Closes a session belonging to the logged in user
+      operationId: closeSession
+      security:
+        - sessionCookie: []
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the session to close
+          schema:
+            type: string
+
+      responses:
+        '204':
+          description: Session closed
+        '400':
+          description: Bad request - will be implemented with error middleware, currently returns wrong error code
+        '401':
+          description: Unauthorized - will be implemented with error middleware, currently returns wrong error code
+        '404':
+          description: Session not found - will be implemented with error middleware, currently returns wrong error code
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: sessionID

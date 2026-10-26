@@ -14,6 +14,13 @@ async function findUserByEmail(
     throw new Error('User repository is not implemented yet')
 }
 
+async function findUserById(
+    _id: string
+): Promise<User | null> {
+	// Not implmented yet: Implement with Prisma.
+    throw new Error('User repository is not implemented yet')
+}
+
 async function createUser(
     _data: NewUserData
 ): Promise<User> {
@@ -24,5 +31,6 @@ async function createUser(
 export {
     findUserByUsername,
 	findUserByEmail,
+	findUserById,
     createUser
 }
