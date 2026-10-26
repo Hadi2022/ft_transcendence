@@ -12,3 +12,9 @@
     --font-sans: "Space Grotesk Variable", sans-serif;
     --font-mono: "JetBrains Mono Variable", monospace;
 }
+
+@layer components {
+    .navlink {
+        @apply hover:text-white transition-colors
+    }
+}

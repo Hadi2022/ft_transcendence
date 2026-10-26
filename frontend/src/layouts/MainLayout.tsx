@@ -14,7 +14,9 @@ export default function MainLayout() {
                     sticky top-0 z-50">
                 <h1>Transcendence</h1>
                 <nav className="flex flex-row gap-4 items-center">
-                    <NavLink to="#">Perfil</NavLink>
+                    <NavLink to="#" className="navlink">{ t("nav.feed") }</NavLink>
+                    <NavLink to="#" className="navlink">{ t("nav.messages") }</NavLink>
+                    <NavLink to="#" className="navlink">{ t("nav.profile") }</NavLink>
                     <LanguageSelector />
                 </nav>
             </header>

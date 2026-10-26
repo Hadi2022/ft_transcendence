@@ -16,5 +16,11 @@
         "registerButton": "Register",
         "registerConfirmPassword": "Confirm password",
         "haveAccount": "Already have an account?"
+    },
+    "nav": {
+        "feed": "Feed",
+        "search": "Search",
+        "messages": "Messages",
+        "profile": "Profile"
     }
 }
