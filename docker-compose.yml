@@ -50,7 +50,6 @@ services:
 
     networks:
       - internal
-
     volumes:
       - db:/var/lib/postgresql/data
 

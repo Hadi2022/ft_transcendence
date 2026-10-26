@@ -1,0 +1,36 @@
+import type { NewUserData, User } from '../types/user.ts'
+
+async function findUserByUsername(
+    _username: string
+): Promise<User | null> {
+    // Not implemented yet: Implement with Prisma.
+    throw new Error('User repository is not implemented yet')
+}
+
+async function findUserByEmail(
+    _email: string
+): Promise<User | null> {
+	// Not implmented yet: Implement with Prisma.
+    throw new Error('User repository is not implemented yet')
+}
+
+async function findUserById(
+    _id: string
+): Promise<User | null> {
+	// Not implmented yet: Implement with Prisma.
+    throw new Error('User repository is not implemented yet')
+}
+
+async function createUser(
+    _data: NewUserData
+): Promise<User> {
+    // Not implmented yet: Implement with Prisma.
+    throw new Error('User repository is not implemented yet')
+}
+
+export {
+    findUserByUsername,
+	findUserByEmail,
+	findUserById,
+    createUser
+}
