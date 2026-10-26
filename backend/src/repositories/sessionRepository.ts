@@ -13,15 +13,18 @@ export const create = async (data: CreateSessionData) => {
 }
 
 export const findByUserId = async (userId: string) => {
-	return prisma.session.findMany({ where: { userId } })
+	return prisma.session.findMany({
+		where: { userId },
+		omit: { tokenHash: true },
+	})
 }
 
 export const findByTokenHash = async (tokenHash: string) => {
 	return prisma.session.findUnique({ where: { tokenHash } })
 }
 
-export const deleteByIdAndUserId = async (id: string, userId: string) => {
-	return prisma.session.deleteMany({ where: { id, userId} })
+export const deleteByIdAndUserId = async ({ userId, sessionId }: { userId: string; sessionId: string }) => {
+	return prisma.session.deleteMany({ where: { id: sessionId, userId} })
 }
 
 export const deleteByUserId = async (userId: string) => {

@@ -10,7 +10,7 @@ export const loadSession = async (req: Request, res: Response, next: NextFunctio
 
 	const token = req.cookies[sessionConstants.COOKIE_NAME]
 
-	if (token)
+	if (typeof token === 'string')
 		req.session = await sessionService.findActiveSessionByToken(token)
 
 	if (req.session)
