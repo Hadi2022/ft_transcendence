@@ -6,7 +6,7 @@ export default function LanguageSelector() {
     const { i18n } = useTranslation()
 
     return (
-        <select className="bg-section text-text text-sm border
+        <select className="bg-surface text-text text-sm border
                             border-soft-text/30 rounded-md px-3 py-2
                             focus:outline-none focus:border-primary 
                             cursor-pointer"
