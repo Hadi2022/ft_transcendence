@@ -4,8 +4,8 @@ import * as sessionRepository from '../repositories/sessionRepository.ts'
 import * as sessionConstants from '../constants/session.ts'
 
 type CreateSessionMeta = {
-	ipOrigin?: string
-	userAgent?: string
+	ipOrigin?: string | null
+	userAgent?: string | null
 }
 
 export const findActiveSessionByToken = async (token: string) => {

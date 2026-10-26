@@ -9,6 +9,8 @@ import apiRoutes from './routes/apiRoutes.ts';
 
 const app = express();
 
+app.set('trust proxy', 1)
+
 app.use(express.json())
 app.use(parseCookies)
 app.use(loadSession)

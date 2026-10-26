@@ -26,7 +26,10 @@ export const openSession = async (req: Request, res: Response) => {
 	if (!user)
 		throw new Error('Invalid credentials') // will be new InvalidCredentials('Invalid credentials')
 
-	const session = await sessionService.openSession(user.id)
+	const session = await sessionService.openSession(user.id, {
+		ipOrigin: req.ip ?? null,
+		userAgent: req.get('user-agent')?.slice(0, 255) ?? null,
+	})
 
 	res.cookie(sessionConstants.COOKIE_NAME, session.token, {
 		httpOnly: true,
@@ -54,6 +57,12 @@ export const closeSession = async (req: Request, res: Response) => {
 
 	if (!await sessionService.closeUserSessionById({userId: req.user.id, sessionId: parsed.data.id}))
 		throw new Error('Not found') // new NotFound('Session does not exist')
+
+	if (parsed.data.id === req.session.id)
+		res.clearCookie(sessionConstants.COOKIE_NAME, {
+			httpOnly: true,
+			path: '/'
+	})
 
 	res.status(204).end();
 }

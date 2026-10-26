@@ -4,8 +4,8 @@ type CreateSessionData = {
 	userId: string
 	tokenHash: string
 	expiresAt: Date
-	ipOrigin?: string
-	userAgent?: string
+	ipOrigin?: string | null
+	userAgent?: string | null
 }
 
 export const create = async (data: CreateSessionData) => {
