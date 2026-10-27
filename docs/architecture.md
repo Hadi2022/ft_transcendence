@@ -258,6 +258,26 @@ The agreed team workflow is:
 - Shared seed data is maintained in the designated seed file.
 - Deployment environments apply existing migrations rather than generating development migrations.
 
+### Useful commands for managing the database
+
+```bash
+# Before modifying the schema
+git pull
+
+# After editing schema.prisma
+npx prisma migrate dev --name <description>
+
+# After pulling new migrations
+npx prisma migrate dev
+npx prisma generate
+
+# Shared test data
+npx prisma db seed
+
+# Docker / production
+npx prisma migrate deploy
+```
+
 ### Pending Verification
 
 - Apply the initial migration in a clean environment.
