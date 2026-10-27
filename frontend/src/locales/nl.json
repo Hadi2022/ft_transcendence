@@ -2,25 +2,25 @@
     "auth": {
 
         "email": "Email",
-        "emailPlaceholder": "your@email.com",
-        "password": "Password",
-        "username": "Username",
+        "emailPlaceholder": "jouw@email.com",
+        "password": "Wachtwoord",
+        "username": "Gebruikersnaam",
 
-        "loginTitle": "Log In",
-        "loginSubtitle": "Discover a new world",
-        "loginButton": "Login",
-        "dontHaveAccount": "Don't have an account?",
+        "loginTitle": "Inloggen",
+        "loginSubtitle": "Ontdek een nieuwe wereld",
+        "loginButton": "Inloggen",
+        "dontHaveAccount": "Nog geen account?",
 
-        "registerTitle": "Create your account",
-        "registerSubtitle": "It will only take a minute",
-        "registerButton": "Register",
-        "registerConfirmPassword": "Confirm password",
-        "haveAccount": "Already have an account?"
+        "registerTitle": "Maak een account",
+        "registerSubtitle": "Het duurt maar een minuut",
+        "registerButton": "Registreren",
+        "registerConfirmPassword": "Bevestig wachtwoord",
+        "haveAccount": "Heb je al een account?"
     },
     "nav": {
         "feed": "Feed",
-        "search": "Search",
-        "messages": "Messages",
-        "profile": "Profile"
+        "search": "Zoeken",
+        "messages": "Berichten",
+        "profile": "Profiel"
     }
 }
