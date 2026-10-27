@@ -11,7 +11,7 @@ export default function LanguageSelector() {
                             focus:outline-none focus:border-primary 
                             cursor-pointer"
 
-            value={i18n.language}
+            value={i18n.resolvedLanguage}
             onChange={(e) => i18n.changeLanguage(e.target.value)} >
             <option value="es">Español 🇪🇸</option>
             <option value="en">English 🇬🇧</option>
