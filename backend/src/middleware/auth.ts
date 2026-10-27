@@ -1,4 +1,3 @@
-
 import * as sessionService from '../services/sessionService.ts'
 import * as userService from '../services/userService.ts'
 
@@ -10,17 +9,25 @@ export const loadSession = async (req: Request, res: Response, next: NextFunctio
 
 	const token = req.cookies[sessionConstants.COOKIE_NAME]
 
-	if (typeof token === 'string')
-		req.session = await sessionService.findActiveSessionByToken(token)
+	if (typeof token === 'string') {
+		const session = await sessionService.findActiveSessionByToken(token)
 
-	if (req.session)
-		req.user = await userService.findUserById(req.session.userId)
+		if (session) {
+			req.session = session
+
+			const user = await userService.findUserById(session.userId)
+
+			if (user) {
+				req.user = user
+			}
+		}
+	}
 
 	next();
 }
 
 export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
-	if (!req.user)
-		throw new Error('Unauthorized')// will be new Unauthorized()
+	if (!req.user || !req.session)
+		throw new Error('Unauthorized') // will be new Unauthorized()
 	next()
 }

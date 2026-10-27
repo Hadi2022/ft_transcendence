@@ -1,4 +1,3 @@
-
 import type { Request, Response } from 'express';
 
 import { idParamSchema } from '../schemas/common.ts';
@@ -8,6 +7,18 @@ import * as sessionService from '../services/sessionService.ts'
 import * as userService from '../services/userService.ts'
 
 import * as sessionConstants from '../constants/session.ts'
+
+function assertAuthenticated(req: Request
+): asserts req is Request & {
+    user: NonNullable<Request['user']>
+    session: NonNullable<Request['session']>
+} {
+    if (!req.user || !req.session) {
+        const error = new Error('Unauthorized')
+        Object.assign(error, { status: 401 })
+        throw error
+    }
+}
 
 export const openSession = async (req: Request, res: Response) => {
 
@@ -42,6 +53,7 @@ export const openSession = async (req: Request, res: Response) => {
 }
 
 export const listSessions = async (req: Request, res: Response) => {
+	assertAuthenticated(req)
 
 	const sessions = await sessionService.findUserSessions(req.user.id)
 	
@@ -52,6 +64,7 @@ export const listSessions = async (req: Request, res: Response) => {
 }
 
 export const closeSession = async (req: Request, res: Response) => {
+	assertAuthenticated(req)
 
 	const parsed = idParamSchema.safeParse(req.params)
 
@@ -71,6 +84,7 @@ export const closeSession = async (req: Request, res: Response) => {
 }
 
 export const closeCurrentSession = async (req: Request, res: Response) => {
+	assertAuthenticated(req)
 
 	await sessionService.closeUserSessionById({userId: req.user.id, sessionId: req.session.id});
 
@@ -83,6 +97,7 @@ export const closeCurrentSession = async (req: Request, res: Response) => {
 }
 
 export const closeAllUserSessions = async (req: Request, res: Response) => {
+	assertAuthenticated(req)
 
 	await sessionService.closeAllUserSessions(req.user.id)
 
