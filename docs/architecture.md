@@ -1,6 +1,6 @@
 # Application Architecture 
 
-**Versión:** Maroma  
+**Version:** Maroma  
 **Date:** 2026-10-26
 
 ## 1. Overview
