@@ -7,3 +7,9 @@ export type NewUserData = {
 export type User = NewUserData & {
     id: string
 }
+
+export interface userResponseDto {
+    id:string;
+    username: string;
+    email: string;
+}

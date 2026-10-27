@@ -1,10 +1,20 @@
-import type { NewUserData, User } from '../types/user.ts'
+import { prisma } from '../db/prisma/prisma.ts'
+import type { NewUserData, User, userResponseDto } from '../types/user.ts'
+
+const userResponseSelect = {
+    id:true,
+    username:true,
+    email:true,
+} as const;
 
 async function findUserByUsername(
     _username: string
-): Promise<User | null> {
-    // Not implemented yet: Implement with Prisma.
-    throw new Error('User repository is not implemented yet')
+): Promise<userResponseDto | null> {
+    const user = await prisma.user.findUnique({
+        where: {id : _username},
+        select: userResponseSelect,
+    });
+    return user;
 }
 
 async function findUserByEmail(
