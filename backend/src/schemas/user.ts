@@ -17,3 +17,12 @@ export const registerUserSchema = z.object({
         .max(128)
         .regex(/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/)
 })
+
+export const emailSchema = z.object({
+    email: z.string()
+        .trim()
+        .toLowerCase()
+        .max(254)
+        .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/),
+})
+

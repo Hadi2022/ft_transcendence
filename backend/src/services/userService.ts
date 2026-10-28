@@ -46,22 +46,29 @@ async function isValidCredentials(
     username: string,
     password: string
 ): Promise<User | null> {
-    const user = await userRepository.findUserByUsername(username)
 
-    if (!user) {
+    const userPublic = await userRepository.findUserByUsername(username)
+
+    if (!userPublic) {
         return null
     }
 
-    const isValid = await verifyPassword(user.passwordHash, password)
+    const userPrivate = await userRepository.findUserById(userPublic.id)
+
+    if (!userPrivate) {
+        return null
+    }
+
+    const isValid = await verifyPassword(userPrivate.passwordHash, password)
 
     if (!isValid) {
         return null
     }
 
-    return user
+    return userPrivate
 }
 
-async function findUserById(id: string): Promise<User | null> {
+async function findUserById(id: string): Promise<UserPublic | null> {
     return userRepository.findUserById(id)
 }
 
