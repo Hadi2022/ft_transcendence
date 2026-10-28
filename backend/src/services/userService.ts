@@ -1,4 +1,4 @@
-import type { NewUserData, User } from '../types/user.ts'
+import type { NewUserData, User, UserPublic } from '../types/user.ts'
 
 import { UserConflictError } from '../errors/userErrors.ts'
 import { hashPassword, verifyPassword } from './passwordService.ts'
@@ -20,7 +20,7 @@ async function prepareUser(input: CreateUserInput): Promise<NewUserData> {
     }
 }
 
-async function createUser(input: CreateUserInput): Promise<User> {
+async function createUser(input: CreateUserInput): Promise<UserPublic> {
     const existingUser = await userRepository.findUserByUsername(
         input.username
     )

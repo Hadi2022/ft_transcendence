@@ -1,20 +1,12 @@
 import { prisma } from '../db/prisma/prisma.ts'
-import type { NewUserData, User, userResponseDto } from '../types/user.ts'
-
-const userResponseSelect = {
-    id:true,
-    username:true,
-    email:true,
-} as const;
+import { hashPassword } from '../services/passwordService.ts';
+import type { NewUserData, User, UserPublic } from '../types/user.ts'
 
 async function findUserByUsername(
     _username: string
-): Promise<userResponseDto | null> {
-    const user = await prisma.user.findUnique({
-        where: {id : _username},
-        select: userResponseSelect,
-    });
-    return user;
+): Promise<User | null> {
+ // Not implmented yet: Implement with Prisma.
+    throw new Error('User repository is not implemented yet')
 }
 
 async function findUserByEmail(
@@ -31,11 +23,24 @@ async function findUserById(
     throw new Error('User repository is not implemented yet')
 }
 
+const userPublicSelect = {
+    id: true,
+    username: true,
+    email: true,
+} as const
+
 async function createUser(
     _data: NewUserData
-): Promise<User> {
-    // Not implmented yet: Implement with Prisma.
-    throw new Error('User repository is not implemented yet')
+): Promise<UserPublic> {
+    const createdUser = await prisma.user.create({
+        data: {
+            username: _data.username,
+            email: _data.email,
+            passwordHash: _data.passwordHash,
+        },
+        select: userPublicSelect,
+    });
+    return createdUser;
 }
 
 export {
