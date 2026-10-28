@@ -1,47 +1,79 @@
+import { prisma } from '../db/prisma/prisma.ts';
 import { createUser } from '../services/userService.ts';
 
 
 async function testCreateUser() {
-  const prueba =
-  {
-    username : 'prueba',
-    email: 'prueba@prueba.com',
-    password: '$2b$10$hashedpasswordforexample123',
-  };
-  const pruebaBefore =
-  {
-    username : 'prueba1',
-    email: 'prueba@prueba.com',
+
+  let timestamp = Date.now();
+  const testUser = {
+    username: `dev_${timestamp}`,
+    email: `dev_${timestamp}@example.com`,
     password: '$2b$10$hashedpasswordforexample123',
   };
 
-  try
-  {
+
+  try {
     console.log('Creating user prueba .... \n');
-    const created = await createUser(prueba);
+    const created = await createUser(testUser);
     if ('passwordHash' in created)
-        console.error("PasswordHash not filtered\n");
+      console.error("PasswordHash not filtered\n");
     else
       console.log("PasswordHash filtered\n");
     console.log(
       created.id,
       created.username,
-			created.email,
+      created.email,
     );
-    console.log('Creating user pruebaBefore .... \n');
-    const createdBefore = await createUser(pruebaBefore);
-    if ('passwordHash' in created)
-        console.error("PasswordHash not filtered\n");
-    else
-      console.log("PasswordHash filtered\n");
-    console.log(
-      createdBefore.id,
-      createdBefore.username,
-			createdBefore.email,
-    )
+    let users = await prisma.user.findMany();
 
-  }catch(error)
-  {
+    console.log(`Total rows: ${users.length}`);
+    console.table(
+      users.map((u) => ({
+        id: u.id,
+        username: u.username,
+        email: u.email,
+        createdAt: u.createdAt,
+      }))
+    );
+    console.log('Creating user testEmail .... \n');
+    try {
+      timestamp = Date.now();
+      const testEmail =
+      {
+        username: `dev_${timestamp}`,
+        email: testUser.email,
+        password: '$2b$10$hashedpasswordforexample123',
+      };
+      const testEmailUser = await createUser(testEmail);
+    } catch (error) {
+      console.error('Error', error)
+    }
+    console.log('Creating user testUsername .... \n');
+    try {
+      const testUsername =
+      {
+        username: testUser.username,
+        email: `dev_${timestamp}@example.com`,
+        password: '$2b$10$hashedpasswordforexample123',
+      };
+
+      const testUsernameUser = await createUser(testUsername);
+    } catch (error) {
+      console.error('Error', error)
+    }
+    users = await prisma.user.findMany();
+
+    console.log(`Total rows: ${users.length}`);
+    console.table(
+      users.map((u) => ({
+        id: u.id,
+        username: u.username,
+        email: u.email,
+        createdAt: u.createdAt,
+      }))
+    );
+
+  } catch (error) {
     console.error('Error:', error);
   }
 }

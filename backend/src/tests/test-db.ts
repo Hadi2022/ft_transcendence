@@ -1,6 +1,6 @@
-import { use } from 'react';
+
 import { prisma } from '../db/prisma/prisma.ts';
-import { createUser } from '../services/userService.ts';
+
 
 async function testQuery() {
   try {
