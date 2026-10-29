@@ -1,6 +1,5 @@
-import { prisma } from '../db/prisma/prisma.ts';
-import { createUser } from '../services/userService.ts';
-
+import { prisma } from "../src/db/prisma/prisma.ts";
+import { createUser } from "../src/repositories/userRepository.ts";
 
 async function testCreateUser() {
 
@@ -8,7 +7,7 @@ async function testCreateUser() {
   const testUser = {
     username: `dev_${timestamp}`,
     email: `dev_${timestamp}@example.com`,
-    password: '$2b$10$hashedpasswordforexample123',
+    passwordHash: '$2b$10$hashedpasswordforexample123',
   };
 
 
@@ -42,7 +41,7 @@ async function testCreateUser() {
       {
         username: `dev_${timestamp}`,
         email: testUser.email,
-        password: '$2b$10$hashedpasswordforexample123',
+        passwordHash: '$2b$10$hashedpasswordforexample123',
       };
       const testEmailUser = await createUser(testEmail);
     } catch (error) {
@@ -54,7 +53,7 @@ async function testCreateUser() {
       {
         username: testUser.username,
         email: `dev_${timestamp}@example.com`,
-        password: '$2b$10$hashedpasswordforexample123',
+        passwordHash: '$2b$10$hashedpasswordforexample123',
       };
 
       const testUsernameUser = await createUser(testUsername);

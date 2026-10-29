@@ -1,6 +1,7 @@
 // src/test-find-user.ts
-import { findUserByUsername,findUserByEmail,findUserById, } from '../repositories/userRepository.ts'
-import { prisma } from '../db/prisma/prisma.ts'
+import { findUserByUsername,findUserByEmail,findUserById, } from '../src/repositories/userRepository.ts'
+import { prisma } from '../src/db/prisma/prisma.ts'
+import { findUserByUsernameCredentials } from '../src/repositories/userRepository.ts';
 
 
 
@@ -41,7 +42,7 @@ async function testLookUpMethods() {
     }
     catch(error)
     {
-      console.error(error)
+      console.error('Error formato',error)
     }
     console.log('--- TEST: findUserByEmail ---\n');
     // 1. Obtener un ID real directamente de la base de datos para la prueba
@@ -108,6 +109,28 @@ async function testLookUpMethods() {
     } else {
       console.log('ok Pass filtered.');
     }
+    console.log('--- TEST: findUserByUsername Credentials---\n');
+    // 1. Obtener un ID real directamente de la base de datos para la prueba
+    const anyUserUsernameC = await prisma.user.findFirst();
+
+    if (!anyUserUsernameC) {
+      console.log('No users in DB.');
+      return;
+    }
+
+    console.log(`Username selected: ${anyUserUsernameC.username}\n`);
+    const foundUserUsernameCredentials = await findUserByUsernameCredentials(anyUserUsernameC.username);
+    console.log(' Result:');
+    console.log(foundUserUsernameCredentials);
+	  console.log('\n');
+    // 3. Validar exclusión del hash
+    if (foundUserUsernameCredentials && 'passwordHash' in foundUserUsernameCredentials) {
+      console.error('Error Pass not filtered.');
+    } else {
+      console.log('ok Pass filtered.');
+    }
+
+
     // 3. Probar caso con email inexistente
     console.log('\n2. Find with not exits username ...');
     const nonExistentUsername = 'no_existe';
