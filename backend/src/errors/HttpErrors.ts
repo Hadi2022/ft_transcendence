@@ -1,14 +1,14 @@
 
 interface ErrorOptions {
 	message?: string,
-	details?: string,
+	details?: Record<string, string>,
 }
 
 export class HttpError extends Error {
 
 	constructor(
 		message: string,
-		public readonly details: string,
+		public readonly details: Record<string, string>,
 		public readonly statusCode: number,
 		public readonly code: string,
 	) {
@@ -22,11 +22,11 @@ export class HttpError extends Error {
 export class BadRequestError extends HttpError {
 
 	constructor({
-			message = "Invalid request",
-			details = 'Unspecified'
+			message = 'Invalid request',
+			details = {}
 		}: ErrorOptions
 	) {
-		super(message, details, 400, "BAD_REQUEST")
+		super(message, details, 400, 'BAD_REQUEST')
 	}
 
 }
@@ -35,11 +35,11 @@ export class BadRequestError extends HttpError {
 export class UnauthorizedError extends HttpError {
 
 	constructor({
-			message = "You unauthorized to access this resource",
-			details = 'Unspecified'
+			message = 'You unauthorized to access this resource',
+			details = {}
 		}: ErrorOptions
 	) {
-		super(message, details, 401, "UNAUTHORIZED")
+		super(message, details, 401, 'UNAUTHORIZED')
 	}
 
 }
@@ -48,11 +48,11 @@ export class UnauthorizedError extends HttpError {
 export class NotFoundError extends HttpError {
 
 	constructor({
-			message = "Resource not found",
-			details = 'Unspecified'
+			message = 'Resource not found',
+			details = {}
 		}: ErrorOptions
 	) {
-		super(message, details, 404, "NOT_FOUND")
+		super(message, details, 404, 'NOT_FOUND')
 	}
 
 }
@@ -61,11 +61,11 @@ export class NotFoundError extends HttpError {
 export class ConflictError extends HttpError {
 
 	constructor({
-			message = "Conflict",
-			details = 'Unspecified'
+			message = 'Conflict',
+			details = {}
 		}: ErrorOptions
 	) {
-		super(message, details, 409, "CONFLICT")
+		super(message, details, 409, 'CONFLICT')
 	}
 
 }
@@ -74,11 +74,11 @@ export class ConflictError extends HttpError {
 export class InternalError extends HttpError {
 
 	constructor({
-			message = "Internal server error",
-			details = 'Unspecified'
+			message = 'Internal server error',
+			details = {}
 		}: ErrorOptions
 	) {
-		super(message, details, 500, "INTERNAL")
+		super(message, details, 500, 'INTERNAL')
 	}
 
 }
