@@ -1,8 +1,6 @@
-import { error } from 'node:console';
 import { prisma } from '../db/prisma/prisma.ts'
 import { idParamSchema } from '../schemas/common.ts';
-import { emailSchema } from '../schemas/user.ts';
-import { hashPassword } from '../services/passwordService.ts';
+import { emailSchema, usernameSchema } from '../schemas/user.ts';
 import type { NewUserData, User, UserPublic } from '../types/user.ts'
 
 const userPublicSelect = {
@@ -31,6 +29,22 @@ async function findUserByUsername(
     return user;
 }
 
+async function findUserByUsernameCredentials(
+    _username: string
+): Promise<User | null> {
+
+    const validationUsername = usernameSchema.safeParse({username:_username});
+    if (!validationUsername.success)
+        throw validationUsername.error;
+    const user = await prisma.user.findUnique(
+        {
+            where: {username:validationUsername.data.username},
+            select:userPrivateSelect
+        }
+    )
+    return user;
+}
+
 async function findUserByEmail(
     _email: string
 ): Promise<UserPublic | null> {
@@ -40,7 +54,7 @@ async function findUserByEmail(
         throw validationEmail.error;
     const user = await prisma.user.findUnique(
         {
-            where: {email: _email},
+            where: {email: validationEmail.data.email},
             select: userPublicSelect
         }
     )
@@ -49,7 +63,7 @@ async function findUserByEmail(
 
 async function findUserById(
     _id: string
-): Promise<User | null> {
+): Promise<UserPublic | null> {
 
     const validationId = idParamSchema.safeParse({id:_id});
     if (!validationId.success)
@@ -57,7 +71,7 @@ async function findUserById(
     const user = await prisma.user.findUnique(
         {
             where: {id:_id},
-            select:userPrivateSelect
+            select:userPublicSelect
         }
     )
     return user;
@@ -67,20 +81,14 @@ async function createUser(
     _data: NewUserData
 ): Promise<UserPublic> {
 
-    const createdUser = await prisma.user.create({
-        data: {
-            username: _data.username,
-            email: _data.email,
-            passwordHash: _data.passwordHash,
-        },
-        select: userPublicSelect,
-    });
-    return createdUser;
+    // Not implmented yet: Implement with Prisma.
+    throw new Error('User repository is not implemented yet')
 }
 
 export {
     findUserByUsername,
 	findUserByEmail,
 	findUserById,
-    createUser
+    createUser,
+    findUserByUsernameCredentials
 }
