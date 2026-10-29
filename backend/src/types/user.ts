@@ -7,3 +7,8 @@ export type NewUserData = {
 export type User = NewUserData & {
     id: string
 }
+
+
+
+export type UserPublic = Omit<User, 'passwordHash'>
+
