@@ -41,6 +41,8 @@ paths:
               example:
                 data:
                   status: ok
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /sessions:
     post:
@@ -56,15 +58,18 @@ paths:
             schema:
               type: object
               required:
-                - identifier
+                - email
                 - password
               properties:
-                identifier:
-                  description: Email or username
+                email:
+                  description: Email
                   type: string
                 password:
                   type: string
                   format: password
+            example:
+              email: john.doe@selfhosted.es
+              password: s3cret-passw0rd
 
       responses:
         '201':
@@ -76,11 +81,41 @@ paths:
               schema:
                 type: string
         '400':
-          description: Bad request - will be implemented with error middleware, currently returns wrong error code
+          description: Request contains invalid fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: BAD_REQUEST
+                  message: Input contains invalid fields
+                  details:
+                    password: Password is required.
         '401':
-          description: Invalid credentials - will be implemented with error middleware, currently returns wrong error code
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: UNAUTHORIZED
+                  message: Invalid credentials
+                  details: {}
         '409':
-          description: Session already exists - will be implemented with error middleware, currently returns wrong error code
+          description: Session already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: CONFLICT
+                  message: You are already logged in
+                  details: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
     get:
       summary: Get user sessions
@@ -102,22 +137,21 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      required:
-                        - current
-                      properties:
-                        id:
-                          type: string
-                          description: Session ID
-                        current:
-                          type: boolean
-                          description: Whether this is the current session
+                      $ref: '#/components/schemas/Session'
+              example:
+                data:
+                  - id: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
+                    current: true
+                  - id: a41d80c5-92b7-4f3e-8a15-c0d9e6b72f14
+                    current: false
         '401':
-          description: Unauthorized - will be implemented with error middleware, currently returns wrong error code
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
     delete:
       summary: Close all user sessions
-      description: Closes all sessions of the logged in user
+      description: Closes all sessions of the logged in user and clears the cookie
       operationId: closeAllUserSessions
       security:
         - sessionCookie: []
@@ -125,8 +159,16 @@ paths:
       responses:
         '204':
           description: All sessions closed
+          headers:
+            Set-Cookie:
+              description: Clears the session cookie
+              required: true
+              schema:
+                type: string
         '401':
-          description: Unauthorized - will be implemented with error middleware, currently returns wrong error code
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /sessions/current:
     delete:
@@ -139,13 +181,23 @@ paths:
       responses:
         '204':
           description: Session closed
+          headers:
+            Set-Cookie:
+              description: Clears the session cookie
+              required: true
+              schema:
+                type: string
         '401':
-          description: Unauthorized - will be implemented with error middleware, currently returns wrong error code
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /sessions/{id}:
     delete:
       summary: Close a session by ID
-      description: Closes a session belonging to the logged in user
+      description: >-
+        Closes a session belonging to the logged in user. If the closed
+        session is the current one, the cookie is cleared as well.
       operationId: closeSession
       security:
         - sessionCookie: []
@@ -157,16 +209,133 @@ paths:
           description: ID of the session to close
           schema:
             type: string
+            format: uuid
 
       responses:
         '204':
           description: Session closed
+          headers:
+            Set-Cookie:
+              description: >-
+                Clears the session cookie. Only present when the closed
+                session was the current one.
+              required: false
+              schema:
+                type: string
         '400':
-          description: Bad request - will be implemented with error middleware, currently returns wrong error code
+          description: Invalid session ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: BAD_REQUEST
+                  message: Invalid UUID in route parameter
+                  details: {}
         '401':
-          description: Unauthorized - will be implemented with error middleware, currently returns wrong error code
+          $ref: '#/components/responses/Unauthorized'
         '404':
-          description: Session not found - will be implemented with error middleware, currently returns wrong error code
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Session could not be found
+                  details: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users:
+    post:
+      summary: Register a new user
+      description: Creates a new user account from a username, email and password
+      operationId: registerUser
+      security: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+              properties:
+                username:
+                  type: string
+                  description: Unique username
+                email:
+                  type: string
+                  format: email
+                  description: Unique email address
+                password:
+                  type: string
+                  format: password
+            example:
+              username: jdoe
+              email: jdoe@example.com
+              password: s3cret-passw0rd
+
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserPublic'
+              example:
+                data:
+                  id: 42
+                  username: jdoe
+                  email: jdoe@example.com
+        '400':
+          description: Request contains invalid fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: BAD_REQUEST
+                  message: Input contains invalid fields
+                  details:
+                    email: Invalid email address.
+        '409':
+          description: Username or email is already in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                emailConflict:
+                  summary: Email already registered
+                  value:
+                    error:
+                      code: CONFLICT
+                      message: User already exists
+                      details:
+                        email: email is in use
+                usernameConflict:
+                  summary: Username already taken
+                  value:
+                    error:
+                      code: CONFLICT
+                      message: User already exists
+                      details:
+                        username: username is in use
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
 components:
   securitySchemes:
@@ -174,3 +343,101 @@ components:
       type: apiKey
       in: cookie
       name: sessionID
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: UNAUTHORIZED
+              message: You are not authorized to access this resource
+              details: {}
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INTERNAL
+              message: Internal server error
+              details: {}
+
+  schemas:
+    UserPublic:
+      type: object
+      required:
+        - id
+        - username
+        - email
+      properties:
+        id:
+          type: string
+          description: User ID represented as UUID
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+
+    Session:
+      type: object
+      required:
+        - id
+        - current
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Session ID
+        current:
+          type: boolean
+          description: Whether this is the current session
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+            - details
+          properties:
+            code:
+              $ref: '#/components/schemas/ErrorCode'
+            message:
+              type: string
+              description: Human-readable error message
+            details:
+              type: object
+              description: Per-field error messages, keyed by field name. Empty when the error is not tied to specific fields
+              additionalProperties:
+                type: string
+
+    ErrorCode:
+      type: string
+      description: >-
+        Machine-readable error code. Currently one code per HTTP status.
+        New, more specific codes may be added in the future, so clients must
+        tolerate unknown values and fall back to the HTTP status and `message`.
+      enum:
+        - BAD_REQUEST
+        - UNAUTHORIZED
+        - NOT_FOUND
+        - CONFLICT
+        - INTERNAL
+      x-enumDescriptions:
+        BAD_REQUEST: Request failed validation; see `details`.
+        UNAUTHORIZED: Missing or invalid session, or wrong credentials.
+        NOT_FOUND: The referenced resource does not exist.
+        CONFLICT: The request conflicts with current state (session or user already exists).
+        INTERNAL: Unexpected server failure.

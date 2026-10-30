@@ -1,7 +1,8 @@
 
 import { z } from 'zod'
+import { emailField } from './user.ts'
 
 export const openSessionSchema = z.object({
-  identifier: z.string().min(1),
-  password: z.string().min(1),
+  email: emailField,
+  password: z.string('Password must be a string').min(1, 'password required'),
 })
