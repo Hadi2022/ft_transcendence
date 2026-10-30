@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(parseCookies);
 app.use(loadSession);
 
-app.use('/', apiRoutes);
+app.use('/api', apiRoutes);
 
 app.use(errorHandler)
 

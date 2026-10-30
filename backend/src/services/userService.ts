@@ -3,7 +3,6 @@ import { UserNameConflictError, UserEmailConflictError } from '../errors/userErr
 import { hashPassword, verifyPassword } from './passwordService.ts'
 import * as userRepository from '../repositories/userRepository.ts'
 import { UniqueConstraintError } from '../errors/RepositoryErrors.ts'
-import { emailSchema } from '../schemas/user.ts'
 
 type CreateUserInput = {
     username: string

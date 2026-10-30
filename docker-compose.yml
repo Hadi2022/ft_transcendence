@@ -30,7 +30,7 @@ services:
       - external
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${INTERNAL_PORT}/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:${INTERNAL_PORT}/api/health"]
       interval: 10s
       timeout: 3s
       retries: 5

@@ -33,7 +33,7 @@ async function registerUser(req: Request, res: Response): Promise<void> {
                 'name': 'username is in use'
             }})
 
-        throw new InternalError({})
+        throw e
     }
 
     res.status(201).json({

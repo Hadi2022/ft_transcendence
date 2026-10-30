@@ -7,8 +7,8 @@ import sessionRoutes from './api/sessions.ts'
 const router = express.Router()
 
 router.use('/health', healthRoutes)
-router.use('/api/status', statusRoutes)
-router.use('/api/users', userRoutes)
-router.use('/api/sessions', sessionRoutes)
+router.use('/status', statusRoutes)
+router.use('/users', userRoutes)
+router.use('/sessions', sessionRoutes)
 
 export default router
