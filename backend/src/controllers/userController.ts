@@ -26,12 +26,12 @@ async function registerUser(req: Request, res: Response): Promise<void> {
         if (e instanceof UserEmailConflictError)
             throw new ConflictError({ message: 'User already exists', details: {
                 'email': 'email is in use'
-            } })
+            }})
 
         if (e instanceof UserNameConflictError)
             throw new ConflictError({ message: 'User already exists', details: {
                 'name': 'username is in use'
-            } })
+            }})
 
         throw new InternalError({})
     }

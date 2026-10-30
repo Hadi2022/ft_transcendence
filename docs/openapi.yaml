@@ -41,6 +41,8 @@ paths:
               example:
                 data:
                   status: ok
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /sessions:
     post:
@@ -65,6 +67,9 @@ paths:
                 password:
                   type: string
                   format: password
+            example:
+              identifier: jdoe
+              password: s3cret-passw0rd
 
       responses:
         '201':
@@ -76,11 +81,36 @@ paths:
               schema:
                 type: string
         '400':
-          description: Bad request
+          description: Request contains invalid fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  message: The request contains invalid fields.
+                  details:
+                    password: Password is required.
         '401':
           description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  message: Invalid credentials.
         '409':
           description: Session already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  message: A session already exists.
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
     get:
       summary: Get user sessions
@@ -102,18 +132,17 @@ paths:
                   data:
                     type: array
                     items:
-                      type: object
-                      required:
-                        - current
-                      properties:
-                        id:
-                          type: string
-                          description: Session ID
-                        current:
-                          type: boolean
-                          description: Whether this is the current session
+                      $ref: '#/components/schemas/Session'
+              example:
+                data:
+                  - id: 3f9c2b7e
+                    current: true
+                  - id: a41d80c5
+                    current: false
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
     delete:
       summary: Close all user sessions
@@ -126,7 +155,9 @@ paths:
         '204':
           description: All sessions closed
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /sessions/current:
     delete:
@@ -140,7 +171,9 @@ paths:
         '204':
           description: Session closed
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /sessions/{id}:
     delete:
@@ -162,11 +195,114 @@ paths:
         '204':
           description: Session closed
         '400':
-          description: Bad request
+          description: Invalid session ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  message: The request contains invalid fields.
+                  details:
+                    id: Invalid session ID.
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/Unauthorized'
         '404':
           description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  message: Session not found.
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users:
+    post:
+      summary: Register a new user
+      description: Creates a new user account from a username, email and password
+      operationId: registerUser
+      security: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+              properties:
+                username:
+                  type: string
+                  description: Unique username
+                email:
+                  type: string
+                  format: email
+                  description: Unique email address
+                password:
+                  type: string
+                  format: password
+            example:
+              username: jdoe
+              email: jdoe@example.com
+              password: s3cret-passw0rd
+
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserPublic'
+              example:
+                data:
+                  id: 42
+                  username: jdoe
+                  email: jdoe@example.com
+        '400':
+          description: Request contains invalid fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  message: The request contains invalid fields.
+                  details:
+                    email: Invalid email address.
+        '409':
+          description: Username or email is already in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                emailConflict:
+                  summary: Email already registered
+                  value:
+                    error:
+                      message: User already exists.
+                      details:
+                        email: Email is in use.
+                usernameConflict:
+                  summary: Username already taken
+                  value:
+                    error:
+                      message: User already exists.
+                      details:
+                        username: Username is in use.
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
 components:
   securitySchemes:
@@ -174,3 +310,72 @@ components:
       type: apiKey
       in: cookie
       name: sessionID
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              message: Authentication is required.
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              message: An unexpected error occurred.
+
+  schemas:
+    UserPublic:
+      type: object
+      required:
+        - id
+        - username
+        - email
+      properties:
+        id:
+          type: integer
+          description: User ID
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+
+    Session:
+      type: object
+      required:
+        - current
+      properties:
+        id:
+          type: string
+          description: Session ID
+        current:
+          type: boolean
+          description: Whether this is the current session
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - message
+          properties:
+            message:
+              type: string
+              description: Human-readable error message
+            details:
+              type: object
+              description: Optional per-field error messages, keyed by field name
+              additionalProperties:
+                type: string
