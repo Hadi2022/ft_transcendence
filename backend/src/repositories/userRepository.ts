@@ -83,19 +83,12 @@ async function createUser(
     _data: NewUserData
 ): Promise<UserPublic> {
 
-    const validationUser = UserSchema.safeParse({
-        username: _data.username,
-        email: _data.email,
-        passwordHash: _data.passwordHash
-    });
-    if (!validationUser.success)
-        throw validationUser.error;
     try {
         const user = await prisma.user.create({
             data: {
-                username: validationUser.data.username,
-                email: validationUser.data.email,
-                passwordHash: validationUser.data.passwordHash
+                username: _data.username,
+                email: _data.email,
+                passwordHash: _data.passwordHash
             },
             select:userPublicSelect
         });
