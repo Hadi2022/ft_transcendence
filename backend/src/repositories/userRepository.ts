@@ -3,7 +3,7 @@ import { prisma } from '../db/prisma/prisma.ts'
 import { idParamSchema } from '../schemas/common.ts';
 import { emailSchema, usernameSchema, UserSchema } from '../schemas/user.ts';
 import type { NewUserData, User, UserPublic } from '../types/user.ts'
-import { UserAlreadyExistsError } from './errors.userRepository.ts';
+import { UniqueConstraintError } from './errors.userRepository.ts';
 
 const userPublicSelect = {
     id: true,
@@ -96,7 +96,8 @@ async function createUser(
                 username: validationUser.data.username,
                 email: validationUser.data.email,
                 passwordHash: validationUser.data.passwordHash
-            }
+            },
+            select:userPublicSelect
         });
         return user;
     }
@@ -104,10 +105,10 @@ async function createUser(
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2002') {
             const target = (error.message as string);
             if (target.includes('users_email_key')) {
-                throw new UserAlreadyExistsError("The email address is already registered.", 'email');
+                throw new UniqueConstraintError('Unique constraint violation: record already exists', 'email');
             }
             if (target.includes('users_username_key')) {
-                throw new UserAlreadyExistsError("The username is already registered.", 'username');
+                throw new UniqueConstraintError("Unique constraint violation: record already exists", 'username');
             }
         }
         throw error;

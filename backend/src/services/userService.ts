@@ -1,8 +1,8 @@
 import type { NewUserData, User, UserPublic } from '../types/user.ts'
-
 import { UserConflictError } from '../errors/userErrors.ts'
 import { hashPassword, verifyPassword } from './passwordService.ts'
 import * as userRepository from '../repositories/userRepository.ts'
+import { UniqueConstraintError } from '../repositories/errors.userRepository.ts'
 
 type CreateUserInput = {
     username: string
@@ -21,6 +21,7 @@ async function prepareUser(input: CreateUserInput): Promise<NewUserData> {
 }
 
 async function createUser(input: CreateUserInput): Promise<UserPublic> {
+
     const existingUser = await userRepository.findUserByUsername(
         input.username
     )
@@ -38,8 +39,20 @@ async function createUser(input: CreateUserInput): Promise<UserPublic> {
     }
 
     const userData = await prepareUser(input)
+    try {
+        const userPublic = userRepository.createUser(userData);
+        return userPublic;
+    }
+    catch (error) {
+        if (error instanceof UniqueConstraintError) {
+            if (error?.field === 'email')
+                throw new UserConflictError('The email address is already registered');
+            else if (error?.field === 'username')
+                throw new UserConflictError('The username is already in use');
+        }
+        throw error;
+    }
 
-    return userRepository.createUser(userData)
 }
 
 async function isValidCredentials(
