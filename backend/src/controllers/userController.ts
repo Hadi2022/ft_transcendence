@@ -37,9 +37,11 @@ async function registerUser(req: Request, res: Response): Promise<void> {
     }
 
     res.status(201).json({
-        id: user.id,
-        username: user.username,
-        email: user.email
+        data: {
+            id: user.id,
+            username: user.username,
+            email: user.email
+        }
     })
 }
 
