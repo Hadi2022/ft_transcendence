@@ -40,7 +40,7 @@ async function createUser(input: CreateUserInput): Promise<UserPublic> {
 
     const userData = await prepareUser(input)
     try {
-        const userPublic = userRepository.createUser(userData);
+        const userPublic = await userRepository.createUser(userData);
         return userPublic;
     }
     catch (error) {
