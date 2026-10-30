@@ -3,10 +3,12 @@ import ButtonComponent from "./components/ButtonComponent";
 import InputComponent from "./components/InputComponent";
 import { register } from "../../services/auth";
 import { useState, type SubmitEvent } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function RegisterPage() {
 
     const navigate = useNavigate()
+    const { t } = useTranslation()
 
     const [email, setEmail] = useState("")
     const [username, setUsername] = useState("")
@@ -30,15 +32,15 @@ export default function RegisterPage() {
     return (
         <div className="text-text">
             <div className="mb-10">
-                <h1 className="text-2xl font-bold tracking-tight">Create your account</h1>
-                <p className="text-sm text-zinc-500">It will only take a minute</p>
+                <h1 className="text-2xl font-bold tracking-tight">{ t("auth.registerTitle") }</h1>
+                <p className="text-sm text-zinc-500">{ t("auth.registerSubtitle") }</p>
             </div>
 
             <form onSubmit={handleSubmit}
                 className="flex flex-col gap-5 mb-2">
                 
                 { /* Username input*/ }
-                <InputComponent label="Username" type="text"
+                <InputComponent label={ t("auth.username") } type="text"
                                 placeholder="joaquin42"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
@@ -46,15 +48,15 @@ export default function RegisterPage() {
                                 required />
 
                 { /* Email input*/ }
-                <InputComponent label="Email" type="email"
-                                placeholder="your@email.com"
+                <InputComponent label={ t("auth.email") } type="email"
+                                placeholder={ t("auth.emailPlaceholder") }
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 minLength={6} maxLength={254}
                                 required />
             
                 { /* Password input */ }
-                <InputComponent label="Password" type="password"
+                <InputComponent label={ t("auth.password") } type="password"
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -62,7 +64,7 @@ export default function RegisterPage() {
                                 required />
 
                 { /* Confirm password input */ }
-                <InputComponent label="Confirm password" type="password"
+                <InputComponent label={ t("auth.registerConfirmPassword") } type="password"
                                 placeholder="••••••••"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -70,10 +72,10 @@ export default function RegisterPage() {
                                 required />
                 
                 { /* Register button */ }
-                <ButtonComponent text="Register" />
+                <ButtonComponent text={ t("auth.registerButton") } />
             </form>
             <Link to="/login" className="text-sm underline text-blue-400 hover:no-underline">
-                ¿Tienes cuenta?
+                { t("auth.haveAccount") }
             </Link>
         </div>
     )

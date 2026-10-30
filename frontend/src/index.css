@@ -2,7 +2,7 @@
 
 @theme {
     --color-transcendence: #0b0f19;
-    --color-section: #151b2b;
+    --color-surface: #151b2b;
     --color-text: #e6e9f0;
     --color-soft-text: #8b93a7;
     --color-primary: #22d3ee;
@@ -11,4 +11,10 @@
 
     --font-sans: "Space Grotesk Variable", sans-serif;
     --font-mono: "JetBrains Mono Variable", monospace;
+}
+
+@layer components {
+    .navlink {
+        @apply hover:text-white transition-colors
+    }
 }
