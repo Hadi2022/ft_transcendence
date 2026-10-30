@@ -58,17 +58,17 @@ paths:
             schema:
               type: object
               required:
-                - identifier
+                - email
                 - password
               properties:
-                identifier:
-                  description: Email or username
+                email:
+                  description: Email
                   type: string
                 password:
                   type: string
                   format: password
             example:
-              identifier: john.doe@selfhosted.es
+              email: john.doe@selfhosted.es
               password: s3cret-passw0rd
 
       responses:
@@ -378,8 +378,8 @@ components:
         - email
       properties:
         id:
-          type: integer
-          description: User ID
+          type: string
+          description: User ID represented as UUID
         username:
           type: string
         email:

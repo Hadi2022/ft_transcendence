@@ -40,11 +40,11 @@ async function createUser(input: CreateUserInput): Promise<UserPublic> {
 }
 
 async function isValidCredentials(
-    identifier: string,
+    email: string,
     password: string
 ): Promise<User | null> {
 
-    const user = await userRepository.findUserByEmailCredentials(identifier)
+    const user = await userRepository.findUserByEmailCredentials(email)
 
     if (!user) {
         return null

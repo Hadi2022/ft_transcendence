@@ -33,9 +33,9 @@ export const openSession = async (req: Request, res: Response) => {
 			details: formatZodErrors(parsed.error)
 	})
 
-	const { identifier, password } = parsed.data
+	const { email, password } = parsed.data
 
-	const user = await userService.isValidCredentials(identifier, password)	
+	const user = await userService.isValidCredentials(email, password)	
 
 	if (!user)
 		throw new UnauthorizedError({ message: 'Invalid credentials' })
