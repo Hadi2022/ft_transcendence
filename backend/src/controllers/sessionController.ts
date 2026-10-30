@@ -8,6 +8,7 @@ import * as userService from '../services/userService.ts'
 
 import * as sessionConstants from '../constants/session.ts'
 import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from '../errors/HttpErrors.ts';
+import { formatZodErrors } from '../utils/zod.ts';
 
 function assertAuthenticated(req: Request
 ): asserts req is Request & {
@@ -27,7 +28,10 @@ export const openSession = async (req: Request, res: Response) => {
 	const parsed = openSessionSchema.safeParse(req.body)
 	
 	if (!parsed.success)
-		throw new BadRequestError({ message: 'Input contains invalid fields', details: { /*Somehow include Zod validation specifics*/ } })
+		throw new BadRequestError({
+			message: 'Input contains invalid fields',
+			details: formatZodErrors(parsed.error)
+	})
 
 	const { identifier, password } = parsed.data
 
