@@ -25,6 +25,4 @@ export const errorHandler: ErrorRequestHandler = (err: Error, req: Request, res:
 		sendError(res, err)
 	else
 		sendError(res, new InternalError({ message: 'An unexpected error has occured' }))
-	
-	next()
 }
