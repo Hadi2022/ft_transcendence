@@ -4,19 +4,27 @@ interface ErrorOptions {
 	details?: Record<string, string>,
 }
 
+
 export class HttpError extends Error {
+	public readonly details: Record<string, string>;
+	public readonly statusCode: number;
+	public readonly code: string;
 
 	constructor(
 		message: string,
-		public readonly details: Record<string, string>,
-		public readonly statusCode: number,
-		public readonly code: string,
+		details: Record<string, string>,
+		statusCode: number,
+		code: string,
 	) {
 		super(message);
 
 		this.name = new.target.name;
+		this.details = details;
+		this.statusCode = statusCode;
+		this.code = code;
 	}
 }
+
 
 // 400
 export class BadRequestError extends HttpError {
