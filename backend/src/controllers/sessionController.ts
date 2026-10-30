@@ -35,11 +35,10 @@ export const openSession = async (req: Request, res: Response) => {
 
 	const { identifier, password } = parsed.data
 
-	try {
-		const user = await userService.isValidCredentials(identifier, password)	
-	} catch (e: any) {
+	const user = await userService.isValidCredentials(identifier, password)	
+
+	if (!user)
 		throw new UnauthorizedError({ message: 'Invalid credentials' })
-	}	
 
 	const session = await sessionService.openSession(user.id, {
 		ipOrigin: req.ip ?? null,

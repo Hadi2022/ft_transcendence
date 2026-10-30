@@ -76,11 +76,11 @@ paths:
               schema:
                 type: string
         '400':
-          description: Bad request - will be implemented with error middleware, currently returns wrong error code
+          description: Bad request
         '401':
-          description: Invalid credentials - will be implemented with error middleware, currently returns wrong error code
+          description: Invalid credentials
         '409':
-          description: Session already exists - will be implemented with error middleware, currently returns wrong error code
+          description: Session already exists
 
     get:
       summary: Get user sessions
@@ -113,7 +113,7 @@ paths:
                           type: boolean
                           description: Whether this is the current session
         '401':
-          description: Unauthorized - will be implemented with error middleware, currently returns wrong error code
+          description: Unauthorized
 
     delete:
       summary: Close all user sessions
@@ -126,7 +126,7 @@ paths:
         '204':
           description: All sessions closed
         '401':
-          description: Unauthorized - will be implemented with error middleware, currently returns wrong error code
+          description: Unauthorized
 
   /sessions/current:
     delete:
@@ -140,7 +140,7 @@ paths:
         '204':
           description: Session closed
         '401':
-          description: Unauthorized - will be implemented with error middleware, currently returns wrong error code
+          description: Unauthorized
 
   /sessions/{id}:
     delete:
@@ -162,11 +162,11 @@ paths:
         '204':
           description: Session closed
         '400':
-          description: Bad request - will be implemented with error middleware, currently returns wrong error code
+          description: Bad request
         '401':
-          description: Unauthorized - will be implemented with error middleware, currently returns wrong error code
+          description: Unauthorized
         '404':
-          description: Session not found - will be implemented with error middleware, currently returns wrong error code
+          description: Session not found
 
 components:
   securitySchemes:

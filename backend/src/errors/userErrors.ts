@@ -5,7 +5,14 @@ class UserValidationError extends Error {
     }
 }
 
-class UserConflictError extends Error {
+class UserNameConflictError extends Error {
+    constructor(message: string) {
+        super(message)
+        this.name = 'UserConflictError'
+    }
+}
+
+class UserEmailConflictError extends Error {
     constructor(message: string) {
         super(message)
         this.name = 'UserConflictError'
@@ -14,5 +21,6 @@ class UserConflictError extends Error {
 
 export {
     UserValidationError,
-    UserConflictError
+    UserNameConflictError,
+    UserEmailConflictError,
 }

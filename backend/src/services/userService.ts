@@ -1,8 +1,9 @@
 import type { NewUserData, User, UserPublic } from '../types/user.ts'
-
-import { UserConflictError } from '../errors/userErrors.ts'
+import { UserNameConflictError, UserEmailConflictError } from '../errors/userErrors.ts'
 import { hashPassword, verifyPassword } from './passwordService.ts'
 import * as userRepository from '../repositories/userRepository.ts'
+import { UniqueConstraintError } from '../errors/RepositoryErrors.ts'
+import { emailSchema } from '../schemas/user.ts'
 
 type CreateUserInput = {
     username: string
@@ -21,33 +22,30 @@ async function prepareUser(input: CreateUserInput): Promise<NewUserData> {
 }
 
 async function createUser(input: CreateUserInput): Promise<UserPublic> {
-    const existingUser = await userRepository.findUserByUsername(
-        input.username
-    )
-
-    if (existingUser) {
-        throw new UserConflictError('Username already exists')
-    }
-
-    const existingEmail = await userRepository.findUserByEmail(
-        input.email
-    )
-
-    if (existingEmail) {
-        throw new UserConflictError('Email already exists')
-    }
 
     const userData = await prepareUser(input)
+    try {
+        const userPublic = await userRepository.createUser(userData);
+        return userPublic;
+    }
+    catch (error) {
+        if (error instanceof UniqueConstraintError) {
+            if (error?.field === 'email')
+                throw new UserEmailConflictError('The email address is already registered');
+            else if (error?.field === 'username')
+                throw new UserNameConflictError('The username is already in use');
+        }
+        throw error;
+    }
 
-    return userRepository.createUser(userData)
 }
 
 async function isValidCredentials(
-    username: string,
+    identifier: string,
     password: string
 ): Promise<User | null> {
 
-    const user = await userRepository.findUserByUsernameCredentials(username)
+    const user = await userRepository.findUserByEmailCredentials(identifier)
 
     if (!user) {
         return null

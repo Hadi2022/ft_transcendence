@@ -4,6 +4,7 @@ import * as userService from '../services/userService.ts'
 import * as sessionConstants from '../constants/session.ts'
 
 import type { Request, Response, NextFunction } from 'express';
+import { UnauthorizedError } from '../errors/HttpErrors.ts';
 
 export const loadSession = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -28,6 +29,6 @@ export const loadSession = async (req: Request, res: Response, next: NextFunctio
 
 export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
 	if (!req.user || !req.session)
-		throw new Error('Unauthorized') // will be new Unauthorized()
+		throw new UnauthorizedError({ message: 'You are not logged in' })
 	next()
 }

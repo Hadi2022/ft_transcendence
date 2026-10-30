@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+const argon2Regex = /^\$argon2(id?|d)\$v=\d+\$m=\d+,t=\d+,p=\d+\$[A-Za-z0-9+/=]+\$[A-Za-z0-9+/=]+$/
+
 const usernameField = z.string({ error: 'Username is required.' })
     .min(3, 'Username must be at least 3 characters.')
     .max(30, 'Username must be at most 30 characters.')
@@ -19,6 +21,9 @@ const passwordField = z.string({ error: 'Password is required.' })
         'Password must contain at least one special character.'
     )
 
+const passwordHashField = z.string({ error: 'Password hash is required.' })
+    .regex(argon2Regex, 'Password hash must be a valid argon2 hash.')
+
 export const registerUserSchema = z.object({
     username: usernameField,
     email: emailField,
@@ -31,4 +36,10 @@ export const emailSchema = z.object({
 
 export const usernameSchema = z.object({
     username: usernameField,
+})
+
+export const UserSchema = z.object({
+    username: usernameField,
+    email: emailField,
+    passwordHash: passwordHashField,
 })
