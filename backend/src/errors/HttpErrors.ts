@@ -2,8 +2,8 @@
 interface ErrorOptions {
 	message?: string,
 	details?: Record<string, string>,
+	code?: string
 }
-
 
 export class HttpError extends Error {
 	public readonly details: Record<string, string>;
@@ -31,10 +31,11 @@ export class BadRequestError extends HttpError {
 
 	constructor({
 			message = 'Invalid request',
-			details = {}
-		}: ErrorOptions
+			details = {},
+			code = 'BAD_REQUEST'
+		}: ErrorOptions = {}
 	) {
-		super(message, details, 400, 'BAD_REQUEST')
+		super(message, details, 400, code)
 	}
 
 }
@@ -43,11 +44,12 @@ export class BadRequestError extends HttpError {
 export class UnauthorizedError extends HttpError {
 
 	constructor({
-			message = 'You unauthorized to access this resource',
-			details = {}
-		}: ErrorOptions
+			message = 'You are not authorized to access this resource',
+			details = {},
+			code = 'UNAUTHORIZED'
+		}: ErrorOptions = {}
 	) {
-		super(message, details, 401, 'UNAUTHORIZED')
+		super(message, details, 401, code)
 	}
 
 }
@@ -57,10 +59,11 @@ export class NotFoundError extends HttpError {
 
 	constructor({
 			message = 'Resource not found',
-			details = {}
-		}: ErrorOptions
+			details = {},
+			code = 'NOT_FOUND'
+		}: ErrorOptions = {}
 	) {
-		super(message, details, 404, 'NOT_FOUND')
+		super(message, details, 404, code)
 	}
 
 }
@@ -70,10 +73,11 @@ export class ConflictError extends HttpError {
 
 	constructor({
 			message = 'Conflict',
-			details = {}
-		}: ErrorOptions
+			details = {},
+			code = 'CONFLICT'
+		}: ErrorOptions = {}
 	) {
-		super(message, details, 409, 'CONFLICT')
+		super(message, details, 409, code)
 	}
 
 }
@@ -83,10 +87,11 @@ export class InternalError extends HttpError {
 
 	constructor({
 			message = 'Internal server error',
-			details = {}
-		}: ErrorOptions
+			details = {},
+			code = 'INTERNAL'
+		}: ErrorOptions = {}
 	) {
-		super(message, details, 500, 'INTERNAL')
+		super(message, details, 500, code)
 	}
 
 }
