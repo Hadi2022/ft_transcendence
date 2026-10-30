@@ -4,6 +4,7 @@ import express from 'express';
 import parseCookies from './middleware/parseCookies.ts';
 import { loadSession } from './middleware/auth.ts';
 import apiRoutes from './routes/apiRoutes.ts';
+import { errorHandler } from './middleware/errorHandler.ts';
 
 const app = express();
 
@@ -14,6 +15,8 @@ app.use(parseCookies);
 app.use(loadSession);
 
 app.use('/', apiRoutes);
+
+app.use(errorHandler)
 
 const port = process.env.PORT || 3000;
 
