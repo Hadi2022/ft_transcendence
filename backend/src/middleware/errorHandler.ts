@@ -24,5 +24,5 @@ export const errorHandler: ErrorRequestHandler = (err: Error, req: Request, res:
 	if (err instanceof HttpError)
 		sendError(res, err)
 	else
-		sendError(res, new InternalError({ message: 'An unexpected error has occured' }))
+		sendError(res, new InternalError())
 }

@@ -88,7 +88,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 error:
-                  message: The request contains invalid fields.
+                  code: BAD_REQUEST
+                  message: Input contains invalid fields
                   details:
                     password: Password is required.
         '401':
@@ -99,7 +100,9 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 error:
-                  message: Invalid credentials.
+                  code: UNAUTHORIZED
+                  message: Invalid credentials
+                  details: {}
         '409':
           description: Session already exists
           content:
@@ -108,7 +111,9 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 error:
-                  message: A session already exists.
+                  code: CONFLICT
+                  message: You are already logged in
+                  details: {}
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -135,9 +140,9 @@ paths:
                       $ref: '#/components/schemas/Session'
               example:
                 data:
-                  - id: 3f9c2b7e
+                  - id: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
                     current: true
-                  - id: a41d80c5
+                  - id: a41d80c5-92b7-4f3e-8a15-c0d9e6b72f14
                     current: false
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -146,7 +151,7 @@ paths:
 
     delete:
       summary: Close all user sessions
-      description: Closes all sessions of the logged in user
+      description: Closes all sessions of the logged in user and clears the cookie
       operationId: closeAllUserSessions
       security:
         - sessionCookie: []
@@ -154,6 +159,12 @@ paths:
       responses:
         '204':
           description: All sessions closed
+          headers:
+            Set-Cookie:
+              description: Clears the session cookie
+              required: true
+              schema:
+                type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -170,6 +181,12 @@ paths:
       responses:
         '204':
           description: Session closed
+          headers:
+            Set-Cookie:
+              description: Clears the session cookie
+              required: true
+              schema:
+                type: string
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -178,7 +195,9 @@ paths:
   /sessions/{id}:
     delete:
       summary: Close a session by ID
-      description: Closes a session belonging to the logged in user
+      description: >-
+        Closes a session belonging to the logged in user. If the closed
+        session is the current one, the cookie is cleared as well.
       operationId: closeSession
       security:
         - sessionCookie: []
@@ -190,10 +209,19 @@ paths:
           description: ID of the session to close
           schema:
             type: string
+            format: uuid
 
       responses:
         '204':
           description: Session closed
+          headers:
+            Set-Cookie:
+              description: >-
+                Clears the session cookie. Only present when the closed
+                session was the current one.
+              required: false
+              schema:
+                type: string
         '400':
           description: Invalid session ID
           content:
@@ -202,9 +230,9 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 error:
-                  message: The request contains invalid fields.
-                  details:
-                    id: Invalid session ID.
+                  code: BAD_REQUEST
+                  message: Invalid UUID in route parameter
+                  details: {}
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -215,7 +243,9 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 error:
-                  message: Session not found.
+                  code: NOT_FOUND
+                  message: Session could not be found
+                  details: {}
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -277,7 +307,8 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 error:
-                  message: The request contains invalid fields.
+                  code: BAD_REQUEST
+                  message: Input contains invalid fields
                   details:
                     email: Invalid email address.
         '409':
@@ -291,16 +322,18 @@ paths:
                   summary: Email already registered
                   value:
                     error:
-                      message: User already exists.
+                      code: CONFLICT
+                      message: User already exists
                       details:
-                        email: Email is in use.
+                        email: email is in use
                 usernameConflict:
                   summary: Username already taken
                   value:
                     error:
-                      message: User already exists.
+                      code: CONFLICT
+                      message: User already exists
                       details:
-                        username: Username is in use.
+                        username: username is in use
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -320,7 +353,9 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
           example:
             error:
-              message: Authentication is required.
+              code: UNAUTHORIZED
+              message: You are not authorized to access this resource
+              details: {}
 
     InternalServerError:
       description: Internal server error
@@ -330,7 +365,9 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
           example:
             error:
-              message: An unexpected error occurred.
+              code: INTERNAL
+              message: Internal server error
+              details: {}
 
   schemas:
     UserPublic:
@@ -352,10 +389,12 @@ components:
     Session:
       type: object
       required:
+        - id
         - current
       properties:
         id:
           type: string
+          format: uuid
           description: Session ID
         current:
           type: boolean
@@ -369,13 +408,36 @@ components:
         error:
           type: object
           required:
+            - code
             - message
+            - details
           properties:
+            code:
+              $ref: '#/components/schemas/ErrorCode'
             message:
               type: string
               description: Human-readable error message
             details:
               type: object
-              description: Optional per-field error messages, keyed by field name
+              description: Per-field error messages, keyed by field name. Empty when the error is not tied to specific fields
               additionalProperties:
                 type: string
+
+    ErrorCode:
+      type: string
+      description: >-
+        Machine-readable error code. Currently one code per HTTP status.
+        New, more specific codes may be added in the future, so clients must
+        tolerate unknown values and fall back to the HTTP status and `message`.
+      enum:
+        - BAD_REQUEST
+        - UNAUTHORIZED
+        - NOT_FOUND
+        - CONFLICT
+        - INTERNAL
+      x-enumDescriptions:
+        BAD_REQUEST: Request failed validation; see `details`.
+        UNAUTHORIZED: Missing or invalid session, or wrong credentials.
+        NOT_FOUND: The referenced resource does not exist.
+        CONFLICT: The request conflicts with current state (session or user already exists).
+        INTERNAL: Unexpected server failure.

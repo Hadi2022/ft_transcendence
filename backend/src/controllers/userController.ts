@@ -2,7 +2,7 @@ import type { Request, Response } from 'express'
 
 import { registerUserSchema } from '../schemas/user.ts'
 import { createUser } from '../services/userService.ts'
-import { BadRequestError, ConflictError, InternalError } from '../errors/HttpErrors.ts'
+import { BadRequestError, ConflictError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'
 import type { UserPublic } from '../types/user.ts'
 import { UserEmailConflictError, UserNameConflictError } from '../errors/userErrors.ts'
@@ -30,7 +30,7 @@ async function registerUser(req: Request, res: Response): Promise<void> {
 
         if (e instanceof UserNameConflictError)
             throw new ConflictError({ message: 'User already exists', details: {
-                'name': 'username is in use'
+                'username': 'username is in use'
             }})
 
         throw e
