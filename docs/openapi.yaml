@@ -293,12 +293,16 @@ paths:
                   - data
                 properties:
                   data:
-                    $ref: '#/components/schemas/UserPublic'
+                    $ref: '#/components/schemas/UserProfile'
               example:
                 data:
                   id: f659603a-e5dc-45be-bf70-21390457357e
                   username: jdoe
-                  email: jdoe@example.com
+                  name: null
+                  biography: null
+                  avatarUrl: null
+                  isVerified: false
+                  createdAt: '2026-10-31T12:00:00.000Z'
         '400':
           description: Request contains invalid fields
           content:
@@ -356,14 +360,30 @@ paths:
                   - data
                 properties:
                   data:
-                    $ref: '#/components/schemas/UserPublic'
+                    $ref: '#/components/schemas/OwnProfile'
               example:
                 data:
                   id: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
-                  username: jdoe
-                  email: jdoe@example.com
+                  username: hadi
+                  email: hadi@selfhosted.selfhostingiscool
+                  name: hadi
+                  biography: I hate big tech
+                  avatarUrl: https://example.com/avatars/hadi.png
+                  isVerified: false
+                  createdAt: '2026-10-31T12:00:00.000Z'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: You do not exist! (wow!)
+                  details: {}
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -400,21 +420,51 @@ components:
               details: {}
 
   schemas:
-    UserPublic:
+    UserProfile:
       type: object
+      description: Public profile of a user. Does not include the email address.
       required:
         - id
         - username
-        - email
+        - name
+        - biography
+        - avatarUrl
+        - isVerified
+        - createdAt
       properties:
         id:
           type: string
+          format: uuid
           description: User ID represented as UUID
         username:
           type: string
-        email:
+          maxLength: 30
+        name:
+          type: [string, 'null']
+          maxLength: 100
+          description: Display name
+        biography:
+          type: [string, 'null']
+        avatarUrl:
+          type: [string, 'null']
+          maxLength: 500
+        isVerified:
+          type: boolean
+        createdAt:
           type: string
-          format: email
+          format: date-time
+
+    OwnProfile:
+      description: Profile of the logged in user. Public profile plus the email address.
+      allOf:
+        - $ref: '#/components/schemas/UserProfile'
+        - type: object
+          required:
+            - email
+          properties:
+            email:
+              type: string
+              format: email
 
     Session:
       type: object
