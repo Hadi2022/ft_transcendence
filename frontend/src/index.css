@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@theme {
+    --color-transcendence: #0b0f19;
+    --color-surface: #151b2b;
+    --color-text: #e6e9f0;
+    --color-soft-text: #8b93a7;
+    --color-primary: #22d3ee;
+    --color-danger: #f43f5e;
+    --color-success: #4ade80;
+
+    --font-sans: "Space Grotesk Variable", sans-serif;
+    --font-mono: "JetBrains Mono Variable", monospace;
+}
+
+@layer components {
+    .navlink {
+        @apply hover:text-white transition-colors
+    }
+}

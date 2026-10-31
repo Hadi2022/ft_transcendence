@@ -1,0 +1,26 @@
+{
+    "auth": {
+
+        "email": "Email",
+        "emailPlaceholder": "your@email.com",
+        "password": "Password",
+        "username": "Username",
+
+        "loginTitle": "Log In",
+        "loginSubtitle": "Discover a new world",
+        "loginButton": "Login",
+        "dontHaveAccount": "Don't have an account?",
+
+        "registerTitle": "Create your account",
+        "registerSubtitle": "It will only take a minute",
+        "registerButton": "Register",
+        "registerConfirmPassword": "Confirm password",
+        "haveAccount": "Already have an account?"
+    },
+    "nav": {
+        "feed": "Feed",
+        "search": "Search",
+        "messages": "Messages",
+        "profile": "Profile"
+    }
+}
