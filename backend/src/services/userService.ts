@@ -1,4 +1,4 @@
-import type { NewUserData, User, UserPublic } from '../types/user.ts'
+import type { User, NewUserData, OwnProfile, UserProfile } from '../types/user.ts'
 import { UserNameConflictError, UserEmailConflictError } from '../errors/userErrors.ts'
 import { hashPassword, verifyPassword } from './passwordService.ts'
 import * as userRepository from '../repositories/userRepository.ts'
@@ -20,7 +20,7 @@ async function prepareUser(input: CreateUserInput): Promise<NewUserData> {
     }
 }
 
-async function createUser(input: CreateUserInput): Promise<UserPublic> {
+async function createUser(input: CreateUserInput): Promise<UserProfile> {
 
     const userData = await prepareUser(input)
     try {
@@ -44,7 +44,7 @@ async function isValidCredentials(
     password: string
 ): Promise<User | null> {
 
-    const user = await userRepository.findUserByEmailCredentials(email)
+    const user = await userRepository.findByEmail(email)
 
     if (!user) {
         return null
@@ -59,13 +59,26 @@ async function isValidCredentials(
     return user
 }
 
-async function findUserById(id: string): Promise<UserPublic | null> {
-    return userRepository.findUserById(id)
+// Returns full user object
+async function findUserById(id: string): Promise<User | null> {
+    return userRepository.findById(id)
+}
+
+// Returns only public user fields
+async function findUserProfileById(id: string): Promise<UserProfile | null> {
+    return userRepository.findProfileById(id)
+}
+
+// Public profile + email
+async function findUserOwnProfileById(id: string): Promise<OwnProfile | null> {
+    return userRepository.findOwnProfileById(id)
 }
 
 export {
     prepareUser,
     createUser,
     isValidCredentials,
-    findUserById
+    findUserById,
+    findUserProfileById,
+    findUserOwnProfileById,
 }

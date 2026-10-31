@@ -1,10 +1,9 @@
 import type { Request, Response } from 'express'
 
 import { registerUserSchema } from '../schemas/user.ts'
-import { createUser, findUserById } from '../services/userService.ts'
+import { createUser, findUserOwnProfileById } from '../services/userService.ts'
 import { BadRequestError, ConflictError, NotFoundError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'
-import type { UserPublic } from '../types/user.ts'
 import { UserEmailConflictError, UserNameConflictError } from '../errors/userErrors.ts'
 import type { AuthenticatedRequest } from '../types/express/Request.js'
 
@@ -18,7 +17,7 @@ async function registerUser(req: Request, res: Response): Promise<void> {
         })
     }
 
-    let user: UserPublic
+    let user
 
     try {
         user = await createUser(parsed.data)
@@ -39,22 +38,21 @@ async function registerUser(req: Request, res: Response): Promise<void> {
 
     res.status(201).json({
         data: {
-            id: user.id,
-            username: user.username,
-            email: user.email
+            ...user
         }
     })
 }
 
 const getCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
 
-    const user = req.user
+    const user = await findUserOwnProfileById(req.user.id)
+
+    if (!user)
+        throw new NotFoundError({message: 'You do not exist! (wow!)'})
 
     res.status(200).json({
         data: {
-            id: user.id,
-            username: user.username,
-            email: user.email,
+            ...user
         }
     })
 
