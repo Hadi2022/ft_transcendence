@@ -1,89 +1,73 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, type User } from '@prisma/client';
 import { prisma } from '../db/prisma/prisma.ts'
-import type { NewUserData, User, UserPublic } from '../types/user.ts'
+import type { NewUserData, UserProfile, OwnProfile } from '../types/user.ts'
 import { UniqueConstraintError } from '../errors/RepositoryErrors.ts';
 
-const userPublicSelect = {
-    id: true,
-    username: true,
-    email: true,
-} as const
-
-const userPrivateSelect = {
-    id: true,
-    username: true,
-    email: true,
+const userProfileOmit = {
     passwordHash: true,
-} as const
+    email: true,
+    updatedAt: true,
+} satisfies Prisma.UserOmit
 
-async function findUserByUsername(
-    _username: string
-): Promise<UserPublic | null> {
+const ownProfileOmit = {
+    passwordHash: true,
+    updatedAt: true,
+} satisfies Prisma.UserOmit
 
-    const user = await prisma.user.findUnique(
-        {
-            where: { username: _username },
-            select: userPublicSelect
-        }
-    )
-    return user;
-}
-
-async function findUserByUsernameCredentials(
-    _username: string
-): Promise<User | null> {
-
-    const user = await prisma.user.findUnique(
-        {
-            where: { username: _username },
-            select: userPrivateSelect
-        }
-    )
-    return user;
-}
-
-async function findUserByEmail(
-    _email: string
-): Promise<UserPublic | null> {
-
-    const user = await prisma.user.findUnique(
-        {
-            where: { email: _email },
-            select: userPublicSelect
-        }
-    )
-    return user;
-}
-
-async function findUserByEmailCredentials(
+export async function findByEmail(
     _email: string
 ): Promise<User | null> {
 
     const user = await prisma.user.findUnique(
         {
             where: { email: _email },
-            select: userPrivateSelect
         }
     )
     return user;
 }
 
-async function findUserById(
+export async function findById(
     _id: string
-): Promise<UserPublic | null> {
+): Promise<User | null> {
 
     const user = await prisma.user.findUnique(
         {
             where: { id: _id },
-            select: userPublicSelect
         }
     )
     return user;
 }
 
-async function createUser(
+
+export async function findProfileById(
+    _id: string
+): Promise<UserProfile | null> {
+
+    const user = await prisma.user.findUnique(
+        {
+            where: { id: _id },
+            omit: userProfileOmit
+        }
+    )
+    return user;
+}
+
+export async function findOwnProfileById(
+    _id: string
+): Promise<OwnProfile | null> {
+
+    const user = await prisma.user.findUnique(
+        {
+            where: { id: _id },
+            omit: ownProfileOmit
+        }
+    )
+    return user;
+}
+
+export async function createUser(
     _data: NewUserData
-): Promise<UserPublic> {
+): Promise<UserProfile> {
 
     try {
         const user = await prisma.user.create({
@@ -92,7 +76,7 @@ async function createUser(
                 email: _data.email,
                 passwordHash: _data.passwordHash
             },
-            select:userPublicSelect
+            omit: userProfileOmit
         });
         return user;
     }
@@ -108,13 +92,4 @@ async function createUser(
         }
         throw error;
     }
-}
-
-export {
-    findUserByUsername,
-    findUserByEmail,
-    findUserById,
-    createUser,
-    findUserByUsernameCredentials,
-    findUserByEmailCredentials,
 }
