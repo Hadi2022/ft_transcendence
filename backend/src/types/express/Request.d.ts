@@ -1,4 +1,5 @@
 import "express"
+import type { Request } from "express"
 import type { Session } from '@prisma/client'
 import type { User } from '../../user.ts'
 
@@ -9,6 +10,11 @@ declare global {
       user?: User
     }
   }
+}
+
+export interface AuthenticatedRequest extends Request {
+  session: Session,
+  user: User,
 }
 
 export {}

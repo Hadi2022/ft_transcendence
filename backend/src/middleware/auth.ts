@@ -29,6 +29,6 @@ export const loadSession = async (req: Request, res: Response, next: NextFunctio
 
 export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
 	if (!req.user || !req.session)
-		throw new UnauthorizedError({ message: 'You are not logged in' })
+		throw new UnauthorizedError()
 	next()
 }

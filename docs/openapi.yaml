@@ -296,7 +296,7 @@ paths:
                     $ref: '#/components/schemas/UserPublic'
               example:
                 data:
-                  id: 42
+                  id: f659603a-e5dc-45be-bf70-21390457357e
                   username: jdoe
                   email: jdoe@example.com
         '400':
@@ -334,6 +334,36 @@ paths:
                       message: User already exists
                       details:
                         username: username is in use
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/me:
+    get:
+      summary: Get the current user
+      description: Returns the profile of the user who owns the current session
+      operationId: getCurrentUser
+      security:
+        - sessionCookie: []
+
+      responses:
+        '200':
+          description: Current user returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserPublic'
+              example:
+                data:
+                  id: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
+                  username: jdoe
+                  email: jdoe@example.com
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
