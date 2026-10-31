@@ -20,7 +20,7 @@ async function prepareUser(input: CreateUserInput): Promise<NewUserData> {
     }
 }
 
-async function createUser(input: CreateUserInput): Promise<UserPublic> {
+async function createUser(input: CreateUserInput): Promise<UserProfile> {
 
     const userData = await prepareUser(input)
     try {

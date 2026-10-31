@@ -45,7 +45,7 @@ async function registerUser(req: Request, res: Response): Promise<void> {
 
 const getCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
 
-    const user = findUserOwnProfileById(req.user.id)
+    const user = await findUserOwnProfileById(req.user.id)
 
     if (!user)
         throw new NotFoundError({message: 'You do not exist! (wow!)'})
