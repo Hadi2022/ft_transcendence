@@ -58,4 +58,19 @@ const getCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
 
 }
 
-export { registerUser, getCurrentUser }
+const getUserById = (req: Request, res: Response): void => {
+
+    const user = req.userResource
+
+    if (!user) {
+        throw new NotFoundError({
+            message: 'User not found'
+        })
+    }
+
+    res.status(200).json({
+        data: user
+    })
+}
+
+export { registerUser, getCurrentUser, getUserById }

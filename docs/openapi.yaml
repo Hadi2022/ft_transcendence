@@ -387,6 +387,72 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /users/{id}:
+    get:
+      summary: Get a user by ID
+      description: Returns the public profile of a user by their UUID
+      operationId: getUserById
+      security: []
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the user to retrieve
+          schema:
+            type: string
+            format: uuid
+
+      responses:
+        '200':
+          description: User profile returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+              example:
+                data:
+                  id: 2c5e3619-cbed-4a02-a1e3-9807f0b2989c
+                  username: alejandro_test
+                  name: null
+                  biography: null
+                  avatarUrl: null
+                  isVerified: false
+                  createdAt: '2026-10-31T17:10:37.131Z'
+
+        '400':
+          description: Invalid user ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: BAD_REQUEST
+                  message: Invalid user ID
+                  details:
+                    id: User ID must be a valid UUID
+
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: User not found
+                  details: {}
+
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
   securitySchemes:
     sessionCookie:
