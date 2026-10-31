@@ -16,7 +16,7 @@ export const loadUser: RequestHandler = async (req, _res, next) => {
         })
     }
 
-    const user = await findUserProfileById(parsed.data)
+const user = await findUserProfileById(parsed.data.id)
 
     if (!user) {
         throw new NotFoundError({
