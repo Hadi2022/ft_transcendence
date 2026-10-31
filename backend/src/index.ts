@@ -5,12 +5,14 @@ import parseCookies from './middleware/parseCookies.ts';
 import { loadSession } from './middleware/auth.ts';
 import apiRoutes from './routes/apiRoutes.ts';
 import { errorHandler } from './middleware/errorHandler.ts';
+import { syntaxErrorParser } from './middleware/jsonParser.ts';
 
 const app = express();
 
 app.set('trust proxy', 1);
 
 app.use(express.json());
+app.use(syntaxErrorParser)
 app.use(parseCookies);
 app.use(loadSession);
 

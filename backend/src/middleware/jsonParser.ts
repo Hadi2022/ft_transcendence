@@ -2,29 +2,15 @@
 import type { NextFunction, Request, Response } from 'express'
 import { BadRequestError } from '../errors/HttpErrors.ts'
 
+export const syntaxErrorParser = (err: Error, req: Request, res: Response, next: NextFunction) => {
 
-
-export const jsonParser = (req: Request, res: Response, next: NextFunction) => {
-
-	if (typeof req.body !== 'string')	
+	if (err instanceof SyntaxError && 'type' in err && err.type == 'entity.parse.failed')
 		throw new BadRequestError({
-				message: 'Request body must be a JSON string'
-			})
+			message: 'Error parsing JSON',
+			details: {
+				reason: err.message
+			}
+		})
 
-	try {
-		req.body = JSON.parse(req.body)
-	} catch (error: any) {
-
-		if (error instanceof SyntaxError)
-			throw new BadRequestError({
-				message: 'Error parsing JSON',
-				details: {
-					reason: error.message
-				}
-			})
-
-		throw error
-	}
-
-	next()
+	throw err
 }
