@@ -1,6 +1,6 @@
-import { Prisma, type User } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../db/prisma/prisma.ts'
-import type { NewUserData, UserProfile, OwnProfile } from '../types/user.ts'
+import type { NewUserData, User, UserProfile, OwnProfile } from '../types/user.ts'
 import { UniqueConstraintError } from '../errors/RepositoryErrors.ts';
 
 const userProfileOmit = {
