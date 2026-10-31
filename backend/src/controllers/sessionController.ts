@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import type { AuthenticatedRequest } from '../types/express/Request.js';
 
 import { idParamSchema } from '../schemas/common.ts';
 import { openSessionSchema } from '../schemas/session.ts';
@@ -9,16 +10,6 @@ import * as userService from '../services/userService.ts'
 import * as sessionConstants from '../constants/session.ts'
 import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from '../errors/HttpErrors.ts';
 import { formatZodErrors } from '../utils/zod.ts';
-
-function assertAuthenticated(req: Request
-): asserts req is Request & {
-    user: NonNullable<Request['user']>
-    session: NonNullable<Request['session']>
-} {
-    if (!req.user || !req.session) {
-        throw new UnauthorizedError({})
-    }
-}
 
 export const openSession = async (req: Request, res: Response) => {
 
@@ -55,8 +46,7 @@ export const openSession = async (req: Request, res: Response) => {
 	res.status(201).end()
 }
 
-export const listSessions = async (req: Request, res: Response) => {
-	assertAuthenticated(req)
+export const listSessions = async (req: AuthenticatedRequest, res: Response) => {
 
 	const sessions = await sessionService.findUserSessions(req.user.id)
 	
@@ -66,8 +56,7 @@ export const listSessions = async (req: Request, res: Response) => {
 	})
 }
 
-export const closeSession = async (req: Request, res: Response) => {
-	assertAuthenticated(req)
+export const closeSession = async (req: AuthenticatedRequest, res: Response) => {
 
 	const parsed = idParamSchema.safeParse(req.params)
 
@@ -86,8 +75,7 @@ export const closeSession = async (req: Request, res: Response) => {
 	res.status(204).end();
 }
 
-export const closeCurrentSession = async (req: Request, res: Response) => {
-	assertAuthenticated(req)
+export const closeCurrentSession = async (req: AuthenticatedRequest, res: Response) => {
 
 	await sessionService.closeUserSessionById({userId: req.user.id, sessionId: req.session.id});
 
@@ -99,8 +87,7 @@ export const closeCurrentSession = async (req: Request, res: Response) => {
 	res.status(204).end();
 }
 
-export const closeAllUserSessions = async (req: Request, res: Response) => {
-	assertAuthenticated(req)
+export const closeAllUserSessions = async (req: AuthenticatedRequest, res: Response) => {
 
 	await sessionService.closeAllUserSessions(req.user.id)
 
