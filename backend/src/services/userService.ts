@@ -1,4 +1,4 @@
-import type { NewUserData, OwnProfile, UserProfile } from '../types/user.ts'
+import type { User, NewUserData, OwnProfile, UserProfile } from '../types/user.ts'
 import { UserNameConflictError, UserEmailConflictError } from '../errors/userErrors.ts'
 import { hashPassword, verifyPassword } from './passwordService.ts'
 import * as userRepository from '../repositories/userRepository.ts'
