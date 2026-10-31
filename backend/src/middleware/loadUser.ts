@@ -1,12 +1,11 @@
 import type { RequestHandler } from 'express'
-import { z } from 'zod'
+import { idParamSchema } from '../schemas/common.ts'
 import { findUserProfileById } from '../services/userService.ts'
 import { BadRequestError, NotFoundError } from '../errors/HttpErrors.ts'
 
 export const loadUser: RequestHandler = async (req, _res, next) => {
 
-    const idSchema = z.uuid()
-    const parsed = idSchema.safeParse(req.params.id)
+    const parsed = idParamSchema.safeParse(req.params)
 
     if (!parsed.success) {
         throw new BadRequestError({
