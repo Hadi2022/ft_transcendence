@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../db/prisma/prisma.ts'
 import type { NewUserData, UpdateUserData, User, UserProfile, OwnProfile } from '../types/user.ts'
-import { UniqueConstraintError } from '../errors/RepositoryErrors.ts';
+import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts';
 
 const userProfileOmit = {
     passwordHash: true,
@@ -94,16 +94,28 @@ export async function createUser(
     }
 }
 
+
 export async function updateUser(
     _id: string,
     _data: UpdateUserData
 ): Promise<OwnProfile> {
 
-    const user = await prisma.user.update({
-        where: { id: _id },
-        data: _data,
-        omit: ownProfileOmit
-    })
+    try {
+        return await prisma.user.update({
+            where: { id: _id },
+            data: _data,
+            omit: ownProfileOmit
+        })
+    }
+    catch (error: unknown) {
+        if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === 'P2025'
+        ) {
+            throw new RecordNotFoundError('User not found')
+        }
 
-    return user
+        throw error
+    }
 }
+

@@ -1,5 +1,4 @@
 
-
 export class UniqueConstraintError extends Error {
 
   public readonly field?: string | undefined;
@@ -11,4 +10,11 @@ export class UniqueConstraintError extends Error {
     this.name = 'UniqueConstraintError';
     this.field = field;
   }
+}
+
+export class RecordNotFoundError extends Error {
+    constructor(message: string) {
+        super(message)
+        this.name = 'RecordNotFoundError'
+    }
 }

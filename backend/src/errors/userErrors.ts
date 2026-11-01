@@ -19,8 +19,16 @@ class UserEmailConflictError extends Error {
     }
 }
 
+class UserNotFoundError extends Error {
+    constructor(message: string) {
+        super(message)
+        this.name = 'UserNotFoundError'
+    }
+}
+
 export {
     UserValidationError,
     UserNameConflictError,
     UserEmailConflictError,
+	UserNotFoundError
 }
