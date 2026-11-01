@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { orderSchema } from './common.ts'
 
 const argon2Regex = /^\$argon2(id?|d)\$v=\d+\$m=\d+,t=\d+,p=\d+\$[A-Za-z0-9+/=]+\$[A-Za-z0-9+/=]+$/
 
@@ -52,3 +53,8 @@ export const updateUserSchema = z.strictObject({
     (data) => Object.keys(data).length > 0,
     { message: 'At least one field must be provided' }
 )
+
+export const listUsersQuerySchema = z.object({
+    order: orderSchema.optional(),
+    order_by: z.enum(['created_at', 'username']).optional(),
+})

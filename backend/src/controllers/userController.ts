@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
 
-import { registerUserSchema, updateUserSchema } from '../schemas/user.ts'
+import { registerUserSchema, updateUserSchema, listUsersQuerySchema } from '../schemas/user.ts'
 import { createUser, listUserProfiles, findUserOwnProfileById, updateUser } from '../services/userService.ts'
 import { BadRequestError, ConflictError, NotFoundError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'
@@ -44,9 +44,20 @@ async function registerUser(req: Request, res: Response): Promise<void> {
 }
 
 const getUsers = async (req: Request, res: Response) => {
+    const parsed = listUsersQuerySchema.safeParse(req.query)
+
+    if (!parsed.success) {
+        throw new BadRequestError({
+            message: 'Invalid query parameters',
+            details: formatZodErrors(parsed.error)
+        })
+    }
+
+    const { order, order_by } = parsed.data
 
     const users = await listUserProfiles({
-
+        order,
+        orderBy: order_by === 'created_at' ? 'createdAt' : order_by
     })
 
     res.status(200).json({
