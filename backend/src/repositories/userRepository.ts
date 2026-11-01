@@ -94,7 +94,6 @@ export async function createUser(
     }
 }
 
-
 export async function updateUser(
     _id: string,
     _data: UpdateUserData
@@ -103,7 +102,12 @@ export async function updateUser(
     try {
         return await prisma.user.update({
             where: { id: _id },
-            data: _data,
+			// Omit undefined fields to satisfy Prisma's strict optional property types.
+            data: {
+                ...(_data.name !== undefined && { name: _data.name }),
+                ...(_data.biography !== undefined && { biography: _data.biography }),
+                ...(_data.avatarUrl !== undefined && { avatarUrl: _data.avatarUrl })
+            },
             omit: ownProfileOmit
         })
     }
