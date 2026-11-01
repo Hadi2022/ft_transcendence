@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express'
 
 import { registerUserSchema } from '../schemas/user.ts'
-import { createUser, findUserOwnProfileById } from '../services/userService.ts'
+import { createUser, listUserProfiles, findUserOwnProfileById } from '../services/userService.ts'
 import { BadRequestError, ConflictError, NotFoundError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'
 import { UserEmailConflictError, UserNameConflictError } from '../errors/userErrors.ts'
@@ -43,6 +43,21 @@ async function registerUser(req: Request, res: Response): Promise<void> {
     })
 }
 
+const getUsers = async (req: Request, res: Response) => {
+
+    const users = await listUserProfiles({
+
+    })
+
+    res.status(200).json({
+        data: {
+            users: users,
+            // add pagination details here when implemented
+        }
+    })
+
+}
+
 const getCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
 
     const user = await findUserOwnProfileById(req.user.id)
@@ -73,4 +88,4 @@ const getUserById = (req: Request, res: Response): void => {
     })
 }
 
-export { registerUser, getCurrentUser, getUserById }
+export { registerUser, getUsers, getCurrentUser, getUserById }

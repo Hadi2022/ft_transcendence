@@ -30,3 +30,5 @@ export type UserCredentials = Pick<User,
 >
 
 export type OwnProfile = UserProfile & Pick<User, 'email'>
+
+export type UserOrderBy = 'createdAt' | 'username'
