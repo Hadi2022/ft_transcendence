@@ -1,7 +1,7 @@
 # Application Architecture 
 
-**Version:** Maroma  
-**Date:** 2026-10-26
+**Version:** Pico Mágina  
+**Date:** 2026-11-02
 
 ## 1. Overview
 
@@ -22,8 +22,11 @@ The architecture follows a layered backend design, uses REST-oriented API commun
 | Database | PostgreSQL 17 | Docker Compose service defined |
 | ORM | Prisma 7 | Client, schema, migration, and repositories present |
 | Validation | Zod 4 | Backend request schemas implemented |
-| API documentation | OpenAPI 3.1.2 | Status and session endpoints documented |
-| Infrastructure | Docker Compose and Nginx | HTTP reverse proxy and database infrastructure configured |
+| API documentation | OpenAPI 3.1.2 | Status, session, and user registration endpoints documented |
+| Infrastructure | Docker Compose and Nginx | HTTPS reverse proxy with self-signed TLS certificate; backend and database services configured |
+| Internationalization | i18next, react-i18next | Translation resources and initialization implemented |
+| Password hashing | Argon2id | Implemented in backend services |
+| Error handling | Custom HTTP errors, Express middleware | Centralized error handling implemented |
 
 ## 3. High-Level Architecture
 
@@ -48,18 +51,19 @@ flowchart TD
     Prisma[Prisma ORM]
     DB[(PostgreSQL)]
 
-    Browser -->|HTTP currently; HTTPS planned| Nginx
-    Nginx --> API
+    Browser -->|HTTPS :443| Nginx
+    Nginx --> |HTTP internal| API
 	API --> Routes
 	Routes --> Services
     Services --> Repositories
     Repositories --> Prisma
     Prisma -.-> DB
 ```
+Nginx terminates HTTPS connections using a locally generated self-signed TLS certificate. Communication between Nginx and the Express backend takes place over the Docker network using HTTP.
 
 ## 4. Frontend Architecture
 
-The frontend is implemented using React, TypeScript, Vite, React Router, and Tailwind CSS.
+The frontend is implemented using React, TypeScript, Vite, React Router, Tailwind CSS, and i18next for internationalization.
 
 It follows a page-based structure with shared layouts and client-side routing.
 
@@ -75,6 +79,10 @@ It follows a page-based structure with shared layouts and client-side routing.
 | `src/pages/home/HomePage.tsx` | Initial home page |
 | `src/services/auth.ts` | Provisional authentication service functions |
 | `src/main.tsx` | Frontend application entry point |
+| `src/app/i18n/` | Internationalization configuration and initialization |
+| `src/locales/en.json` | English translations |
+| `src/locales/es.json` | Spanish translations |
+| `src/locales/nl.json` | Dutch translations |
 
 ### Application Routes
 
@@ -104,11 +112,11 @@ Handle HTTP requests, validate incoming data, invoke services, and construct HTT
 
 **Services**
 
-Implement business logic independently of HTTP handling. Current services include user registration, credential verification, password hashing, and session management.
+Implement business logic independently of HTTP handling. Current services include user registration, credential verification, password hashing, user profile management, and session management.
 
 **Repositories**
 
-Encapsulate database access and separate business logic from persistence operations.
+Encapsulate database access and separate business logic from persistence operations. User and session repositories are implemented using Prisma.
 
 **Database**
 
@@ -119,7 +127,7 @@ Provides PostgreSQL connectivity through the Prisma client.
 | Directory | Responsibility |
 |---|---|
 | `schemas/` | Request validation with Zod |
-| `middleware/` | Cookie parsing, session loading, and authentication checks |
+| `middleware/` | Cookie parsing, authentication checks, user loading, JSON parsing, and centralized error handling |
 | `errors/` | Application-specific error definitions |
 | `types/` | Shared TypeScript types and interfaces |
 | `constants/` | Shared configuration values |
@@ -130,14 +138,19 @@ Provides PostgreSQL connectivity through the Prisma client.
 
 | Method | Endpoint | Purpose |
 |---|---|---|
-| GET | `/health` | Backend health check |
-| GET | `/api/status` | API status |
+| GET | `/api/health` | Backend health check || GET | `/api/status` | API status |
 | POST | `/api/users` | User registration |
+| GET | `/api/users` | List users |
+| GET | `/api/users/me` | Retrieve the authenticated user's profile |
+| PATCH | `/api/users/me` | Update the authenticated user's profile |
+| GET | `/api/users/:id` | Retrieve a user's public profile |
 | POST | `/api/sessions` | Create a session |
 | GET | `/api/sessions` | List user sessions |
 | DELETE | `/api/sessions/current` | Close the current session |
 | DELETE | `/api/sessions/:id` | Close a specific session |
 | DELETE | `/api/sessions` | Close all user sessions |
+
+User profile responses distinguish between public and authenticated user data. Public profiles exclude sensitive fields such as email addresses and password hashes, while authenticated users can access their own profile information.
 
 ## 6. API Communication and Contracts
 
@@ -159,10 +172,13 @@ The current specification documents:
 - `DELETE /api/sessions/current`
 - `DELETE /api/sessions/{id}`
 - `DELETE /api/sessions`
+- `POST /api/users`
+- `GET /api/users`
+- `GET /api/users/me`
+- `PATCH /api/users/me`
+- `GET /api/users/{id}`
 
-The backend also defines `POST /api/users`, but this endpoint is not yet included in the OpenAPI specification.
-
-The `/health` endpoint is used for backend health checks and is not currently documented in OpenAPI.
+The `/api/health` endpoint is used for backend health checks and is not currently documented in OpenAPI.
 
 ### Response Conventions
 
@@ -247,6 +263,14 @@ The session repository implements database operations for:
 - Deleting individual sessions belonging to a user.
 - Deleting all sessions belonging to a user.
 
+The user repository implements database operations for:
+
+- Listing users.
+- Finding users by email or ID.
+- Retrieving public and authenticated user profiles.
+- Creating users.
+- Updating user profiles.
+
 ### Database Development Conventions
 
 The agreed team workflow is:
@@ -281,7 +305,6 @@ npx prisma migrate deploy
 ### Pending Verification
 
 - Apply the initial migration in a clean environment.
-- Complete the user repository implementation.
 - Verify database persistence through the running backend.
 - Validate seed execution and test credentials.
 - Confirm database integration through automated or manual tests.
@@ -292,7 +315,7 @@ The current `docker-compose.yml` defines three services:
 
 | Service | Responsibility | Current implementation |
 | --- | --- | --- |
-| `nginx` | Public-facing reverse proxy | Publishes host port 80 and proxies to backend |
+| `nginx` | Public-facing reverse proxy | Publishes host port 443 with HTTPS and proxies to backend |
 | `backend` | Express API | Runs on internal configured port; joins `internal` and `external` networks |
 | `database` | PostgreSQL persistence | Uses internal network and persistent Docker volume |
 
@@ -303,7 +326,7 @@ Two Docker bridge networks are configured:
 - `external`: Connects Nginx and the backend.
 - `internal`: Connects the backend and PostgreSQL.
 
-The PostgreSQL container is not directly attached to the external network.
+The PostgreSQL container is attached only to the internal Docker network. However, port 5432 is also published on the host for direct database access during development.
 
 ### Service Dependencies
 
@@ -323,13 +346,13 @@ Prisma client generation does not replace the need to apply database migrations.
 
 The current configuration remains development-oriented.
 
-- Nginx listens on port 80 without HTTPS.
-- Incoming requests are forwarded to the backend.
+- Nginx listens on port 443 with HTTPS using a self-signed TLS certificate.
+- Incoming requests are forwarded to the backend over HTTP within the Docker network.
 - The React application is not yet served as compiled static assets by Nginx.
 - Docker Compose does not define a frontend service.
 - Complete browser-to-API deployment has not been verified.
 
-The intended deployment includes HTTPS and static frontend hosting. These capabilities remain pending.
+Static frontend hosting and complete deployment verification remain pending.
 
 ## 9. Security Boundaries
 
@@ -353,13 +376,25 @@ The configured session lifetime is seven days.
 
 Zod schemas validate registration and session requests.
 
+**User profile data**
+
+Public user profiles exclude email addresses and password hashes. Authenticated users can retrieve their own profile data, including their email address, without exposing password hashes.
+
 **Authentication middleware**
 
 Protected session endpoints require an authenticated user and an active session context.
 
+**Error handling**
+
+Centralized Express error handling converts application errors into structured JSON responses. Unexpected errors return a generic internal error response.
+
 **Infrastructure separation**
 
 PostgreSQL is connected only to the internal Docker network.
+
+**HTTPS**
+
+Nginx terminates HTTPS connections using a self-signed TLS certificate generated during the container build. Communication with the Express backend takes place over HTTP within the Docker network.
 
 **Environment files**
 
@@ -370,17 +405,18 @@ The repository's `.gitignore` excludes `.env` files while allowing `.env.example
 | Topic | Status / next action |
 |---|---|
 | Application domain model | Initial social platform schema present; feature integration pending |
-| User registration | Controller, validation, and service present; repository implementation pending |
+| User registration | Controller, validation, service, and Prisma repository implemented; end-to-end verification pending |
 | Authentication mechanism | Database-backed session approach established |
 | Session management | Routes, services, and repository present; end-to-end verification pending |
-| Centralized error handling | Pending integration |
-| API contract consistency | Document registration and align response formats |
+| Centralized error handling | Implemented using custom HTTP errors and Express middleware |
+| API contract consistency | User endpoints documented in OpenAPI; response consistency requires verification |
 | Frontend authentication | Pages present; API communication pending |
+| Frontend internationalization | i18next configured with English, Spanish, and Dutch translations |
 | Prisma migrations | Initial migration present; clean-environment verification pending |
 | Database seed | Present; configuration and password compatibility require verification |
-| HTTPS | Not implemented |
+| HTTPS | Configured in Nginx on port 443 using a self-signed TLS certificate |
 | Frontend static hosting | Not configured in Nginx |
-| Security hardening | Cookie policy |
+| Security hardening | Secure and SameSite cookie attributes pending |
 | Deployment verification | Build containers and test complete application flows |
 
 ## 11. Related Documents and Team Review
