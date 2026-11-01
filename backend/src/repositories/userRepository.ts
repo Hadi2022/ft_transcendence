@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../db/prisma/prisma.ts'
-import type { NewUserData, User, UserProfile, OwnProfile } from '../types/user.ts'
+import type { NewUserData, UpdateUserData, User, UserProfile, OwnProfile } from '../types/user.ts'
 import { UniqueConstraintError } from '../errors/RepositoryErrors.ts';
 
 const userProfileOmit = {
@@ -92,4 +92,18 @@ export async function createUser(
         }
         throw error;
     }
+}
+
+export async function updateUser(
+    _id: string,
+    _data: UpdateUserData
+): Promise<OwnProfile> {
+
+    const user = await prisma.user.update({
+        where: { id: _id },
+        data: _data,
+        omit: ownProfileOmit
+    })
+
+    return user
 }

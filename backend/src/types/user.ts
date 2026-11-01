@@ -30,3 +30,9 @@ export type UserCredentials = Pick<User,
 >
 
 export type OwnProfile = UserProfile & Pick<User, 'email'>
+
+export type UpdateUserData = {
+    name?: string | null
+    biography?: string | null
+    avatarUrl?: string | null
+}
