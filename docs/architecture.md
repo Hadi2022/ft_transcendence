@@ -138,7 +138,8 @@ Provides PostgreSQL connectivity through the Prisma client.
 
 | Method | Endpoint | Purpose |
 |---|---|---|
-| GET | `/api/health` | Backend health check || GET | `/api/status` | API status |
+| GET | `/api/health` | Backend health check |
+| GET | `/api/status` | API status |
 | POST | `/api/users` | User registration |
 | GET | `/api/users` | List users |
 | GET | `/api/users/me` | Retrieve the authenticated user's profile |
