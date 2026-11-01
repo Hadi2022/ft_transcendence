@@ -1,8 +1,8 @@
-import type { User, NewUserData, OwnProfile, UserProfile } from '../types/user.ts'
-import { UserNameConflictError, UserEmailConflictError } from '../errors/userErrors.ts'
+import type { User, NewUserData, UpdateUserData, OwnProfile, UserProfile } from '../types/user.ts'
+import { UserNameConflictError, UserEmailConflictError, UserNotFoundError } from '../errors/userErrors.ts'
 import { hashPassword, verifyPassword } from './passwordService.ts'
 import * as userRepository from '../repositories/userRepository.ts'
-import { UniqueConstraintError } from '../errors/RepositoryErrors.ts'
+import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts'
 
 type CreateUserInput = {
     username: string
@@ -74,6 +74,23 @@ async function findUserOwnProfileById(id: string): Promise<OwnProfile | null> {
     return userRepository.findOwnProfileById(id)
 }
 
+async function updateUser(
+    id: string,
+    data: UpdateUserData
+): Promise<OwnProfile> {
+
+    try {
+        return await userRepository.updateUser(id, data)
+    }
+    catch (error) {
+        if (error instanceof RecordNotFoundError) {
+            throw new UserNotFoundError('User not found')
+        }
+
+        throw error
+    }
+}
+
 export {
     prepareUser,
     createUser,
@@ -81,4 +98,5 @@ export {
     findUserById,
     findUserProfileById,
     findUserOwnProfileById,
+	updateUser
 }

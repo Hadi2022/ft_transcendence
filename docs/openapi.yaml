@@ -387,6 +387,88 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+    patch:
+      summary: Update the current user profile
+      description: Updates one or more editable profile fields of the logged in user
+      operationId: updateCurrentUser
+      security:
+        - sessionCookie: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              minProperties: 1
+              additionalProperties: false
+              properties:
+                name:
+                  type: [string, 'null']
+                  maxLength: 100
+                  description: Display name
+                biography:
+                  type: [string, 'null']
+                avatarUrl:
+                  type: [string, 'null']
+                  format: uri
+                  maxLength: 500
+            example:
+              name: CrazyIgor
+              biography: Updated profile biography
+
+      responses:
+        '200':
+          description: User profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/OwnProfile'
+              example:
+                data:
+                  id: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
+                  username: hadi
+                  email: hadi@selfhosted.selfhostingiscool
+                  name: CrazyIgor
+                  biography: Updated profile biography
+                  avatarUrl: null
+                  isVerified: false
+                  createdAt: '2026-10-31T12:00:00.000Z'
+
+        '400':
+          description: Invalid profile fields or empty request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: BAD_REQUEST
+                  message: Input contains invalid fields
+                  details:
+                    _root: At least one field must be provided
+
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: You do not exist! (wow!)
+                  details: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /users/{id}:
     get:
       summary: Get a user by ID
