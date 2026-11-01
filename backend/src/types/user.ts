@@ -1,5 +1,4 @@
 
-
 export type NewUserData = {
     username: string
 	email: string
@@ -30,5 +29,11 @@ export type UserCredentials = Pick<User,
 >
 
 export type OwnProfile = UserProfile & Pick<User, 'email'>
+
+export type UpdateUserData = {
+    name?: string | null | undefined
+    biography?: string | null | undefined
+    avatarUrl?: string | null | undefined
+}
 
 export type UserOrderBy = 'createdAt' | 'username'

@@ -43,3 +43,12 @@ export const userSchema = z.object({
     email: emailField,
     passwordHash: passwordHashField,
 })
+
+export const updateUserSchema = z.strictObject({
+    name: z.string().max(100).nullable().optional(),
+    biography: z.string().nullable().optional(),
+    avatarUrl: z.url().max(500).nullable().optional(),
+}).refine(
+    (data) => Object.keys(data).length > 0,
+    { message: 'At least one field must be provided' }
+)

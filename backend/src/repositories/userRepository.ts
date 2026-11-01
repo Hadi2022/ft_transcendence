@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../db/prisma/prisma.ts'
-import type { NewUserData, User, UserProfile, OwnProfile, UserOrderBy } from '../types/user.ts'
-import { UniqueConstraintError } from '../errors/RepositoryErrors.ts';
+import type { NewUserData, UpdateUserData, User, UserProfile, OwnProfile, UserOrderBy } from '../types/user.ts'
+import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts';
 import type { Order } from '../types/query.ts';
 
 const userProfileOmit = {
@@ -108,3 +108,33 @@ export async function createUser(
         throw error;
     }
 }
+
+export async function updateUser(
+    _id: string,
+    _data: UpdateUserData
+): Promise<OwnProfile> {
+
+    try {
+        return await prisma.user.update({
+            where: { id: _id },
+			// Omit undefined fields to satisfy Prisma's strict optional property types.
+            data: {
+                ...(_data.name !== undefined && { name: _data.name }),
+                ...(_data.biography !== undefined && { biography: _data.biography }),
+                ...(_data.avatarUrl !== undefined && { avatarUrl: _data.avatarUrl })
+            },
+            omit: ownProfileOmit
+        })
+    }
+    catch (error: unknown) {
+        if (
+            error instanceof Prisma.PrismaClientKnownRequestError &&
+            error.code === 'P2025'
+        ) {
+            throw new RecordNotFoundError('User not found')
+        }
+
+        throw error
+    }
+}
+
