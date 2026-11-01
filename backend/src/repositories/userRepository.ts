@@ -15,12 +15,12 @@ const ownProfileOmit = {
     updatedAt: true,
 } satisfies Prisma.UserOmit
 
-export interface FindUsersParams {
-  order?: Order
-  orderBy?: UserOrderBy
+interface FindUsersParams {
+    order?: Order | undefined,
+    orderBy?: UserOrderBy | undefined,
 }
 
-export async function findMany ({order = 'desc', orderBy = 'createdAt'}): Promise<UserProfile[]> {
+export async function findMany ({order = 'desc', orderBy = 'createdAt'}: FindUsersParams): Promise<UserProfile[]> {
 
     return prisma.user.findMany({
         orderBy: [{ [orderBy]: order }, { id: order }],

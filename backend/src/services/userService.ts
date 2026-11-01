@@ -11,9 +11,9 @@ type CreateUserInput = {
     password: string
 }
 
-type ListUserProfilesInput = {
-    order?: Order
-    orderBy?: UserOrderBy,
+interface ListUserProfilesInput {
+    order?: Order | undefined,
+    orderBy?: UserOrderBy | undefined,
 }
 
 async function prepareUser(input: CreateUserInput): Promise<NewUserData> {
