@@ -347,6 +347,25 @@ paths:
       operationId: getUserList
       security: []
 
+      parameters:
+        - name: order
+          in: query
+          required: false
+          description: Sort direction
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+
+        - name: order_by
+          in: query
+          required: false
+          description: Field used to sort users
+          schema:
+            type: string
+            enum: [created_at, username]
+            default: created_at
+
       responses:
         '200':
           description: Sucessfully returned list of users 
@@ -366,6 +385,18 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/UserProfile'
+        '400':
+          description: Invalid ordering query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: BAD_REQUEST
+                  message: Invalid query parameters
+                  details:
+                    order: Invalid option
         '500':
           $ref: '#/components/responses/InternalServerError'
 
