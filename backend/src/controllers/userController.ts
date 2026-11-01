@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express'
 
 import { registerUserSchema, updateUserSchema } from '../schemas/user.ts'
-import { createUser, findUserOwnProfileById, updateUser } from '../services/userService.ts'
+import { createUser, listUserProfiles, findUserOwnProfileById, updateUser } from '../services/userService.ts'
 import { BadRequestError, ConflictError, NotFoundError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'
 import { UserEmailConflictError, UserNameConflictError, UserNotFoundError } from '../errors/userErrors.ts'
@@ -41,6 +41,21 @@ async function registerUser(req: Request, res: Response): Promise<void> {
             ...user
         }
     })
+}
+
+const getUsers = async (req: Request, res: Response) => {
+
+    const users = await listUserProfiles({
+
+    })
+
+    res.status(200).json({
+        data: {
+            users: users,
+            // add pagination details here when implemented
+        }
+    })
+
 }
 
 const getCurrentUser = async (req: AuthenticatedRequest, res: Response) => {
@@ -108,4 +123,4 @@ const updateCurrentUser = async (
     })
 }
 
-export { registerUser, getCurrentUser, getUserById, updateCurrentUser }
+export { registerUser, getUsers, getCurrentUser, getUserById, updateCurrentUser }

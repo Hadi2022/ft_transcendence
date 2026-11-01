@@ -1,7 +1,8 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../db/prisma/prisma.ts'
-import type { NewUserData, UpdateUserData, User, UserProfile, OwnProfile } from '../types/user.ts'
+import type { NewUserData, UpdateUserData, User, UserProfile, OwnProfile, UserOrderBy } from '../types/user.ts'
 import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts';
+import type { Order } from '../types/query.ts';
 
 const userProfileOmit = {
     passwordHash: true,
@@ -13,6 +14,20 @@ const ownProfileOmit = {
     passwordHash: true,
     updatedAt: true,
 } satisfies Prisma.UserOmit
+
+interface FindUsersParams {
+    order?: Order | undefined,
+    orderBy?: UserOrderBy | undefined,
+}
+
+export async function findMany ({order = 'desc', orderBy = 'createdAt'}: FindUsersParams): Promise<UserProfile[]> {
+
+    return prisma.user.findMany({
+        orderBy: [{ [orderBy]: order }, { id: order }],
+        take: 100, // temporary cap, pagination will replace this
+        omit: userProfileOmit
+    })
+}
 
 export async function findByEmail(
     _email: string

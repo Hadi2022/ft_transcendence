@@ -35,3 +35,5 @@ export type UpdateUserData = {
     biography?: string | null | undefined
     avatarUrl?: string | null | undefined
 }
+
+export type UserOrderBy = 'createdAt' | 'username'

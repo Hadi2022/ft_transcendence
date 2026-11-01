@@ -341,6 +341,35 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+    get:
+      summary: Retrieve a list of users 
+      description: Returns a list of users, by default, sorted by creation time in descending order
+      operationId: getUserList
+      security: []
+
+      responses:
+        '200':
+          description: Sucessfully returned list of users 
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: object
+                    required: 
+                      - users
+                    properties: 
+                      users:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserProfile'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+
   /users/me:
     get:
       summary: Get the current user

@@ -1,13 +1,19 @@
-import type { User, NewUserData, UpdateUserData, OwnProfile, UserProfile } from '../types/user.ts'
+import type { User, NewUserData, UpdateUserData, OwnProfile, UserProfile, UserOrderBy } from '../types/user.ts'
 import { UserNameConflictError, UserEmailConflictError, UserNotFoundError } from '../errors/userErrors.ts'
 import { hashPassword, verifyPassword } from './passwordService.ts'
 import * as userRepository from '../repositories/userRepository.ts'
 import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts'
+import type { Order } from '../types/query.ts'
 
 type CreateUserInput = {
     username: string
     email: string
     password: string
+}
+
+interface ListUserProfilesInput {
+    order?: Order | undefined,
+    orderBy?: UserOrderBy | undefined,
 }
 
 async function prepareUser(input: CreateUserInput): Promise<NewUserData> {
@@ -59,6 +65,15 @@ async function isValidCredentials(
     return user
 }
 
+async function listUserProfiles(params: ListUserProfilesInput): Promise<UserProfile[]> {
+    
+    return userRepository.findMany({
+        order: params.order,
+        orderBy: params.orderBy,
+    })
+
+}
+
 // Returns full user object
 async function findUserById(id: string): Promise<User | null> {
     return userRepository.findById(id)
@@ -95,6 +110,7 @@ export {
     prepareUser,
     createUser,
     isValidCredentials,
+    listUserProfiles,
     findUserById,
     findUserProfileById,
     findUserOwnProfileById,
