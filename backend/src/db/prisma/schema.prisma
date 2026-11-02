@@ -52,7 +52,6 @@ model Session {
   tokenHash    String    @unique @map("token_hash") @db.VarChar(255)
   ipOrigin     String?   @map("ip_origin") @db.VarChar(45)
   userAgent    String?   @map("user_agent") @db.Text
-  isValid      Boolean   @default(true) @map("is_valid")
   expiresAt    DateTime  @map("expires_at") @db.Timestamptz
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
   lastAccess   DateTime  @default(now()) @updatedAt @map("last_access") @db.Timestamptz
