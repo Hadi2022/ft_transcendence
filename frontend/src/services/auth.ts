@@ -20,6 +20,7 @@ export async function login({email, password}: LoginData): Promise<void>  {
     const res = await fetch("/api/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password })
     })
 
