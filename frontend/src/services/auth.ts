@@ -40,3 +40,12 @@ export async function register({username, email, password}: RegisterData): Promi
 
     return (body.data)
 }
+
+export async function logout(): Promise<void> {
+    const res = await fetch("/api/sessions/current", {
+        method: "DELETE",
+        credentials: "include"
+    })
+
+    if (!res.ok) await throwApiError(res)
+}
