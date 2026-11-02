@@ -38,12 +38,19 @@ export default function InputComponent(
                         onClick={() => setIsPasswordVisible(visible => !visible)}
                         aria-label={`${isPasswordVisible ? "Hide" : "Show"} ${label}`}
                         aria-controls={id}
-                        className="w-20 shrink-0 rounded-md border-2 px-3 py-2
+                        className="shrink-0 rounded-md border-2 px-3 py-2
                                    focus-visible:outline-2
                                    focus-visible:outline-offset-2
                                    focus-visible:outline-blue-400"
                     >
-                        {isPasswordVisible ? "Hide" : "Show"}
+                        <svg viewBox="0 0 24 24" width="24" height="24"
+                            fill="none" stroke="currentColor" strokeWidth="2"
+                            strokeLinecap="round" strokeLinejoin="round"
+                            aria-hidden="true" focusable="false">
+                            <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" />
+                            <circle cx="12" cy="12" r="3" />
+                            {isPasswordVisible && <path d="m3 3 18 18" />}
+                        </svg>
                     </button>
                 )}
             </div>
