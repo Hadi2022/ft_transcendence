@@ -17,6 +17,13 @@ enum StatePost {
   @@map("state_post")
 }
 
+enum FriendStatus {
+  pending
+  accepted
+
+  @@map("friend_status")
+}
+
 // ----------------------------------------------------
 // MODELOS PRINCIPALES
 // ----------------------------------------------------
@@ -43,7 +50,24 @@ model User {
   followers      Follow_up[] @relation("Followers")
   following      Follow_up[] @relation("Continued")
 
+  friendRequestsSent     Friend[] @relation("FriendSender")
+  friendRequestsReceived Friend[] @relation("FriendReceiver")
+
   @@map("users")
+}
+
+model Friend {
+  id         String       @id @default(uuid()) @db.Uuid
+  senderId   String       @map("sender_id") @db.Uuid
+  receiverId String       @map("receiver_id") @db.Uuid
+  status     FriendStatus @default(pending)
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz
+
+  sender     User @relation("FriendSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User @relation("FriendReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@map("friends")
 }
 
 model Session {
