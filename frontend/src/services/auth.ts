@@ -11,8 +11,14 @@ export type LoginData = {
     password: string;
 }
 
-export async function login({email, password}: LoginData)  {
-    console.log("Logeando..." + email + ", " + password)
+export async function login({email, password}: LoginData): Promise<void>  {
+    const res = await fetch("/api/sessions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+    })
+
+    if (!res.ok) await throwApiError(res)
 }
 
 export type RegisterData = {
