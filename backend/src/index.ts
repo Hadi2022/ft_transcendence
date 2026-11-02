@@ -6,6 +6,7 @@ import { loadSession } from './middleware/auth.ts';
 import apiRoutes from './routes/apiRoutes.ts';
 import { errorHandler } from './middleware/errorHandler.ts';
 import { syntaxErrorParser } from './middleware/jsonParser.ts';
+import { startSessionCleanUp } from './jobs/session-cleanup.ts';
 
 const app = express();
 
@@ -25,7 +26,9 @@ const port = process.env.PORT || 3000;
 const start = async () => {
     app.listen(port, () => {
         console.log(`App started on port ${port}`);
+        startSessionCleanUp();
     });
+
 };
 
 start();

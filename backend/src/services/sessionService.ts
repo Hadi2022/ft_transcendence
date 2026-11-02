@@ -1,5 +1,4 @@
 import { hashToken, generateToken } from "../utils/hash.ts"
-
 import * as sessionRepository from '../repositories/sessionRepository.ts'
 import * as sessionConstants from '../constants/session.ts'
 
@@ -9,7 +8,7 @@ type CreateSessionMeta = {
 }
 
 export const findActiveSessionByToken = async (token: string) => {
-	
+
 	const session = await sessionRepository.findByTokenHash(hashToken(token))
 
 	if (!session || session.expiresAt < new Date())
@@ -45,4 +44,13 @@ export const closeUserSessionById = async ({ userId, sessionId }: { userId: stri
 
 export const closeAllUserSessions = async (userId: string) => {
 	await sessionRepository.deleteByUserId(userId)
+}
+
+export const purgeExpiredSessionsJob = async()=>{
+	try {
+		const deletedSessions = await sessionRepository.purgeExpired();
+		return deletedSessions;
+	} catch (error) {
+		throw error;
+	}
 }
