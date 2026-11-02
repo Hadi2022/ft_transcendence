@@ -1,3 +1,5 @@
+import { throwApiError } from "./api";
+
 export type User = {
     id: string;
     username: string;
@@ -19,6 +21,16 @@ export type RegisterData = {
     password: string;
 }
 
-export async function register({username, email, password}: RegisterData) {
-    console.log("Registering..." + username + ", " + email + ", " + password)
+export async function register({username, email, password}: RegisterData): Promise<User> {
+    const res = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, email, password })
+    })
+
+    if (!res.ok) await throwApiError(res)
+
+    const body = await res.json()
+
+    return (body.data)
 }
