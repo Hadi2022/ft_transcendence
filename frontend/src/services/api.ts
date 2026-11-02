@@ -16,7 +16,7 @@ export async function throwApiError(res: Response): Promise<never> {
 
     throw new ApiError(
         body?.error?.message ?? "Unexpected server error",
-        body?.error?.code ?? "UNKNOW",
+        body?.error?.code ?? "UNKNOWN",
         body?.error?.details ?? {}
     )
 }
