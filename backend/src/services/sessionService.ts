@@ -1,8 +1,6 @@
 import { hashToken, generateToken } from "../utils/hash.ts"
-
 import * as sessionRepository from '../repositories/sessionRepository.ts'
 import * as sessionConstants from '../constants/session.ts'
-import { ErrorSessionCleanup } from "../errors/sessionErrors.ts"
 
 type CreateSessionMeta = {
 	ipOrigin?: string | null

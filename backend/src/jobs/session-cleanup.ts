@@ -14,7 +14,7 @@ export const runSessionCleanup = async()=>{
 		const deletedSessions = await purgeExpiredSessionsJob();
 		console.log(`[SessionCleanup] Cleanup completed: ${deletedSessions.count} expired sessions removed`);
 	} catch (error) {
-		throw error;
+		console.error("[SessionCleanup] Cleanup failed:", error);
 	}finally{
 		isRunning = false;
 	}
