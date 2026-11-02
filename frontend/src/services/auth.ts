@@ -1,9 +1,14 @@
 import { throwApiError } from "./api";
 
-export type User = {
+export type UserProfile = {
     id: string;
     username: string;
-    email: string;
+    name: string | null;
+    biography: string | null;
+    avatarUrl: string | null;
+    isVerified: boolean;
+    createdAt: string;
+
 }
 
 export type LoginData = {
@@ -27,7 +32,7 @@ export type RegisterData = {
     password: string;
 }
 
-export async function register({username, email, password}: RegisterData): Promise<User> {
+export async function register({username, email, password}: RegisterData): Promise<UserProfile> {
     const res = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
