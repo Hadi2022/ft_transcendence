@@ -19,26 +19,25 @@ export default function InputComponent(
                 {label}
             </label>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 bg-white rounded">
                 <input
                     id={id}
                     type={type === "password" && isPasswordVisible ? "text" : type}
                     placeholder={placeholder}
-                    className={`bg-white text-zinc-800 w-full min-w-0
+                    className={`bg-none text-zinc-800 w-full min-w-0
                                 rounded-md px-3 py-2
                                 border-2 focus:border-blue-400
-                                transition-colors focus:outline-none
+                                transition-colors focus:outline-none border-none
                                 ${className}`}
                     {...props}
                 />
-
                 {type === "password" && (
                     <button
                         type="button"
                         onClick={() => setIsPasswordVisible(visible => !visible)}
                         aria-label={`${isPasswordVisible ? "Hide" : "Show"} ${label}`}
                         aria-controls={id}
-                        className="shrink-0 rounded-md border-2 px-3 py-2
+                        className="shrink-0 rounded-md px-3 py-2 text-black
                                    focus-visible:outline-2
                                    focus-visible:outline-offset-2
                                    focus-visible:outline-blue-400"
