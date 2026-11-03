@@ -9,7 +9,7 @@ import { UserNotFoundError } from '../errors/userErrors.ts'
 
 export const openOrAcceptFriendRequest = async (relation: FriendRelation): Promise<Friend> => {
 
-	if (userRepository.findById(relation.receiverId) == null)
+	if (await userRepository.findById(relation.receiverId) == null)
 		throw new UserNotFoundError('User not found')
 
 	if (relation.receiverId == relation.senderId)
@@ -28,7 +28,7 @@ export const openOrAcceptFriendRequest = async (relation: FriendRelation): Promi
 	} catch (error) {
 
 		if (error instanceof UniqueConstraintError || error instanceof GenericConstraintError)
-			throw new FriendRequestExistsError('Friend reqeuest already open')
+			throw new FriendRequestExistsError('Friend request already open')
 
 		throw error
 	}
