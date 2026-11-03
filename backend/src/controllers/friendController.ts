@@ -4,8 +4,9 @@ import { openOrAcceptFriendRequest } from '../services/friendService.ts'
 import type { AuthenticatedRequest } from '../types/express/Request.js'
 import { openFriendRequestSchema } from '../schemas/friend.ts'
 import { formatZodErrors } from '../utils/zod.ts'
-import { BadRequestError, ConflictError, InternalError } from '../errors/HttpErrors.ts'
+import { BadRequestError, ConflictError, InternalError, NotFoundError } from '../errors/HttpErrors.ts'
 import { FriendError } from '../errors/friendErrors.ts'
+import { UserNotFoundError } from '../errors/userErrors.ts'
 
 export const openFriendRequest = async (req: AuthenticatedRequest, res: Response) => {
 
@@ -28,6 +29,11 @@ export const openFriendRequest = async (req: AuthenticatedRequest, res: Response
 				details: {reason: error.message}
 			})
 		}
+
+		else if (error instanceof UserNotFoundError)
+			throw new NotFoundError({
+				details: {reason: 'cannot send friend request because the user does not exist'}
+			})
 		
 		throw error
 	}

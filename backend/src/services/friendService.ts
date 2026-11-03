@@ -1,11 +1,16 @@
 
 import { GenericConstraintError, UniqueConstraintError } from '../errors/RepositoryErrors.ts'
 import * as friendRepository from '../repositories/friendRepository.ts'
+import * as userRepository from '../repositories/userRepository.ts'
 import type { Friend, FriendRelation } from '../types/friend.ts'
 
 import { AlreadyFriendsError, FriendSelfError, FriendRequestExistsError } from '../errors/friendErrors.ts'
+import { UserNotFoundError } from '../errors/userErrors.ts'
 
 export const openOrAcceptFriendRequest = async (relation: FriendRelation): Promise<Friend> => {
+
+	if (userRepository.findById(relation.receiverId) == null)
+		throw new UserNotFoundError('User not found')
 
 	if (relation.receiverId == relation.senderId)
 		throw new FriendSelfError('Cannot friend yourself')
