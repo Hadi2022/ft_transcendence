@@ -1,4 +1,5 @@
 import { useId, useState, type ComponentProps } from "react"
+import { useTranslation } from "react-i18next"
 
 type InputProps = ComponentProps<"input"> & {
     label: string,
@@ -9,6 +10,8 @@ export default function InputComponent(
 ) {
     const id = useId()
     const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+
+    const { t } = useTranslation()
 
     return (
         <div className="space-y-1">
@@ -24,7 +27,7 @@ export default function InputComponent(
                     id={id}
                     type={type === "password" && isPasswordVisible ? "text" : type}
                     placeholder={placeholder}
-                    className={`bg-none text-zinc-800 w-full min-w-0
+                    className={`bg-transparent text-zinc-800 w-full min-w-0
                                 rounded-md px-3 py-2
                                 border-2 focus:border-blue-400
                                 transition-colors focus:outline-none border-none
@@ -35,7 +38,7 @@ export default function InputComponent(
                     <button
                         type="button"
                         onClick={() => setIsPasswordVisible(visible => !visible)}
-                        aria-label={`${isPasswordVisible ? "Hide" : "Show"} ${label}`}
+                        aria-label={t(isPasswordVisible ? "auth.hideField" : "auth.showField", {label})}
                         aria-controls={id}
                         className="shrink-0 rounded-md px-3 py-2 text-black
                                    focus-visible:outline-2
