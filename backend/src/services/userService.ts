@@ -52,7 +52,7 @@ async function isValidCredentials(
 
     const user = await userRepository.findByEmail(email)
 
-    if (!user) {
+    if (!user || !user.passwordHash) {
         return null
     }
 

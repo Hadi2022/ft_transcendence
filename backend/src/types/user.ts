@@ -9,7 +9,8 @@ export type User = {
     id: string;
     username: string;
     email: string;
-    passwordHash: string;
+    passwordHash?: string | null;
+    googleId?: string | null;
     name: string | null;
     biography: string | null;
     avatarUrl: string | null;
@@ -20,6 +21,7 @@ export type User = {
 
 export type UserProfile = Omit<User, 
     'passwordHash' |
+    'googleId' |
     'email' |
     'updatedAt'
     >
