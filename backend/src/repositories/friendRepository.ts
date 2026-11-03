@@ -9,7 +9,7 @@ export const create = async (data: FriendRelation) => {
 	let friend
 
 	try {
-		friend = prisma.friend.create({
+		friend = await prisma.friend.create({
 			data
 		})
 	} catch (error) {
@@ -37,13 +37,13 @@ export const findOpenRequest = async (data: FriendRelation) => {
 }
 
 export const findBidirectional = async (data: FriendRelation): Promise<Friend | null> => {
-	return prisma.friend.findUnique({
+	return await prisma.friend.findUnique({
 		where: {
 				senderId_receiverId: {...data},
 		}
 	})
 	??
-	prisma.friend.findUnique({
+	await prisma.friend.findUnique({
 		where: {
 				senderId_receiverId: {senderId: data.receiverId, receiverId: data.senderId},
 		}
@@ -66,7 +66,7 @@ export const findAcceptedBidirectional = async (data: FriendRelation): Promise<F
 	})
 }
 
-export const updateStatus = async (id: string, status: FriendshipStatus): Promise<Friend | null> => {
+export const updateStatus = async (id: string, status: FriendshipStatus): Promise<Friend> => {
 
 	return prisma.friend.update({
 		where: {

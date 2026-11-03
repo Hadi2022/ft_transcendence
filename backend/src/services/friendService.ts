@@ -5,7 +5,7 @@ import type { Friend, FriendRelation } from '../types/friend.ts'
 
 import { AlreadyFriendsError, FriendSelfError, FriendRequestExistsError } from '../errors/friendErrors.ts'
 
-export const openOrAcceptFriendRequest = async (relation: FriendRelation): Promise<Friend | null> => {
+export const openOrAcceptFriendRequest = async (relation: FriendRelation): Promise<Friend> => {
 
 	if (relation.receiverId == relation.senderId)
 		throw new FriendSelfError('Cannot friend yourself')
@@ -16,7 +16,7 @@ export const openOrAcceptFriendRequest = async (relation: FriendRelation): Promi
 		throw new AlreadyFriendsError('Already friends')
 
 	if (existingRequest?.status == 'pending' && existingRequest.senderId == relation.receiverId)
-		return friendRepository.updateStatus(existingRequest.id, 'accepted')
+		return await friendRepository.updateStatus(existingRequest.id, 'accepted')
 
 	try {
 		return await friendRepository.create(relation)	
