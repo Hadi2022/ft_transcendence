@@ -6,6 +6,16 @@ import { login } from "../../services/auth";
 import { useTranslation } from "react-i18next";
 import { ApiError } from "../../services/api";
 
+function getLoginErrorKey(err: unknown) : string {
+    if (!(err instanceof ApiError))
+        return "auth.errors.network"
+    if (err.status === 401)
+        return "auth.errors.invalidCredentials"
+    if (err.status === 400)
+        return "auth.errors.invalidCredentials"
+    return "auth.errors.unexpected"
+}
+
 export default function LoginPage() {
 
     const navigate = useNavigate()
@@ -14,27 +24,20 @@ export default function LoginPage() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
 
+    const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>("")
-
-    function getLoginErrorKey(err: unknown) : string {
-        if (!(err instanceof ApiError))
-            return "auth.errors.network"
-        if (err.status === 401)
-            return "auth.errors.invalidCredentials"
-        if (err.status === 400)
-            return "auth.errors.invalidCredentials"
-        return "auth.errors.unexpected"
-    }
 
     async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
         setError(null)
-
+        setIsLoading(true)
         try {
             await login({ email, password })
             navigate("/")
         } catch (err) {
             setError(getLoginErrorKey(err))
+        } finally {
+            setIsLoading(false)
         }
     }
     
@@ -72,7 +75,7 @@ export default function LoginPage() {
                 )}
 
                 { /* Login button */ }
-                <ButtonComponent text={ t("auth.loginButton") } />
+                <ButtonComponent text={ t("auth.loginButton") } isLoading={isLoading} />
             </form>
 
             <Link to="/register" className="text-sm underline text-blue-400 hover:no-underline">

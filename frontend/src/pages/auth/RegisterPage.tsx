@@ -6,6 +6,20 @@ import { useState, type SubmitEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { ApiError } from "../../services/api";
 
+const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/
+
+function getRegisterErrorKey(err: unknown): string {
+    if (!(err instanceof ApiError))
+        return "auth.errors.network"
+    if (err.status === 409 && err.details.email)
+        return "auth.errors.emailInUse"
+    if (err.status === 409 && err.details.username)
+        return "auth.errors.usernameInUse"
+    if (err.status === 400)
+            return "auth.errors.invalidFields"
+    return "auth.errors.unexpected"
+}
+
 export default function RegisterPage() {
 
     const navigate = useNavigate()
@@ -16,21 +30,9 @@ export default function RegisterPage() {
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
 
+    const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/
-
-    function getRegisterErrorKey(err: unknown): string {
-        if (!(err instanceof ApiError))
-            return "auth.errors.network"
-        if (err.status === 409 && err.details.email)
-            return "auth.errors.emailInUse"
-        if (err.status === 409 && err.details.username)
-            return "auth.errors.usernameInUse"
-        if (err.status === 400)
-                return "auth.errors.invalidFields"
-        return "auth.errors.unexpected"
-    }
 
     async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -46,11 +48,15 @@ export default function RegisterPage() {
             return
         }
 
+        setIsLoading(true)
+
         try {
             await register({ username, email, password })
             navigate("/login")
         } catch (err) {
             setError(getRegisterErrorKey(err))
+        } finally {
+            setIsLoading(false)
         }
         
     }
@@ -70,6 +76,8 @@ export default function RegisterPage() {
                                 placeholder="joaquin42"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
+                                pattern="[a-zA-Z0-9_]+"
+                                title={ t("auth.usernameHint") }
                                 minLength={3} maxLength={30}
                                 required />
 
@@ -105,7 +113,7 @@ export default function RegisterPage() {
                 )}
 
                 { /* Register button */ }
-                <ButtonComponent text={ t("auth.registerButton") } />
+                <ButtonComponent text={ t("auth.registerButton") } isLoading={isLoading}/>
             </form>
             <Link to="/login" className="text-sm underline text-blue-400 hover:no-underline">
                 { t("auth.haveAccount") }
