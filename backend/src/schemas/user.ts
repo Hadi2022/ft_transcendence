@@ -1,6 +1,6 @@
 
 import { z } from 'zod'
-import { orderSchema } from './common.ts'
+import { orderSchema } from '@transcendence/shared/schemas/common'
 import {
     usernameField,
     emailField,
