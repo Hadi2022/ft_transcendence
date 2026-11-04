@@ -171,6 +171,18 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+        '502':
+          description: Google authentication provider failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: GOOGLE_PROVIDER_ERROR
+                  message: Google authentication service is unavailable
+                  details: {}
+
   /sessions:
     post:
       summary: User login endpoint
@@ -853,6 +865,7 @@ components:
         - MISSING_AUTHORIZATION_CODE
         - GOOGLE_AUTHORIZATION_DENIED
         - GOOGLE_AUTHENTICATION_FAILED
+        - GOOGLE_PROVIDER_ERROR
       x-enumDescriptions:
         BAD_REQUEST: Request failed validation.
         UNAUTHORIZED: Missing or invalid session, or wrong credentials.
@@ -863,4 +876,4 @@ components:
         MISSING_AUTHORIZATION_CODE: Google callback has no authorization code.
         GOOGLE_AUTHORIZATION_DENIED: Google authorization was not completed.
         GOOGLE_AUTHENTICATION_FAILED: Google authentication or identity verification failed.
-        
+        GOOGLE_PROVIDER_ERROR: Google authentication provider failed.
