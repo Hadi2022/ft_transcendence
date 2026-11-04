@@ -37,3 +37,11 @@ export const openOrAcceptFriendRequest = async (relation: FriendRelation): Promi
 	}
     
 }
+
+export const listPendingByRecipient = async (id: string) => {
+
+	const list = await friendRepository.findManyPendingByReceiver(id)
+
+	return list
+
+}
