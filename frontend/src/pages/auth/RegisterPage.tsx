@@ -22,7 +22,7 @@ export default function RegisterPage() {
 
         try {
             await register({ username, email, password })
-            navigate("/")
+            navigate("/login")
         } catch {
             // TODO
         }
