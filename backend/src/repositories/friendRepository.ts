@@ -26,6 +26,17 @@ export const create = async (data: FriendRelation) => {
 	return friend
 }
 
+export const findManyPendingByReceiver = async (receiver:string) => {
+
+	return prisma.friend.findMany({
+		where: {
+			receiverId: receiver, 
+			status: 'pending',
+		}
+	})
+}
+
+
 export const findOpenRequest = async (data: FriendRelation) => {
 
 	return prisma.friend.findUnique({

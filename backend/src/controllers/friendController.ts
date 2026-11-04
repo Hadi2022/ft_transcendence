@@ -52,9 +52,9 @@ export const openFriendRequest = async (req: AuthenticatedRequest, res: Response
 	})
 }
 
-export const getFriendRequests = async(req: AuthenticatedRequest, res: Response) {
+export const getFriendRequests = async(req: AuthenticatedRequest, res: Response) => {
 
-	const friendRequests = listPendingByRecipient(req.user.id)
+	const friendRequests = await listPendingByRecipient(req.user.id)
 
 	res.status(200).json({
 		data: friendRequests
