@@ -11,12 +11,14 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@transcendence/shared": "file:../shared",
     "i18next": "^26.5.11",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-i18next": "^17.1.9",
     "react-router": "^8.4.0",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.3",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

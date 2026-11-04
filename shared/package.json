@@ -1,0 +1,18 @@
+{
+	"name": "@transcendence/shared",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+	"./schemas/user": "./schemas/user.ts",
+	"./schemas/common": "./schemas/common.ts",
+	"./schemas/friend": "./schemas/friend.ts",
+  	"./schemas/session": "./schemas/session.ts"
+	},
+	"peerDependencies": {
+		"zod": "^4.6.7"
+	},
+	"devDependencies": {
+		"zod": "^4.6.7"
+	}
+}
