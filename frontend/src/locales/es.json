@@ -5,6 +5,7 @@
         "emailPlaceholder": "tu@correo.es",
         "password": "Contraseña",
         "username": "Nombre de usuario",
+        "usernameHint": "Solo letras, numeros y guion bajo (_)",
 
         "showField": "Mostrar",
         "hideField": "Ocultar",
@@ -21,7 +22,12 @@
         "haveAccount": "¿Ya tienes cuenta?",
         "errors": {
             "passwordMismatch": "Las contraseñas no coinciden",
-            "passwordSpecialChar": "La contraseña requiere al menos un carácter especial"
+            "passwordSpecialChar": "La contraseña requiere al menos un carácter especial",
+            "network": "No se ha podido conectar con el servidor",
+            "emailInUse": "Este correo ya está registrado",
+            "usernameInUse": "Este nombre de usuario ya existe",
+            "invalidFields": "Hay campos inválidos",
+            "unexpected": "Error inesperado, inténtalo más tarde"
         }
     },
     "nav": {

@@ -21,7 +21,13 @@
         "haveAccount": "Already have an account?",
         "errors": {
             "passwordMismatch": "Passwords don't match",
-            "passwordSpecialChar": "The password requires one special character at least"
+            "passwordSpecialChar": "The password requires one special character at least",
+            "network": "It was not possible to connect the server",
+            "emailInUse": "This email is already registered",
+            "usernameInUse": "This username is taken",
+            "invalidFields": "Invalid fields",
+            "invalidCredentials": "Invalid credentials",
+            "unexpected": "Unexpected error, try again later"
         }
     },
     "nav": {
