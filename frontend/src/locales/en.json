@@ -18,7 +18,11 @@
         "registerSubtitle": "It will only take a minute",
         "registerButton": "Register",
         "registerConfirmPassword": "Confirm password",
-        "haveAccount": "Already have an account?"
+        "haveAccount": "Already have an account?",
+        "errors": {
+            "passwordMismatch": "Passwords don't match",
+            "passwordSpecialChar": "The password requires one special character at least"
+        }
     },
     "nav": {
         "feed": "Feed",

@@ -18,7 +18,11 @@
         "registerSubtitle": "Solo te llevará 1 minuto",
         "registerButton": "Registrarse",
         "registerConfirmPassword": "Confirmar contraseña",
-        "haveAccount": "¿Ya tienes cuenta?"
+        "haveAccount": "¿Ya tienes cuenta?",
+        "errors": {
+            "passwordMismatch": "Las contraseñas no coinciden",
+            "passwordSpecialChar": "La contraseña requiere al menos un carácter especial"
+        }
     },
     "nav": {
         "feed": "Feed",

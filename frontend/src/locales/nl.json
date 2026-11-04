@@ -18,7 +18,11 @@
         "registerSubtitle": "Het duurt maar een minuut",
         "registerButton": "Registreren",
         "registerConfirmPassword": "Bevestig wachtwoord",
-        "haveAccount": "Heb je al een account?"
+        "haveAccount": "Heb je al een account?",
+        "errors": {
+            "passwordMismatch": "Passwords don't match",
+            "passwordSpecialChar": "The password requires one special character at least"
+        }
     },
     "nav": {
         "feed": "Feed",
