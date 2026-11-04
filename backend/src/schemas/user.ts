@@ -6,16 +6,6 @@ import {
     emailField,
 } from '@transcendence/shared/schemas/user'
 
-export {
-    usernameField,
-    emailField,
-    passwordField,
-    registerUserSchema,
-    emailSchema,
-    usernameSchema,
-    updateUserSchema,
-} from '@transcendence/shared/schemas/user'
-
 const argon2Regex = /^\$argon2(id?|d)\$v=\d+\$m=\d+,t=\d+,p=\d+\$[A-Za-z0-9+/=]+\$[A-Za-z0-9+/=]+$/
 
 const passwordHashField = z.string({ error: 'Password hash is required.' })
