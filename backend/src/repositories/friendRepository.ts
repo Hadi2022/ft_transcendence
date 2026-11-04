@@ -78,3 +78,18 @@ export const updateStatus = async (id: string, status: FriendshipStatus): Promis
 	})
 
 }
+
+export const deletePendingReceivedRequest = async (
+    requestId: string,
+    receiverId: string
+): Promise<boolean> => {
+    const result = await prisma.friend.deleteMany({
+        where: {
+            id: requestId,
+            receiverId,
+            status: 'pending'
+        }
+    })
+
+    return result.count > 0
+}

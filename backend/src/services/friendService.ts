@@ -37,3 +37,13 @@ export const openOrAcceptFriendRequest = async (relation: FriendRelation): Promi
 	}
     
 }
+
+export const declineFriendRequest = async (
+    requestId: string,
+    receiverId: string
+): Promise<boolean> => {
+    return friendRepository.deletePendingReceivedRequest(
+        requestId,
+        receiverId
+    )
+}
