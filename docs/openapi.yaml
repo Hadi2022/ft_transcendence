@@ -912,6 +912,54 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
 
+  /friend-requests/{id}:
+    delete:
+      tags:
+        - Friends
+      summary: Decline a pending friend request
+      description: >-
+        Allows the authenticated receiver to decline a pending
+        friend request. Deletes the corresponding Friend record.
+        Does not remove accepted friendships.
+      operationId: deleteFriendRequest
+      security:
+        - sessionCookie: []
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the friend request to decline
+          schema:
+            type: string
+            format: uuid
+
+      responses:
+        '204':
+          description: Friend request successfully declined
+
+        '400':
+          description: Invalid friend request ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+        '404':
+          description: >-
+            Friend request not found, not pending,
+            or not addressed to the authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
   securitySchemes:
     sessionCookie:

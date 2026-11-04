@@ -7,6 +7,8 @@ import { formatZodErrors } from '../utils/zod.ts'
 import { BadRequestError, ConflictError, InternalError, NotFoundError } from '../errors/HttpErrors.ts'
 import { FriendError } from '../errors/friendErrors.ts'
 import { UserNotFoundError } from '../errors/userErrors.ts'
+import { idParamSchema } from '../schemas/common.ts'
+import { declineFriendRequest } from '../services/friendService.ts'
 
 export const openFriendRequest = async (req: AuthenticatedRequest, res: Response) => {
 
@@ -52,11 +54,39 @@ export const openFriendRequest = async (req: AuthenticatedRequest, res: Response
 	})
 }
 
-export const getFriendRequests = async(req: AuthenticatedRequest, res: Response) => {
+export const deleteFriendRequest = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    const parsed = idParamSchema.safeParse(req.params)
 
-	const friendRequests = await listPendingByRecipient(req.user.id)
+    if (!parsed.success) {
+        throw new BadRequestError({
+            message: 'Invalid UUID in route parameter'
+        })
+    }
 
-	res.status(200).json({
-		data: friendRequests
-	})
+    const deleted = await declineFriendRequest(
+        parsed.data.id,
+        req.user.id
+    )
+
+    if (!deleted) {
+        throw new NotFoundError({
+            message: 'Friend request could not be found'
+        })
+    }
+
+    res.status(204).end()
+}
+
+export const getFriendRequests = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    const friendRequests = await listPendingByRecipient(req.user.id)
+
+    res.status(200).json({
+        data: friendRequests
+    })
 }
