@@ -2,12 +2,12 @@
 import type { Response } from 'express'
 import { listPendingByRecipient, openOrAcceptFriendRequest } from '../services/friendService.ts'
 import type { AuthenticatedRequest } from '../types/express/Request.js'
-import { openFriendRequestSchema } from '../schemas/friend.ts'
+import { openFriendRequestSchema } from '@transcendence/shared/schemas/friend'
 import { formatZodErrors } from '../utils/zod.ts'
 import { BadRequestError, ConflictError, InternalError, NotFoundError } from '../errors/HttpErrors.ts'
 import { FriendError } from '../errors/friendErrors.ts'
 import { UserNotFoundError } from '../errors/userErrors.ts'
-import { idParamSchema } from '../schemas/common.ts'
+import { idParamSchema } from '@transcendence/shared/schemas/common'
 import { declineFriendRequest } from '../services/friendService.ts'
 
 export const openFriendRequest = async (req: AuthenticatedRequest, res: Response) => {

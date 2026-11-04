@@ -1,15 +1,15 @@
-import type { Request, Response } from 'express';
-import type { AuthenticatedRequest } from '../types/express/Request.js';
+import type { Request, Response } from 'express'
+import type { AuthenticatedRequest } from '../types/express/Request.js'
 
-import { idParamSchema } from '../schemas/common.ts';
-import { openSessionSchema } from '../schemas/session.ts';
+import { idParamSchema } from '@transcendence/shared/schemas/common'
+import { openSessionSchema } from '@transcendence/shared/schemas/session'
 
 import * as sessionService from '../services/sessionService.ts'
 import * as userService from '../services/userService.ts'
 
 import * as sessionConstants from '../constants/session.ts'
-import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from '../errors/HttpErrors.ts';
-import { formatZodErrors } from '../utils/zod.ts';
+import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from '../errors/HttpErrors.ts'
+import { formatZodErrors } from '../utils/zod.ts'
 
 export const openSession = async (req: Request, res: Response) => {
 

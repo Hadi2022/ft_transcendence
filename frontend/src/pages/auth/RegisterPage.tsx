@@ -4,6 +4,7 @@ import InputComponent from "./components/InputComponent";
 import { register } from "../../services/auth";
 import { useState, type SubmitEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { registerUserSchema } from "@transcendence/shared/schemas/user";
 
 export default function RegisterPage() {
 
@@ -15,19 +16,29 @@ export default function RegisterPage() {
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
 
-    async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
-        e.preventDefault()
-        
-        if (password !== confirmPassword) return 
+	async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+		e.preventDefault()
 
-        try {
-            await register({ username, email, password })
-            navigate("/")
-        } catch {
-            // TODO
-        }
-        
-    }
+		if (password !== confirmPassword) return
+
+		const result = registerUserSchema.safeParse({
+			username,
+			email,
+			password,
+		})
+
+		if (!result.success) {
+			console.error("Registration validation failed:", result.error.issues)
+			return
+		}
+
+		try {
+			await register(result.data)
+			navigate("/")
+		} catch {
+			// TODO
+		}
+	}
     
     return (
         <div className="text-text">

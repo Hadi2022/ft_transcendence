@@ -18,7 +18,10 @@ services:
         condition: service_healthy
 
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+
     restart: unless-stopped
 
     environment:
@@ -31,6 +34,9 @@ services:
     networks:
       - internal
       - external
+
+    volumes:
+      - ./shared/schemas:/app/shared/schemas:ro
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${INTERNAL_PORT}/api/health"]

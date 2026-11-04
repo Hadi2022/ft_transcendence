@@ -4,6 +4,7 @@ import InputComponent from "./components/InputComponent";
 import { useState, type SubmitEvent } from "react";
 import { login } from "../../services/auth";
 import { useTranslation } from "react-i18next";
+import { openSessionSchema } from "@transcendence/shared/schemas/session";
 
 export default function LoginPage() {
 
@@ -13,15 +14,26 @@ export default function LoginPage() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
 
-    async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
-        e.preventDefault()
-        try {
-            await login({ email, password })
-            navigate("/")
-        } catch {
-            // TODO
-        }
-    }
+	async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+		e.preventDefault()
+
+		const result = openSessionSchema.safeParse({
+			email,
+			password,
+		})
+
+		if (!result.success) {
+			console.error("Login validation failed:", result.error.issues)
+			return
+		}
+
+		try {
+			await login(result.data)
+			navigate("/")
+		} catch {
+			// TODO
+		}
+	}
     
     return (
         <div className="text-text">
@@ -38,7 +50,7 @@ export default function LoginPage() {
                                 placeholder={ t("auth.emailPlaceholder") }
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                minLength={6} maxLength={33}
+                                maxLength={254}
                                 required />
             
                 { /* Password input */ }
@@ -46,7 +58,6 @@ export default function LoginPage() {
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                minLength={3} maxLength={33}
                                 required />
 
                 { /* Login button */ }
