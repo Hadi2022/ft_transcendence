@@ -1,14 +1,14 @@
 import "express"
 import type { Request } from "express"
-import type { Session, User } from '@prisma/client'
-import type { UserProfile } from '../../user.ts'
+import type { Session } from '@prisma/client'
+import type { UserProfile, User } from '../../user.ts'
 
 declare global {
   namespace Express {
     interface Request {
       session?: Session
       user?: User
-	  userResource?: UserProfile
+	    userResource?: UserProfile
     }
   }
 }

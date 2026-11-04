@@ -734,6 +734,132 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /friend-requests:
+    post:
+      summary: Send or accept a friend request
+      description: >-
+        Sends a friend request from the logged in user to the receiver. If the
+        receiver has already sent a pending request to the logged in user, that
+        request is accepted instead and the two users become friends.
+      operationId: openFriendRequest
+      security:
+        - sessionCookie: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - receiverId
+              properties:
+                receiverId:
+                  type: string
+                  format: uuid
+                  description: ID of the user to send the friend request to
+            example:
+              receiverId: 2c5e3619-cbed-4a02-a1e3-9807f0b2989c
+
+      responses:
+        '200':
+          description: >-
+            The receiver had already sent a pending request, which is now
+            accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/FriendRequest'
+              example:
+                data:
+                  id: 7b0e5a52-3c4d-4d1e-8f6a-1d2c9e3b5a47
+                  senderId: 2c5e3619-cbed-4a02-a1e3-9807f0b2989c
+                  receiverId: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
+                  status: accepted
+                  createdAt: '2026-11-03T12:00:00.000Z'
+        '201':
+          description: Friend request created and pending
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/FriendRequest'
+              example:
+                data:
+                  id: 7b0e5a52-3c4d-4d1e-8f6a-1d2c9e3b5a47
+                  senderId: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
+                  receiverId: 2c5e3619-cbed-4a02-a1e3-9807f0b2989c
+                  status: pending
+                  createdAt: '2026-11-03T12:00:00.000Z'
+        '400':
+          description: Request contains invalid fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: BAD_REQUEST
+                  message: Input contains invalid fields
+                  details:
+                    receiverId: User id has to be valid UUID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Receiver does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Resource not found
+                  details:
+                    reason: cannot send friend request because the user does not exist
+        '409':
+          description: The friend request conflicts with the current state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                self:
+                  summary: Sender and receiver are the same user
+                  value:
+                    error:
+                      code: CONFLICT
+                      message: Conflict
+                      details:
+                        reason: Cannot friend yourself
+                alreadyFriends:
+                  summary: Users are already friends
+                  value:
+                    error:
+                      code: CONFLICT
+                      message: Conflict
+                      details:
+                        reason: Already friends
+                requestExists:
+                  summary: A request from the sender is already open
+                  value:
+                    error:
+                      code: CONFLICT
+                      message: Conflict
+                      details:
+                        reason: Friend request already open
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 components:
   securitySchemes:
     sessionCookie:
@@ -813,6 +939,37 @@ components:
               type: string
               format: email
 
+    FriendRequest:
+      type: object
+      description: A friend request between two users, pending or accepted
+      required:
+        - id
+        - senderId
+        - receiverId
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Friend request ID
+        senderId:
+          type: string
+          format: uuid
+          description: ID of the user who sent the request
+        receiverId:
+          type: string
+          format: uuid
+          description: ID of the user who received the request
+        status:
+          type: string
+          enum:
+            - pending
+            - accepted
+        createdAt:
+          type: string
+          format: date-time
+
     Session:
       type: object
       required:
@@ -870,7 +1027,7 @@ components:
         BAD_REQUEST: Request failed validation.
         UNAUTHORIZED: Missing or invalid session, or wrong credentials.
         NOT_FOUND: The referenced resource does not exist.
-        CONFLICT: Request conflicts with the current state.
+        CONFLICT: The request conflicts with current state (session or user already exists, or the friend request is not allowed).
         INTERNAL: Unexpected server failure.
         INVALID_OAUTH_STATE: Missing or invalid OAuth state.
         MISSING_AUTHORIZATION_CODE: Google callback has no authorization code.
