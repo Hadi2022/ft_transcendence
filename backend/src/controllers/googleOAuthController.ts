@@ -6,6 +6,11 @@ import {
   verifyGoogleAuthorizationCode,
 } from '../services/googleOAuthService.ts'
 
+import {
+  BadRequestError,
+  UnauthorizedError,
+} from '../errors/HttpErrors.ts'
+
 const STATE_COOKIE = 'google_oauth_state'
 const STATE_MAX_AGE = 10 * 60 * 1000
 
@@ -27,9 +32,11 @@ export function authorizeGoogle(_req: Request, res: Response) {
   res.redirect(getGoogleAuthorizationUrl(state))
 }
 
+
 export async function googleCallback(req: Request, res: Response) {
   const storedState = req.cookies[STATE_COOKIE]
 
+  // Clear the temporary state cookie on every callback.
   res.clearCookie(STATE_COOKIE, cookieOptions)
 
   const state = req.query.state
@@ -45,49 +52,38 @@ export async function googleCallback(req: Request, res: Response) {
       Buffer.from(state, 'hex')
     )
   ) {
-    res.status(400).json({
-      error: {
-        code: 'INVALID_OAUTH_STATE',
-        message: 'Invalid or missing OAuth state',
-      },
+    throw new BadRequestError({
+      code: 'INVALID_OAUTH_STATE',
+      message: 'Invalid or missing OAuth state',
     })
-    return
   }
 
   if (req.query.error) {
-    res.status(400).json({
-      error: {
-        code: 'GOOGLE_AUTHORIZATION_DENIED',
-        message: 'Google authorization was not completed',
-      },
+    throw new BadRequestError({
+      code: 'GOOGLE_AUTHORIZATION_DENIED',
+      message: 'Google authorization was not completed',
     })
-    return
   }
 
   if (typeof code !== 'string' || !code) {
-    res.status(400).json({
-      error: {
-        code: 'MISSING_AUTHORIZATION_CODE',
-        message: 'Missing Google authorization code',
-      },
+    throw new BadRequestError({
+      code: 'MISSING_AUTHORIZATION_CODE',
+      message: 'Missing Google authorization code',
     })
-    return
   }
 
   try {
     await verifyGoogleAuthorizationCode(code)
-
-    // Temporary response until user/session integration is implemented.
-    res.status(200).json({
-      success: true,
-      message: 'Google identity verified successfully',
-    })
   } catch {
-    res.status(401).json({
-      error: {
-        code: 'GOOGLE_AUTHENTICATION_FAILED',
-        message: 'Google authentication could not be completed',
-      },
+    throw new UnauthorizedError({
+      code: 'GOOGLE_AUTHENTICATION_FAILED',
+      message: 'Google authentication could not be completed',
     })
   }
+
+  // Temporary response until user/session integration.
+  res.status(200).json({
+    success: true,
+    message: 'Google identity verified successfully',
+  })
 }
