@@ -3,6 +3,7 @@ import { prisma } from '../db/prisma/prisma.ts'
 import type { Friend, FriendRelation, FriendshipStatus } from '../types/friend.ts'
 import { UniqueConstraintError,GenericConstraintError } from '../errors/RepositoryErrors.ts'
 import { Prisma } from '@prisma/client'
+import type { Order } from '../types/query.ts'
 
 export const create = async (data: FriendRelation) => {
 
@@ -28,11 +29,14 @@ export const create = async (data: FriendRelation) => {
 
 export const findManyPendingByReceiver = async (receiver:string) => {
 
+	const order: Order = 'desc'
+
 	return prisma.friend.findMany({
 		where: {
 			receiverId: receiver, 
 			status: 'pending',
-		}
+		},
+		orderBy: [{ createdAt: order }],
 	})
 }
 
