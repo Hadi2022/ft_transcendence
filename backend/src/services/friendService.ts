@@ -20,8 +20,11 @@ export const openOrAcceptFriendRequest = async (relation: FriendRelation): Promi
 	if (existingRequest?.status == 'accepted')
 		throw new AlreadyFriendsError('Already friends')
 
-	if (existingRequest?.status == 'pending' && existingRequest.senderId == relation.receiverId)
-		return await friendRepository.updateStatus(existingRequest.id, 'accepted')
+	if (existingRequest?.status == 'pending') {
+		if (existingRequest.senderId == relation.receiverId)
+			return await friendRepository.updateStatus(existingRequest.id, 'accepted')
+		throw new FriendRequestExistsError('Friend request already open')
+	}
 
 	try {
 		return await friendRepository.create(relation)	

@@ -51,14 +51,14 @@ export const findBidirectional = async (data: FriendRelation): Promise<Friend | 
 }
 
 export const findAcceptedBidirectional = async (data: FriendRelation): Promise<Friend | null> => {
-	return prisma.friend.findUnique({
+	return await prisma.friend.findUnique({
 		where: {
 				senderId_receiverId: {...data},
 				status: 'accepted',
 		}
 	})
 	??
-	prisma.friend.findUnique({
+	await prisma.friend.findUnique({
 		where: {
 				senderId_receiverId: {senderId: data.receiverId, receiverId: data.senderId},
 				status: 'accepted',
