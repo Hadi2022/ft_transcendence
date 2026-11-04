@@ -37,3 +37,9 @@ export const openOrAcceptFriendRequest = async (relation: FriendRelation): Promi
 	}
     
 }
+
+export const listPendingByRecipient = (id: string) => {
+
+	
+
+}
