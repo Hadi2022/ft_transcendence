@@ -881,7 +881,14 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: '#/components/schemas/FriendRequest'
+                      allOf:
+                        - $ref: '#/components/schemas/FriendRequest'
+                        - type: object
+                          required:
+                            - userProfile
+                    properties:
+                      userProfile:
+                        $ref: '#/components/schemas/UserProfile'
               example:
                 data:
                   - id: 62f19da2-4142-4a61-9f6b-a353dc9e9337
@@ -889,6 +896,14 @@ paths:
                     receiverId: c86c401f-7405-456f-ab6f-0ad2ffa2f462
                     status: pending
                     createdAt: '2026-11-04T13:28:22.339Z'
+                    sender:
+                      id: 32a92853-3745-42c2-a08b-998d4187aae6
+                      username: friend1
+                      name: null
+                      biography: null
+                      avatarUrl: null
+                      isVerified: false
+                      createdAt: 2026-11-03T14:05:57.879Z
 
         '401':
           $ref: '#/components/responses/Unauthorized'

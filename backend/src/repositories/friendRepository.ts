@@ -4,6 +4,7 @@ import type { Friend, FriendRelation, FriendshipStatus } from '../types/friend.t
 import { UniqueConstraintError,GenericConstraintError } from '../errors/RepositoryErrors.ts'
 import { Prisma } from '@prisma/client'
 import type { Order } from '../types/query.ts'
+import { userProfileOmit } from './userRepository.ts'
 
 export const create = async (data: FriendRelation) => {
 
@@ -37,6 +38,11 @@ export const findManyPendingByReceiver = async (receiver:string) => {
 			status: 'pending',
 		},
 		orderBy: [{ createdAt: order }],
+		include: {
+			sender: {
+				omit: userProfileOmit
+			},
+		},
 	})
 }
 
