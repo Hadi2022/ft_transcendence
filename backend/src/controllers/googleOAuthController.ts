@@ -3,10 +3,13 @@ import type { Request, Response } from 'express'
 
 import {
 	getGoogleAuthorizationUrl,
-	verifyGoogleAuthorizationCode,
-	GoogleInvalidCredentialsError,
-	GoogleProviderError,
+	verifyGoogleAuthorizationCode
 } from '../services/googleOAuthService.ts'
+
+import {
+    GoogleInvalidCredentialsError,
+    GoogleProviderError,
+} from '../errors/googleOAuthErrors.ts'
 
 import {
 	BadRequestError,

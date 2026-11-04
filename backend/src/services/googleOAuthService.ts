@@ -1,4 +1,8 @@
 import { OAuth2Client } from 'google-auth-library'
+import {
+    GoogleInvalidCredentialsError,
+    GoogleProviderError,
+} from '../errors/googleOAuthErrors.ts'
 
 function requiredEnv(name: string): string {
 	const value = process.env[name]
@@ -22,20 +26,6 @@ export function getGoogleAuthorizationUrl(state: string): string {
 		state,
 		prompt: 'select_account',
 	})
-}
-
-export class GoogleInvalidCredentialsError extends Error {
-	constructor() {
-		super('Google credentials are invalid')
-		this.name = 'GoogleInvalidCredentialsError'
-	}
-}
-
-export class GoogleProviderError extends Error {
-	constructor() {
-		super('Google authentication provider failed')
-		this.name = 'GoogleProviderError'
-	}
 }
 
 function isInvalidGrant(error: unknown): boolean {
