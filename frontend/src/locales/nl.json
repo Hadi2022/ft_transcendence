@@ -6,6 +6,9 @@
         "password": "Wachtwoord",
         "username": "Gebruikersnaam",
 
+        "showField": "Toon",
+        "hideField": "Verberg",
+
         "loginTitle": "Inloggen",
         "loginSubtitle": "Ontdek een nieuwe wereld",
         "loginButton": "Inloggen",

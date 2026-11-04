@@ -6,6 +6,9 @@
         "password": "Password",
         "username": "Username",
 
+        "showField": "Show",
+        "hideField": "Hide",
+
         "loginTitle": "Log In",
         "loginSubtitle": "Discover a new world",
         "loginButton": "Login",

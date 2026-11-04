@@ -6,6 +6,9 @@
         "password": "Contraseña",
         "username": "Nombre de usuario",
 
+        "showField": "Mostrar",
+        "hideField": "Ocultar",
+
         "loginTitle": "Inicia Sesión",
         "loginSubtitle": "Descubre un mundo nuevo",
         "loginButton": "Iniciar Sesión",

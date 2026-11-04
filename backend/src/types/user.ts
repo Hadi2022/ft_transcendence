@@ -9,8 +9,8 @@ export type User = {
     id: string;
     username: string;
     email: string;
-    passwordHash?: string | null;
-    googleId?: string | null;
+    passwordHash: string | null;
+    googleId: string | null;
     name: string | null;
     biography: string | null;
     avatarUrl: string | null;
