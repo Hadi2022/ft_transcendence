@@ -5,6 +5,7 @@
         "emailPlaceholder": "your@email.com",
         "password": "Password",
         "username": "Username",
+        "usernameHint": "Only letters, numbers and _",
 
         "showField": "Show",
         "hideField": "Hide",

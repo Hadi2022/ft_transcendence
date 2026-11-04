@@ -27,6 +27,7 @@
             "emailInUse": "Este correo ya está registrado",
             "usernameInUse": "Este nombre de usuario ya existe",
             "invalidFields": "Hay campos inválidos",
+            "invalidCredentials": "Credenciales inválidos",
             "unexpected": "Error inesperado, inténtalo más tarde"
         }
     },
