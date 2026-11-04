@@ -4,6 +4,7 @@ import InputComponent from "./components/InputComponent";
 import { register } from "../../services/auth";
 import { useState, type SubmitEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { ApiError } from "../../services/api";
 
 export default function RegisterPage() {
 
@@ -17,6 +18,18 @@ export default function RegisterPage() {
 
     const [error, setError] = useState<string | null>(null)
 
+    function getRegisterErrorKey(err: unknown): string {
+        if (!(err instanceof ApiError))
+            return "auth.errors.network"
+        if (err.status === 409 && err.details.email)
+            return "auth.errors.emailInUse"
+        if (err.status === 409 && err.details.username)
+            return "auth.errors.usernameInUse"
+        if (err.status === 400)
+                return "auth.errors.invalidFields"
+        return "auth.errors.unexpected"
+    }
+
     async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
         setError(null)
@@ -29,8 +42,8 @@ export default function RegisterPage() {
         try {
             await register({ username, email, password })
             navigate("/login")
-        } catch {
-            // TODO
+        } catch (err) {
+            setError(getRegisterErrorKey(err))
         }
         
     }
