@@ -38,7 +38,7 @@ export default function LoginPage() {
                                 placeholder={ t("auth.emailPlaceholder") }
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                minLength={6} maxLength={33}
+                                minLength={4} maxLength={128}
                                 required />
             
                 { /* Password input */ }
@@ -46,7 +46,7 @@ export default function LoginPage() {
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                minLength={3} maxLength={33}
+                                minLength={3} maxLength={128}
                                 required />
 
                 { /* Login button */ }
