@@ -18,6 +18,8 @@ export default function RegisterPage() {
 
     const [error, setError] = useState<string | null>(null)
 
+    const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/
+
     function getRegisterErrorKey(err: unknown): string {
         if (!(err instanceof ApiError))
             return "auth.errors.network"
@@ -37,6 +39,11 @@ export default function RegisterPage() {
         if (password !== confirmPassword) {
             setError("auth.errors.passwordMismatch")
             return 
+        }
+
+        if (!SPECIAL_CHAR_REGEX.test(password)) {
+            setError("auth.errors.passwordSpecialChar")
+            return
         }
 
         try {
