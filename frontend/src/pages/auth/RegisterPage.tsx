@@ -15,10 +15,16 @@ export default function RegisterPage() {
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
 
+    const [error, setError] = useState<string | null>(null)
+
     async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
+        setError(null)
         
-        if (password !== confirmPassword) return 
+        if (password !== confirmPassword) {
+            setError("auth.errors.passwordMismatch")
+            return 
+        }
 
         try {
             await register({ username, email, password })
@@ -71,6 +77,13 @@ export default function RegisterPage() {
                                 minLength={6} maxLength={128}
                                 required />
                 
+                { /* Errors? */ }
+                { error && (
+                    <p role="alert" className="text-sm text-danger">
+                        { t(error) }
+                    </p>
+                )}
+
                 { /* Register button */ }
                 <ButtonComponent text={ t("auth.registerButton") } />
             </form>
