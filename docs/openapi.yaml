@@ -720,6 +720,43 @@ paths:
                         reason: Friend request already open
         '500':
           $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: Get pending friend requests
+      description: >-
+        Returns all pending friend requests received by the logged in user.
+        The authenticated user is matched against the receiverId field.
+      operationId: getFriendRequests
+      security:
+        - sessionCookie: []
+
+      responses:
+        '200':
+          description: Pending friend requests returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FriendRequest'
+              example:
+                data:
+                  - id: 62f19da2-4142-4a61-9f6b-a353dc9e9337
+                    senderId: 32a92853-3745-42c2-a08b-998d4187aae6
+                    receiverId: c86c401f-7405-456f-ab6f-0ad2ffa2f462
+                    status: pending
+                    createdAt: '2026-11-04T13:28:22.339Z'
+
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 
 components:
   securitySchemes:
