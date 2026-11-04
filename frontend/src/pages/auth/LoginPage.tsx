@@ -25,7 +25,7 @@ export default function LoginPage() {
     const [password, setPassword] = useState("")
 
     const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>("")
+    const [error, setError] = useState<string | null>(null)
 
     async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
