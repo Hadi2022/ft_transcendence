@@ -4,6 +4,7 @@ import InputComponent from "./components/InputComponent";
 import { useState, type SubmitEvent } from "react";
 import { login } from "../../services/auth";
 import { useTranslation } from "react-i18next";
+import { ApiError } from "../../services/api";
 
 export default function LoginPage() {
 
@@ -13,13 +14,27 @@ export default function LoginPage() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
 
+    const [error, setError] = useState<string | null>("")
+
+    function getLoginErrorKey(err: unknown) : string {
+        if (!(err instanceof ApiError))
+            return "auth.errors.network"
+        if (err.status === 401)
+            return "auth.errors.invalidCredentials"
+        if (err.status === 400)
+            return "auth.errors.invalidCredentials"
+        return "auth.errors.unexpected"
+    }
+
     async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
+        setError(null)
+
         try {
             await login({ email, password })
             navigate("/")
-        } catch {
-            // TODO
+        } catch (err) {
+            setError(getLoginErrorKey(err))
         }
     }
     
@@ -48,6 +63,13 @@ export default function LoginPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                                 minLength={3} maxLength={128}
                                 required />
+
+                { /* Errors */ }
+                { error && (
+                    <p role="alert" className="text-sm text-danger">
+                        { t(error) }
+                    </p>
+                )}
 
                 { /* Login button */ }
                 <ButtonComponent text={ t("auth.loginButton") } />
