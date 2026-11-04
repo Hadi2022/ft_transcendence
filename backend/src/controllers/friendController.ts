@@ -1,6 +1,6 @@
 
 import type { Response } from 'express'
-import { openOrAcceptFriendRequest } from '../services/friendService.ts'
+import { listPendingByRecipient, openOrAcceptFriendRequest } from '../services/friendService.ts'
 import type { AuthenticatedRequest } from '../types/express/Request.js'
 import { openFriendRequestSchema } from '../schemas/friend.ts'
 import { formatZodErrors } from '../utils/zod.ts'
@@ -78,4 +78,15 @@ export const deleteFriendRequest = async (
     }
 
     res.status(204).end()
+}
+
+export const getFriendRequests = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    const friendRequests = await listPendingByRecipient(req.user.id)
+
+    res.status(200).json({
+        data: friendRequests
+    })
 }

@@ -4,13 +4,13 @@ import type { NewUserData, UpdateUserData, User, UserProfile, OwnProfile, UserOr
 import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts';
 import type { Order } from '../types/query.ts';
 
-const ownProfileOmit = {
+export const ownProfileOmit = {
     googleId: true,
     passwordHash: true,
     updatedAt: true,
 } satisfies Prisma.UserOmit
 
-const userProfileOmit = {
+export const userProfileOmit = {
     ...ownProfileOmit,
     email: true,
 } satisfies Prisma.UserOmit

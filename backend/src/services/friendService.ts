@@ -47,3 +47,11 @@ export const declineFriendRequest = async (
         receiverId
     )
 }
+
+export const listPendingByRecipient = async (id: string) => {
+
+    const list = await friendRepository.findManyPendingByReceiver(id)
+
+    return list
+
+}
