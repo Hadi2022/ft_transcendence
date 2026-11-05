@@ -1,22 +1,23 @@
 import { z } from 'zod'
+import { ValidationErrorDetails as E } from '@transcendence/shared/errors/validation-error-details'
 
-export const usernameField = z.string({ error: 'Username is required.' })
-    .min(3, 'Username must be at least 3 characters.')
-    .max(30, 'Username must be at most 30 characters.')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores.')
+export const usernameField = z.string({ error: E.USERNAME_REQUIRED })
+    .min(3, E.USERNAME_TOO_SHORT)
+    .max(30, E.USERNAME_TOO_LONG)
+    .regex(/^[a-zA-Z0-9_]+$/, E.USERNAME_INVALID_CHARS)
 
-export const emailField = z.string({ error: 'Email is required.' })
+export const emailField = z.string({ error: E.EMAIL_REQUIRED })
     .trim()
     .toLowerCase()
-    .max(254, 'Email must be at most 254 characters.')
-    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Invalid email address.')
+    .max(254, E.EMAIL_TOO_LONG)
+    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, E.EMAIL_INVALID_FORMAT)
 
-export const passwordField = z.string({ error: 'Password is required.' })
-    .min(6, 'Password must be at least 6 characters.')
-    .max(128, 'Password must be at most 128 characters.')
+export const passwordField = z.string({ error: E.PASSWORD_REQUIRED })
+    .min(6, E.PASSWORD_TOO_SHORT)
+    .max(128, E.PASSWORD_TOO_LONG)
     .regex(
         /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/,
-        'Password must contain at least one special character.'
+        E.PASSWORD_NO_SPECIAL_CHAR
     )
 
 export const registerUserSchema = z.object({
@@ -34,10 +35,10 @@ export const usernameSchema = z.object({
 })
 
 export const updateUserSchema = z.strictObject({
-    name: z.string().max(100).nullable().optional(),
+    name: z.string().max(100, E.NAME_TOO_LONG).nullable().optional(),
     biography: z.string().nullable().optional(),
-    avatarUrl: z.url().max(500).nullable().optional(),
+    avatarUrl: z.url({ error: E.AVATAR_URL_INVALID }).max(500, E.AVATAR_URL_TOO_LONG).nullable().optional(),
 }).refine(
     (data) => Object.keys(data).length > 0,
-    { message: 'At least one field must be provided' }
+    { message: E.NO_FIELDS_PROVIDED }
 )
