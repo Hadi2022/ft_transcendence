@@ -1,14 +1,13 @@
 
 import type { Response } from 'express'
-import { listPendingByRecipient, openOrAcceptFriendRequest } from '../services/friendService.ts'
+import { listPendingByRecipient, openOrAcceptFriendRequest, declineFriendRequest, acceptFriendRequest } from '../services/friendService.ts'
 import type { AuthenticatedRequest } from '../types/express/Request.js'
-import { openFriendRequestSchema } from '@transcendence/shared/schemas/friend'
+import { openFriendRequestSchema, acceptFriendRequestSchema } from '@transcendence/shared/schemas/friend'
 import { formatZodErrors } from '../utils/zod.ts'
 import { BadRequestError, ConflictError, InternalError, NotFoundError } from '../errors/HttpErrors.ts'
 import { FriendError } from '../errors/friendErrors.ts'
 import { UserNotFoundError } from '../errors/userErrors.ts'
 import { idParamSchema } from '@transcendence/shared/schemas/common'
-import { declineFriendRequest } from '../services/friendService.ts'
 
 export const openFriendRequest = async (req: AuthenticatedRequest, res: Response) => {
 
@@ -89,4 +88,36 @@ export const getFriendRequests = async (
     res.status(200).json({
         data: friendRequests
     })
+}
+
+export const patchFriendRequest = async (
+    req: AuthenticatedRequest,
+    res: Response
+) => {
+    const parsedId = idParamSchema.safeParse(req.params)
+
+    if (!parsedId.success)
+        throw new BadRequestError({
+            message: 'Invalid UUID in route parameter'
+        })
+
+    const parsedBody = acceptFriendRequestSchema.safeParse(req.body)
+
+    if (!parsedBody.success)
+        throw new BadRequestError({
+            message: 'Invalid friend request status',
+            details: formatZodErrors(parsedBody.error)
+        })
+
+    const friendRequest = await acceptFriendRequest(
+        parsedId.data.id,
+        req.user.id
+    )
+
+    if (!friendRequest)
+        throw new NotFoundError({
+            message: 'Pending friend request could not be found'
+        })
+
+    res.status(200).json({ data: friendRequest })
 }

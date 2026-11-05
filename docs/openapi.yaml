@@ -911,8 +911,87 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-
   /friend-requests/{id}:
+    patch:
+      tags:
+        - Friends
+      summary: Accept a pending friend request
+      description: >-
+        Allows the authenticated receiver to accept a pending
+        friend request. Only the receiver can accept it.
+        Changes the status from pending to accepted.
+        Does not create a new friendship record.
+      operationId: patchFriendRequest
+      security:
+        - sessionCookie: []
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the friend request to accept
+          schema:
+            type: string
+            format: uuid
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              additionalProperties: false
+              properties:
+                status:
+                  type: string
+                  const: accepted
+            example:
+              status: accepted
+
+      responses:
+        '200':
+          description: Friend request successfully accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/FriendRequest'
+              example:
+                data:
+                  id: 5d6f7cbc-6f44-4da9-9ea3-38627ba59b47
+                  senderId: 8d665cf3-2375-48bd-8095-b1205265db4b
+                  receiverId: 93083e19-a059-48c6-a566-b6c161895562
+                  status: accepted
+                  createdAt: '2026-11-06T12:00:00.000Z'
+
+        '400':
+          description: Invalid friend request ID or request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+        '404':
+          description: >-
+            Friend request not found, not pending,
+            or not addressed to the authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
     delete:
       tags:
         - Friends
