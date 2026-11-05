@@ -26,6 +26,7 @@
             "network": "No se ha podido conectar con el servidor",
             "emailInUse": "Este correo ya está registrado",
             "usernameInUse": "Este nombre de usuario ya existe",
+            "sessionExists": "Ya hay una sesión abierta",
             "invalidFields": "Hay campos inválidos",
             "invalidCredentials": "Credenciales inválidos",
             "unexpected": "Error inesperado, inténtalo más tarde"

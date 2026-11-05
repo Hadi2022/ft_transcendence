@@ -9,10 +9,12 @@ import { ApiError } from "../../services/api";
 function getLoginErrorKey(err: unknown) : string {
     if (!(err instanceof ApiError))
         return "auth.errors.network"
+    if (err.status === 400)
+        return "auth.errors.invalidFields"
     if (err.status === 401)
         return "auth.errors.invalidCredentials"
-    if (err.status === 400)
-        return "auth.errors.invalidCredentials"
+    if (err.status === 409)
+        return "auth.errors.sessionExists"
     return "auth.errors.unexpected"
 }
 
@@ -56,7 +58,7 @@ export default function LoginPage() {
                                 placeholder={ t("auth.emailPlaceholder") }
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                minLength={4} maxLength={128}
+                                minLength={4} maxLength={254}
                                 required />
             
                 { /* Password input */ }

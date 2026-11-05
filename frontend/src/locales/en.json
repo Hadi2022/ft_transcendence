@@ -26,6 +26,7 @@
             "network": "It was not possible to connect the server",
             "emailInUse": "This email is already registered",
             "usernameInUse": "This username is taken",
+            "sessionExists": "The session already exists",
             "invalidFields": "Invalid fields",
             "invalidCredentials": "Invalid credentials",
             "unexpected": "Unexpected error, try again later"
