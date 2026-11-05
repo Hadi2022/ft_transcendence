@@ -4,7 +4,31 @@ import InputComponent from "./components/InputComponent";
 import { register } from "../../services/auth";
 import { useState, type SubmitEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { ApiError } from "../../services/api";
 import { registerUserSchema } from "@transcendence/shared/schemas/user";
+
+const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/
+
+function getRegisterErrorKey(err: unknown): string {
+    if (err instanceof TypeError)
+        return "auth.errors.network"
+    if (!(err instanceof ApiError))
+        return "auth.errors.unexpected"
+    if (err.status === 400 && err.details.username)
+      return "auth.errors.username"
+    if (err.status === 400 && err.details.email)
+        return "auth.errors.email"
+    if (err.status === 400 && err.details.password)
+        return "auth.errors.password"
+    if (err.status === 400)
+        return "auth.errors.invalidFields"
+
+    if (err.status === 409 && err.details.email)
+        return "auth.errors.emailInUse"
+    if (err.status === 409 && err.details.username)
+        return "auth.errors.usernameInUse"
+    return "auth.errors.unexpected"
+}
 
 export default function RegisterPage() {
 
@@ -16,29 +40,54 @@ export default function RegisterPage() {
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
 
-	async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
-		e.preventDefault()
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
-		if (password !== confirmPassword) return
 
-		const result = registerUserSchema.safeParse({
-			username,
-			email,
-			password,
-		})
+    async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+        e.preventDefault()
+        setError(null)
+        setFieldErrors({})
+      
+        const result = registerUserSchema.safeParse({ username, email, password })
+        if (!result.success) {
+          setError("auth.errors.invalidFields")
+          return
+        }
+        
+        if (password !== confirmPassword) {
+            setFieldErrors({ confirmPassword: "auth.errors.passwordMismatch" })
+            return 
+        }
 
-		if (!result.success) {
-			console.error("Registration validation failed:", result.error.issues)
-			return
-		}
+        if (!SPECIAL_CHAR_REGEX.test(password)) {
+            setFieldErrors({ password: "auth.errors.passwordSpecialChar" })
+            return
+        }
 
-		try {
-			await register(result.data)
-			navigate("/")
-		} catch {
-			// TODO
-		}
-	}
+        setIsLoading(true)
+
+        try {
+            await register(result.data)
+            navigate("/login")
+        } catch (err) {
+            const key = getRegisterErrorKey(err)
+
+            if (err instanceof ApiError && err.details.username)
+                setFieldErrors({ username: key })
+            else if (err instanceof ApiError && err.details.email)
+                setFieldErrors({ email: key })
+            else if (err instanceof ApiError && err.details.password)
+                setFieldErrors({ password: key })
+            else
+                setError(key)
+
+        } finally {
+            setIsLoading(false)
+        }
+        
+    }
     
     return (
         <div className="text-text">
@@ -55,6 +104,9 @@ export default function RegisterPage() {
                                 placeholder="joaquin42"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
+                                error={fieldErrors.username ? t(fieldErrors.username) : undefined}
+                                pattern="[a-zA-Z0-9_]+"
+                                title={ t("auth.usernameHint") }
                                 minLength={3} maxLength={30}
                                 required />
 
@@ -63,6 +115,7 @@ export default function RegisterPage() {
                                 placeholder={ t("auth.emailPlaceholder") }
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                error={fieldErrors.email ? t(fieldErrors.email) : undefined}
                                 minLength={6} maxLength={254}
                                 required />
             
@@ -71,6 +124,7 @@ export default function RegisterPage() {
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                error={fieldErrors.password ? t(fieldErrors.password) : undefined}
                                 minLength={6} maxLength={128}
                                 required />
 
@@ -79,11 +133,19 @@ export default function RegisterPage() {
                                 placeholder="••••••••"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
+                                error={fieldErrors.confirmPassword ? t(fieldErrors.confirmPassword) : undefined}
                                 minLength={6} maxLength={128}
                                 required />
                 
+                { /* Errors? */ }
+                { error && (
+                    <p role="alert" className="text-sm text-danger">
+                        { t(error) }
+                    </p>
+                )}
+
                 { /* Register button */ }
-                <ButtonComponent text={ t("auth.registerButton") } />
+                <ButtonComponent text={ t("auth.registerButton") } isLoading={isLoading}/>
             </form>
             <Link to="/login" className="text-sm underline text-blue-400 hover:no-underline">
                 { t("auth.haveAccount") }

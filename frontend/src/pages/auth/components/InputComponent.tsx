@@ -3,10 +3,11 @@ import { useTranslation } from "react-i18next"
 
 type InputProps = ComponentProps<"input"> & {
     label: string,
+    error?: string,
 }
 
 export default function InputComponent(
-    { label, type = "text", className = "", placeholder = "", ...props }: InputProps
+    { label, error, type = "text", className = "", placeholder = "", ...props }: InputProps
 ) {
     const id = useId()
     const [isPasswordVisible, setIsPasswordVisible] = useState(false)
@@ -56,6 +57,11 @@ export default function InputComponent(
                     </button>
                 )}
             </div>
+            { error && (
+                <p role="alert" className="text-sm text-danger">
+                    {error}
+                </p>
+            )}
         </div>
     )
 }

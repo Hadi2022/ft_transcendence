@@ -5,6 +5,7 @@
         "emailPlaceholder": "your@email.com",
         "password": "Password",
         "username": "Username",
+        "usernameHint": "Only letters, numbers and _",
 
         "showField": "Show",
         "hideField": "Hide",
@@ -18,7 +19,21 @@
         "registerSubtitle": "It will only take a minute",
         "registerButton": "Register",
         "registerConfirmPassword": "Confirm password",
-        "haveAccount": "Already have an account?"
+        "haveAccount": "Already have an account?",
+        "errors": {
+            "username": "Invalid username",
+            "email": "Invalid email",
+            "password": "Invalid password",
+            "passwordMismatch": "Passwords don't match",
+            "passwordSpecialChar": "The password requires one special character at least",
+            "network": "It was not possible to connect the server",
+            "emailInUse": "This email is already registered",
+            "usernameInUse": "This username is taken",
+            "sessionExists": "The session already exists",
+            "invalidFields": "Invalid fields",
+            "invalidCredentials": "Invalid credentials",
+            "unexpected": "Unexpected error, try again later"
+        }
     },
     "nav": {
         "feed": "Feed",
