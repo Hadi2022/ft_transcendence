@@ -114,3 +114,30 @@ export const deletePendingReceivedRequest = async (
 
     return result.count > 0
 }
+
+export const acceptPendingReceivedRequest = async (
+    requestId: string,
+    receiverId: string
+): Promise<Friend | null> => {
+
+    const result = await prisma.friend.updateMany({
+        where: {
+            id: requestId,
+            receiverId,
+            status: 'pending'
+        },
+        data: {
+            status: 'accepted'
+        }
+    })
+
+    if (result.count === 0)
+        return null
+
+    return prisma.friend.findUnique({
+        where: {
+            id: requestId
+        }
+    })
+}
+
