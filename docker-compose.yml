@@ -36,7 +36,7 @@ services:
       - external
 
     volumes:
-      - ./shared/schemas:/app/shared/schemas:ro
+      - ./shared/src:/app/shared/:ro
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${INTERNAL_PORT}/api/health"]

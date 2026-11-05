@@ -4,10 +4,10 @@
 	"private": true,
 	"type": "module",
 	"exports": {
-	"./schemas/user": "./schemas/user.ts",
-	"./schemas/common": "./schemas/common.ts",
-	"./schemas/friend": "./schemas/friend.ts",
-  	"./schemas/session": "./schemas/session.ts"
+	"./schemas/user": "./src/schemas/user.ts",
+	"./schemas/common": "./src/schemas/common.ts",
+	"./schemas/friend": "./src/schemas/friend.ts",
+  	"./schemas/session": "./src/schemas/session.ts"
 	},
 	"peerDependencies": {
 		"zod": "^4.6.7"
