@@ -35,9 +35,6 @@ services:
       - internal
       - external
 
-    volumes:
-      - ./shared/src:/app/shared/src:ro
-
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${INTERNAL_PORT}/api/health"]
       interval: 10s
