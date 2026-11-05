@@ -21,6 +21,7 @@ export const ValidationErrorDetails = {
 
 	INVALID_UUID: 'INVALID_UUID',
 	INVALID_ORDER: 'INVALID_ORDER',
+	INVALID_ORDER_BY: 'INVALID_ORDER_BY',
 } as const
 
 export type ValidationErrorDetails = (typeof ValidationErrorDetails)[keyof typeof ValidationErrorDetails]

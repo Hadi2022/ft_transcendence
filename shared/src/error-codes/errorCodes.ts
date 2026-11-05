@@ -1,4 +1,4 @@
-export const errorCodes = {
+export const ErrorCodes = {
 
 	VALIDATION_ERROR: 'VALIDATION_ERROR',
 	UNAUTHORIZED: 'UNAUTHORIZED',
@@ -17,3 +17,5 @@ export const errorCodes = {
 	GOOGLE_PROVIDER_ERROR: 'GOOGLE_PROVIDER_ERROR',
 
 } as const
+
+export type ErrorCodes = (typeof ErrorCodes)[keyof typeof ErrorCodes]
