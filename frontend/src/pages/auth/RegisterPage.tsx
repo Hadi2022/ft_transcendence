@@ -9,14 +9,23 @@ import { ApiError } from "../../services/api";
 const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/
 
 function getRegisterErrorKey(err: unknown): string {
-    if (!(err instanceof ApiError))
+    if (err instanceof TypeError)
         return "auth.errors.network"
+    if (!(err instanceof ApiError))
+        return "auth.errors.unexpected"
+    if (err.status === 400 && err.details.username)
+      return "auth.errors.username"
+    if (err.status === 400 && err.details.email)
+        return "auth.errors.email"
+    if (err.status === 400 && err.details.password)
+        return "auth.errors.password"
+    if (err.status === 400)
+        return "auth.errors.invalidFields"
+
     if (err.status === 409 && err.details.email)
         return "auth.errors.emailInUse"
     if (err.status === 409 && err.details.username)
         return "auth.errors.usernameInUse"
-    if (err.status === 400)
-            return "auth.errors.invalidFields"
     return "auth.errors.unexpected"
 }
 
@@ -32,19 +41,21 @@ export default function RegisterPage() {
 
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
 
     async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
         setError(null)
+        setFieldErrors({})
         
         if (password !== confirmPassword) {
-            setError("auth.errors.passwordMismatch")
+            setFieldErrors({ confirmPassword: "auth.errors.passwordMismatch" })
             return 
         }
 
         if (!SPECIAL_CHAR_REGEX.test(password)) {
-            setError("auth.errors.passwordSpecialChar")
+            setFieldErrors({ password: "auth.errors.passwordSpecialChar" })
             return
         }
 
@@ -54,7 +65,17 @@ export default function RegisterPage() {
             await register({ username, email, password })
             navigate("/login")
         } catch (err) {
-            setError(getRegisterErrorKey(err))
+            const key = getRegisterErrorKey(err)
+
+            if (err instanceof ApiError && err.details.username)
+                setFieldErrors({ username: key })
+            else if (err instanceof ApiError && err.details.email)
+                setFieldErrors({ email: key })
+            else if (err instanceof ApiError && err.details.password)
+                setFieldErrors({ password: key })
+            else
+                setError(key)
+
         } finally {
             setIsLoading(false)
         }
@@ -76,6 +97,7 @@ export default function RegisterPage() {
                                 placeholder="joaquin42"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
+                                error={fieldErrors.username ? t(fieldErrors.username) : undefined}
                                 pattern="[a-zA-Z0-9_]+"
                                 title={ t("auth.usernameHint") }
                                 minLength={3} maxLength={30}
@@ -86,6 +108,7 @@ export default function RegisterPage() {
                                 placeholder={ t("auth.emailPlaceholder") }
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                error={fieldErrors.email ? t(fieldErrors.email) : undefined}
                                 minLength={6} maxLength={254}
                                 required />
             
@@ -94,6 +117,7 @@ export default function RegisterPage() {
                                 placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                error={fieldErrors.password ? t(fieldErrors.password) : undefined}
                                 minLength={6} maxLength={128}
                                 required />
 
@@ -102,6 +126,7 @@ export default function RegisterPage() {
                                 placeholder="••••••••"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
+                                error={fieldErrors.confirmPassword ? t(fieldErrors.confirmPassword) : undefined}
                                 minLength={6} maxLength={128}
                                 required />
                 

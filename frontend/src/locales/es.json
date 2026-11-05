@@ -21,6 +21,9 @@
         "registerConfirmPassword": "Confirmar contraseña",
         "haveAccount": "¿Ya tienes cuenta?",
         "errors": {
+            "username": "Usuario inválido",
+            "email": "Email inválido",
+            "password": "Contraseña inválida",
             "passwordMismatch": "Las contraseñas no coinciden",
             "passwordSpecialChar": "La contraseña requiere al menos un carácter especial",
             "network": "No se ha podido conectar con el servidor",

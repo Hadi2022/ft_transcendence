@@ -21,6 +21,9 @@
         "registerConfirmPassword": "Confirm password",
         "haveAccount": "Already have an account?",
         "errors": {
+            "username": "Invalid username",
+            "email": "Invalid email",
+            "password": "Invalid password",
             "passwordMismatch": "Passwords don't match",
             "passwordSpecialChar": "The password requires one special character at least",
             "network": "It was not possible to connect the server",
