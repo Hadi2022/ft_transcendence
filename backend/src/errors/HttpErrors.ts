@@ -95,3 +95,15 @@ export class InternalError extends HttpError {
 	}
 
 }
+
+// 502
+export class BadGatewayError extends HttpError {
+	constructor({
+		message = 'External authentication provider unavailable',
+		details = {},
+		code = 'BAD_GATEWAY',
+  	}: ErrorOptions = {}) {
+    	super(message, details, 502, code)
+  	}
+}
+

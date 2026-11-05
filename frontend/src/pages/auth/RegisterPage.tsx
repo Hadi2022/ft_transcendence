@@ -28,6 +28,7 @@ function getRegisterErrorKey(err: unknown): string {
         return "auth.errors.usernameInUse"
     return "auth.errors.unexpected"
 }
+import { registerUserSchema } from "@transcendence/shared/schemas/user";
 
 export default function RegisterPage() {
 
@@ -48,6 +49,17 @@ export default function RegisterPage() {
         e.preventDefault()
         setError(null)
         setFieldErrors({})
+      
+        const result = registerUserSchema.safeParse({
+          username,
+          email,
+          password,
+        })
+
+        if (!result.success) {
+          console.error("Registration validation failed:", result.error.issues)
+          return
+        }
         
         if (password !== confirmPassword) {
             setFieldErrors({ confirmPassword: "auth.errors.passwordMismatch" })

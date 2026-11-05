@@ -3,6 +3,8 @@ import { prisma } from '../db/prisma/prisma.ts'
 import type { Friend, FriendRelation, FriendshipStatus } from '../types/friend.ts'
 import { UniqueConstraintError,GenericConstraintError } from '../errors/RepositoryErrors.ts'
 import { Prisma } from '@prisma/client'
+import type { Order } from '../types/query.ts'
+import { userProfileOmit } from './userRepository.ts'
 
 export const create = async (data: FriendRelation) => {
 
@@ -25,6 +27,25 @@ export const create = async (data: FriendRelation) => {
 
 	return friend
 }
+
+export const findManyPendingByReceiver = async (receiver:string) => {
+
+	const order: Order = 'desc'
+
+	return prisma.friend.findMany({
+		where: {
+			receiverId: receiver,
+			status: 'pending',
+		},
+		orderBy: [{ createdAt: order }],
+		include: {
+			sender: {
+				omit: userProfileOmit
+			},
+		},
+	})
+}
+
 
 export const findOpenRequest = async (data: FriendRelation) => {
 
@@ -77,4 +98,19 @@ export const updateStatus = async (id: string, status: FriendshipStatus): Promis
 		}
 	})
 
+}
+
+export const deletePendingReceivedRequest = async (
+    requestId: string,
+    receiverId: string
+): Promise<boolean> => {
+    const result = await prisma.friend.deleteMany({
+        where: {
+            id: requestId,
+            receiverId,
+            status: 'pending'
+        }
+    })
+
+    return result.count > 0
 }

@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express'
 
-import { registerUserSchema, updateUserSchema, listUsersQuerySchema } from '../schemas/user.ts'
+import { registerUserSchema, updateUserSchema } from '@transcendence/shared/schemas/user'
+import { listUsersQuerySchema } from '../schemas/user.ts'
 import { createUser, listUserProfiles, findUserOwnProfileById, updateUser } from '../services/userService.ts'
 import { BadRequestError, ConflictError, NotFoundError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'

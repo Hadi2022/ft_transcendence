@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express'
-import { idParamSchema } from '../schemas/common.ts'
+import { idParamSchema } from '@transcendence/shared/schemas/common'
 import { findUserProfileById } from '../services/userService.ts'
 import { BadRequestError, NotFoundError } from '../errors/HttpErrors.ts'
 

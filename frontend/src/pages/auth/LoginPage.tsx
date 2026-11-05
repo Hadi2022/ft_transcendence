@@ -19,6 +19,7 @@ function getLoginErrorKey(err: unknown) : string {
         return "auth.errors.sessionExists"
     return "auth.errors.unexpected"
 }
+import { openSessionSchema } from "@transcendence/shared/schemas/session";
 
 export default function LoginPage() {
 
@@ -44,6 +45,26 @@ export default function LoginPage() {
             setIsLoading(false)
         }
     }
+	async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+		e.preventDefault()
+
+		const result = openSessionSchema.safeParse({
+			email,
+			password,
+		})
+
+		if (!result.success) {
+			console.error("Login validation failed:", result.error.issues)
+			return
+		}
+
+		try {
+			await login(result.data)
+			navigate("/")
+		} catch {
+			// TODO
+		}
+	}
     
     return (
         <div className="text-text">
