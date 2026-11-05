@@ -5,6 +5,12 @@ export type NewUserData = {
     passwordHash: string
 }
 
+export type NewUserDataGoogle = {
+	email: string
+    passwordHash: null
+    googleId:string
+}
+
 export type User = {
     id: string;
     username: string;
@@ -19,7 +25,7 @@ export type User = {
     updatedAt: Date;
 };
 
-export type UserProfile = Omit<User, 
+export type UserProfile = Omit<User,
     'passwordHash' |
     'googleId' |
     'email' |

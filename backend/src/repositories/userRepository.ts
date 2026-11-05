@@ -1,8 +1,9 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../db/prisma/prisma.ts'
-import type { NewUserData, UpdateUserData, User, UserProfile, OwnProfile, UserOrderBy } from '../types/user.ts'
+import type { NewUserData, UpdateUserData, User, UserProfile, OwnProfile, UserOrderBy, NewUserDataGoogle } from '../types/user.ts'
 import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts';
 import type { Order } from '../types/query.ts';
+import { generateBaseUsername } from '../utils/username.ts';
 
 export const ownProfileOmit = {
     googleId: true,
@@ -138,3 +139,61 @@ export async function updateUser(
     }
 }
 
+export async function findUserByGoogleId(
+    _googleId: string
+): Promise<UserProfile | null> {
+
+    const user = await prisma.user.findUnique(
+        {
+            where: { googleId: _googleId },
+            omit: userProfileOmit
+        }
+    )
+    return user;
+}
+
+export async function createGoogleUser(
+    _data: NewUserDataGoogle
+): Promise<UserProfile> {
+
+    let username = generateBaseUsername(_data.email);
+    let check = null;
+    let randomSuffix = 0;
+    let attemps = 0;
+    let limit = 15;
+    while (check != null && attemps < limit){
+        check = await prisma.user.findUnique({
+            where: { username: username}
+        });
+        if (check != null)
+        {
+            randomSuffix = Math.floor(1000 + Math.random() * 9000); // 4 dígitos aleatorios
+            username = `${username}_${randomSuffix}`;
+            attemps++;
+        }
+    }
+    if (attemps == 15)
+        throw new Error('No se pudo generar un nombre de usuario único tras varios intentos debido a alta concurrencia.');
+    try {
+        const user = await prisma.user.create({
+            data: {
+                username: username,
+                email: _data.email,
+                passwordHash: _data.passwordHash
+            },
+            omit: userProfileOmit
+        });
+        return user;
+    }
+    catch (error: unknown) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2002') {
+            const target = (error.message as string);
+            if (target.includes('users_email_key')) {
+                throw new UniqueConstraintError('Unique constraint violation: record already exists', 'email');
+            }
+            if (target.includes('googleId') || target.includes('users_googleid_key'))
+                throw new UniqueConstraintError('Unique constraint violation: record already exists', 'googleId')
+        }
+        throw error;
+    }
+}

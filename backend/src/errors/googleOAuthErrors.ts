@@ -11,3 +11,10 @@ export class GoogleProviderError extends Error {
         this.name = new.target.name
     }
 }
+
+export class GoogleAuthError extends Error {
+  constructor(message: string, public readonly code: 'EMAIL_NOT_VERIFIED' | 'EMAIL_MISSING' | 'EMAIL_CONFLICT' | 'GOOGLE_ACCOUNT_EXISTS') {
+    super(message);
+    this.name = 'GoogleAuthError';
+  }
+}
