@@ -5,6 +5,7 @@ import { register } from "../../services/auth";
 import { useState, type SubmitEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { ApiError } from "../../services/api";
+import { registerUserSchema } from "@transcendence/shared/schemas/user";
 
 const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/
 
@@ -28,7 +29,6 @@ function getRegisterErrorKey(err: unknown): string {
         return "auth.errors.usernameInUse"
     return "auth.errors.unexpected"
 }
-import { registerUserSchema } from "@transcendence/shared/schemas/user";
 
 export default function RegisterPage() {
 
@@ -50,14 +50,9 @@ export default function RegisterPage() {
         setError(null)
         setFieldErrors({})
       
-        const result = registerUserSchema.safeParse({
-          username,
-          email,
-          password,
-        })
-
+        const result = registerUserSchema.safeParse({ username, email, password })
         if (!result.success) {
-          console.error("Registration validation failed:", result.error.issues)
+          setError("auth.errors.invalidFields")
           return
         }
         
@@ -74,7 +69,7 @@ export default function RegisterPage() {
         setIsLoading(true)
 
         try {
-            await register({ username, email, password })
+            await register(result.data)
             navigate("/login")
         } catch (err) {
             const key = getRegisterErrorKey(err)
