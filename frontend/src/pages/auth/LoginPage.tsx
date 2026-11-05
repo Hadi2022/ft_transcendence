@@ -7,8 +7,10 @@ import { useTranslation } from "react-i18next";
 import { ApiError } from "../../services/api";
 
 function getLoginErrorKey(err: unknown) : string {
-    if (!(err instanceof ApiError))
+    if (err instanceof TypeError)
         return "auth.errors.network"
+    if (!(err instanceof ApiError))
+        return "auth.errors.unexpected"
     if (err.status === 400)
         return "auth.errors.invalidFields"
     if (err.status === 401)
