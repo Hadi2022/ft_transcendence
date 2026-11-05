@@ -20,6 +20,7 @@ export const ValidationErrorDetails = {
 	NO_FIELDS_PROVIDED: 'NO_FIELDS_PROVIDED',
 
 	INVALID_UUID: 'INVALID_UUID',
+	INVALID_ORDER: 'INVALID_ORDER',
 } as const
 
 export type ValidationErrorDetails = (typeof ValidationErrorDetails)[keyof typeof ValidationErrorDetails]
