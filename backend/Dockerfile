@@ -17,7 +17,7 @@ WORKDIR /app/backend
 RUN npm ci
 
 # Copy source files
-COPY shared/ /app/shared/
+COPY shared/ /app/shared/src
 COPY backend/ /app/backend/
 
 # Generate Prisma client
