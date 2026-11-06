@@ -9,15 +9,15 @@ interface ErrorOptions {
 }
 
 export class HttpError extends Error {
-	public readonly details: Record<string, string>;
+	public readonly details: Record<string, ErrorDetails>;
 	public readonly statusCode: number;
-	public readonly code: string;
+	public readonly code: ErrorCodes;
 
 	constructor(
 		message: string,
-		details: Record<string, string>,
+		details: Record<string, ErrorDetails>,
 		statusCode: number,
-		code: string,
+		code: ErrorCodes,
 	) {
 		super(message);
 
