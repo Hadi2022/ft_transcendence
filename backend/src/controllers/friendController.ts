@@ -5,9 +5,11 @@ import type { AuthenticatedRequest } from '../types/express/Request.js'
 import { openFriendRequestSchema, acceptFriendRequestSchema } from '@transcendence/shared/schemas/friend'
 import { formatZodErrors } from '../utils/zod.ts'
 import { BadRequestError, ConflictError, InternalError, NotFoundError } from '../errors/HttpErrors.ts'
-import { FriendError } from '../errors/friendErrors.ts'
+import { AlreadyFriendsError, FriendError, FriendRequestExistsError, FriendSelfError } from '../errors/friendErrors.ts'
 import { UserNotFoundError } from '../errors/userErrors.ts'
 import { idParamSchema } from '@transcendence/shared/schemas/common'
+import { ErrorCodes } from '@transcendence/shared/errors/error-codes'
+import { ErrorDetails } from '@transcendence/shared/errors/error-details'
 
 export const openFriendRequest = async (req: AuthenticatedRequest, res: Response) => {
 
@@ -15,6 +17,7 @@ export const openFriendRequest = async (req: AuthenticatedRequest, res: Response
 
 	if (parsed.error) {
 		throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
 			message: "Input contains invalid fields",
 			details: formatZodErrors (parsed.error),
 		})
@@ -25,16 +28,24 @@ export const openFriendRequest = async (req: AuthenticatedRequest, res: Response
 	try {
 		friendRequest = await openOrAcceptFriendRequest({ senderId: req.user.id, ...parsed.data})    
 	} catch (error) {
-		if (error instanceof FriendError) {
-			throw new ConflictError({
-				details: {reason: error.message}
+		if (error instanceof FriendSelfError)
+			throw new BadRequestError({
+				message: error.message,
+				code: ErrorCodes.VALIDATION_ERROR,
+				details: { receiverId: ErrorDetails.CANNOT_TARGET_SELF }
 			})
-		}
 
-		else if (error instanceof UserNotFoundError)
-			throw new NotFoundError({
-				details: {reason: 'cannot send friend request because the user does not exist'}
+		if (error instanceof AlreadyFriendsError)
+			throw new ConflictError({
+				message: error.message,
+				code: ErrorCodes.ALREADY_FRIENDS
 			})
+
+		if (error instanceof FriendRequestExistsError)
+			throw new ConflictError({ message: error.message })
+
+		if (error instanceof UserNotFoundError)
+			throw new NotFoundError()
 		
 		throw error
 	}
@@ -61,7 +72,9 @@ export const deleteFriendRequest = async (
 
     if (!parsed.success) {
         throw new BadRequestError({
-            message: 'Invalid UUID in route parameter'
+			code: ErrorCodes.VALIDATION_ERROR,
+            message: 'Invalid UUID in route parameter',
+			details: formatZodErrors(parsed.error),
         })
     }
 
@@ -98,15 +111,18 @@ export const patchFriendRequest = async (
 
     if (!parsedId.success)
         throw new BadRequestError({
-            message: 'Invalid UUID in route parameter'
+            code: ErrorCodes.VALIDATION_ERROR,
+            message: 'Invalid UUID in route parameter',
+            details: formatZodErrors(parsedId.error),
         })
 
     const parsedBody = acceptFriendRequestSchema.safeParse(req.body)
 
     if (!parsedBody.success)
         throw new BadRequestError({
+            code: ErrorCodes.VALIDATION_ERROR,
             message: 'Invalid friend request status',
-            details: formatZodErrors(parsedBody.error)
+            details: formatZodErrors(parsedBody.error),
         })
 
     const friendRequest = await acceptFriendRequest(
