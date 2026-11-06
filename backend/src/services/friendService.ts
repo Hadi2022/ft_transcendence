@@ -55,3 +55,14 @@ export const listPendingByRecipient = async (id: string) => {
     return list
 
 }
+
+export const acceptFriendRequest = async (
+    requestId: string,
+    receiverId: string
+): Promise<Friend | null> => {
+
+    return friendRepository.acceptPendingReceivedRequest(
+        requestId,
+        receiverId
+    )
+}
