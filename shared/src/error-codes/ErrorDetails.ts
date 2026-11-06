@@ -24,6 +24,8 @@ export const ErrorDetails = {
 	INVALID_UUID: 'INVALID_UUID',
 	INVALID_ORDER: 'INVALID_ORDER',
 	INVALID_ORDER_BY: 'INVALID_ORDER_BY',
+
+	CANNOT_TARGET_SELF: 'CANNOT_TARGET_SELF',
 } as const
 
 export type ErrorDetails = (typeof ErrorDetails)[keyof typeof ErrorDetails]

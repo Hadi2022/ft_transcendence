@@ -17,6 +17,7 @@ export const ErrorCodes = {
 	GOOGLE_AUTHENTICATION_FAILED: 'GOOGLE_AUTHENTICATION_FAILED',
 	GOOGLE_PROVIDER_ERROR: 'GOOGLE_PROVIDER_ERROR',
 
+	ALREADY_FRIENDS: 'ALREADY_FRIENDS',
 } as const
 
 export type ErrorCodes = (typeof ErrorCodes)[keyof typeof ErrorCodes]
