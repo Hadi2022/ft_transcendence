@@ -180,7 +180,9 @@ export async function createGoogleUser(
             data: {
                 username: username,
                 email: _data.email,
-                passwordHash: _data.passwordHash
+                passwordHash: _data.passwordHash,
+                googleId: _data.googleId,
+                isVerified: true,
             },
             omit: userProfileOmit
         });

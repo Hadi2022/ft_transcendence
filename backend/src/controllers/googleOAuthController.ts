@@ -7,6 +7,7 @@ import {
 } from '../services/googleOAuthService.ts'
 
 import {
+	GoogleAuthError,
     GoogleInvalidCredentialsError,
     GoogleProviderError,
 } from '../errors/googleOAuthErrors.ts'
@@ -16,6 +17,9 @@ import {
 	UnauthorizedError,
 	BadGatewayError
 } from '../errors/HttpErrors.ts'
+
+import { createGoogleUser } from '../services/userService.ts'
+import type { GoogleProfile } from '../types/user.ts'
 
 const STATE_COOKIE = 'google_oauth_state'
 const STATE_MAX_AGE = 10 * 60 * 1000
@@ -78,9 +82,18 @@ export async function googleCallback(req: Request, res: Response) {
 		})
 	}
 
-
+	let googleProfileResponse;
+	let googleProfile : GoogleProfile;
 	try {
-		await verifyGoogleAuthorizationCode(code)
+		googleProfileResponse = await verifyGoogleAuthorizationCode(code);
+		googleProfile = {
+			googleId:googleProfileResponse.googleId,
+			email:googleProfileResponse.email,
+			name:googleProfileResponse.name,
+			picture:googleProfileResponse.picture,
+			passwordHash : null,
+			emailVerified:true,
+		}
 	} catch (error) {
 	if (error instanceof GoogleInvalidCredentialsError) {
 		throw new UnauthorizedError({
@@ -99,9 +112,22 @@ export async function googleCallback(req: Request, res: Response) {
 	throw error
 	}
 
+	let user;
+	try {
+		user = await createGoogleUser(googleProfile)
+	} catch (error) {
+		if (error instanceof GoogleAuthError){
+			throw new BadRequestError({
+				message:error.message,
+			})
+		}
+	}
 	// Temporary response until user/session integration.
 	res.status(200).json({
 		success: true,
 		message: 'Google identity verified successfully',
+		data:user,
 	})
 }
+
+

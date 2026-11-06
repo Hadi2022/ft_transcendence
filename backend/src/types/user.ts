@@ -9,7 +9,25 @@ export type NewUserDataGoogle = {
 	email: string
     passwordHash: null
     googleId:string
+    picture: string | null
+    name: string | null
 }
+
+
+
+export type GoogleProfile = {
+    passwordHash : null
+    emailVerified : boolean
+    googleId:string
+    email: string
+    name : string | null
+    picture : string | null
+};
+
+export type GoogleProfileResponse =  Omit <GoogleProfile,
+    'passwordHash' |
+    'emailVerified'
+>
 
 export type User = {
     id: string;
