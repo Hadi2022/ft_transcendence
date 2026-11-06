@@ -1,5 +1,6 @@
 import { randomBytes, timingSafeEqual } from 'node:crypto'
 import type { Request, Response } from 'express'
+import { ErrorCodes as E } from '@transcendence/shared/errors/error-codes'
 
 import {
 	getGoogleAuthorizationUrl,
@@ -65,22 +66,22 @@ export async function googleCallback(req: Request, res: Response) {
 		)
 	) {
 		throw new BadRequestError({
-			code: 'INVALID_OAUTH_STATE',
-			message: 'Invalid or missing OAuth state',
+		code: E.INVALID_OAUTH_STATE,
+		message: 'Invalid or missing OAuth state',
 		})
 	}
 
 	if (req.query.error) {
 		throw new BadRequestError({
-			code: 'GOOGLE_AUTHORIZATION_DENIED',
-			message: 'Google authorization was not completed',
+		code: E.GOOGLE_AUTHORIZATION_DENIED,
+		message: 'Google authorization was not completed',
 		})
 	}
 
 	if (typeof code !== 'string' || !code) {
 		throw new BadRequestError({
-			code: 'MISSING_AUTHORIZATION_CODE',
-			message: 'Missing Google authorization code',
+		code: E.MISSING_AUTHORIZATION_CODE,
+		message: 'Missing Google authorization code',
 		})
 	}
 
@@ -104,21 +105,18 @@ export async function googleCallback(req: Request, res: Response) {
 			emailVerified: true,
 		}
 	} catch (error) {
-		if (error instanceof GoogleInvalidCredentialsError) {
-			throw new UnauthorizedError({
-				code: 'GOOGLE_AUTHENTICATION_FAILED',
-				message: 'Google authentication could not be completed',
-			})
-		}
+	if (error instanceof GoogleInvalidCredentialsError) {
+		throw new UnauthorizedError({
+		code: E.GOOGLE_AUTHENTICATION_FAILED,
+		message: 'Google authentication could not be completed',
+		})
+	}
 
-		if (error instanceof GoogleProviderError) {
-			throw new BadGatewayError({
-				code: 'GOOGLE_PROVIDER_ERROR',
-				message: 'Google authentication service is unavailable',
-			})
-		}
-
-		throw error
+	if (error instanceof GoogleProviderError) {
+		throw new BadGatewayError({
+			code: E.GOOGLE_PROVIDER_ERROR,
+			message: 'Google authentication service is unavailable',
+		})
 	}
 
 	let user;

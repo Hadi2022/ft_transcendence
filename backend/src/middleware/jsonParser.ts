@@ -7,9 +7,6 @@ export const syntaxErrorParser = (err: Error, req: Request, res: Response, next:
 	if (err instanceof SyntaxError && 'type' in err && err.type == 'entity.parse.failed')
 		throw new BadRequestError({
 			message: 'Error parsing JSON',
-			details: {
-				reason: err.message
-			}
 		})
 
 	throw err
