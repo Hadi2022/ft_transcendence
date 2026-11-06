@@ -5,6 +5,7 @@ import * as userRepository from '../repositories/userRepository.ts'
 import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts'
 import type { Order } from '../types/query.ts'
 import { GoogleAuthError } from '../errors/googleOAuthErrors.ts'
+import { ConflictError } from '../errors/HttpErrors.ts'
 
 type CreateUserInput = {
     username: string
@@ -119,23 +120,26 @@ async function updateUser(
 async function createGoogleUser(profile: ProfileGoogle) {
 
     if ( !profile.email )
-        throw new GoogleAuthError("An email address could not be obtained from the Google provider.", "EMAIL_MISSING")
+        throw new ConflictError({
+            message:"An email address could not be obtained from the Google provider.",})
     if ( !profile.emailVerified)
-        throw new GoogleAuthError("The Google email address is not verified. The account cannot be provisioned.", "EMAIL_NOT_VERIFIED")
+        throw new ConflictError({
+            message:"The Google email address is not verified. The account cannot be provisioned.",})
     const checkGoogleId = await userRepository.findUserByGoogleId(profile.googleId);
     if (checkGoogleId)
         return checkGoogleId;
     const checkEmail = await userRepository.findByEmail(profile.email);
     if (checkEmail)
-        throw new GoogleAuthError("User already registered.", "EMAIL_CONFLICT");
+        throw new ConflictError({
+            message:"User already registered.",});
     try {
         return await userRepository.createGoogleUser(profile);
     } catch (error) {
         if (error instanceof UniqueConstraintError)
              if (error?.field === 'email')
-                throw new UserEmailConflictError('The email address is already registered');
+                throw new ConflictError({message:'The count is already registered.',});
             else if (error?.field === 'username')
-                throw new UserNameConflictError('The username is already in use');
+                throw new ConflictError({message:'The count is already registered.',});
         throw error;
     }
 }
