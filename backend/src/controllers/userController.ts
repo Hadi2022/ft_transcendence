@@ -52,6 +52,7 @@ const getUsers = async (req: Request, res: Response) => {
 
     if (!parsed.success) {
         throw new BadRequestError({
+            code: ErrorCodes.VALIDATION_ERROR,
             message: 'Invalid query parameters',
             details: formatZodErrors(parsed.error)
         })
@@ -111,6 +112,7 @@ const updateCurrentUser = async (
 
     if (!parsed.success) {
         throw new BadRequestError({
+            code: ErrorCodes.VALIDATION_ERROR,
             message: 'Input contains invalid fields',
             details: formatZodErrors(parsed.error)
         })
