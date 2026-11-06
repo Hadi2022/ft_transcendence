@@ -4,14 +4,18 @@ import AuthLayout from "../layouts/AuthLayout";
 import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import MainLayout from "../layouts/MainLayout";
+import GuestRoute from "../components/GuestRoute";
 
 export const router = createBrowserRouter([
     {
         element: <AuthLayout />,
-        children: [
-            { path: "/login", element: <LoginPage /> },
-            { path: "/register", element: <RegisterPage /> },
-        ],
+        children: [{
+            element: <GuestRoute />,
+            children: [
+                { path: "/login", element: <LoginPage /> },
+                { path: "/register", element: <RegisterPage /> },
+            ],
+        }]
     },
     {
         path: "/",

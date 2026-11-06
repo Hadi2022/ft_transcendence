@@ -55,3 +55,15 @@ export async function logout(): Promise<void> {
 
     if (!res.ok) await throwApiError(res)
 }
+
+export async function getCurrentUser(): Promise<UserProfile>{
+    const res = await fetch("/api/users/me", {
+        credentials: "include"
+    })
+
+    if (!res.ok) await throwApiError(res)
+
+    const body = await res.json()
+
+    return (body.data)
+}
