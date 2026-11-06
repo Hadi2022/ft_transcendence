@@ -11,7 +11,6 @@ import * as sessionConstants from '../constants/session.ts'
 import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'
 import { ErrorCodes } from '@transcendence/shared/errors/error-codes'
-import { ValidationErrorDetails } from '@transcendence/shared/errors/validation-error-details'
 
 export const openSession = async (req: Request, res: Response) => {
 

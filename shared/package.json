@@ -9,7 +9,7 @@
 	"./schemas/friend": "./src/schemas/friend.ts",
   	"./schemas/session": "./src/schemas/session.ts",
 
-	"./errors/validation-error-details": "./src/error-codes/validationErrorDetails.ts",
+	"./errors/error-details": "./src/error-codes/ErrorDetails.ts",
 	"./errors/error-codes": "./src/error-codes/errorCodes.ts"
 
 	},

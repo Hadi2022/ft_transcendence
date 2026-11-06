@@ -1,5 +1,5 @@
 
-export const ValidationErrorDetails = {
+export const ErrorDetails = {
 	USERNAME_REQUIRED: 'USERNAME_REQUIRED',
 	USERNAME_TOO_SHORT: 'USERNAME_TOO_SHORT',
 	USERNAME_TOO_LONG: 'USERNAME_TOO_LONG',
@@ -24,4 +24,4 @@ export const ValidationErrorDetails = {
 	INVALID_ORDER_BY: 'INVALID_ORDER_BY',
 } as const
 
-export type ValidationErrorDetails = (typeof ValidationErrorDetails)[keyof typeof ValidationErrorDetails]
+export type ErrorDetails = (typeof ErrorDetails)[keyof typeof ErrorDetails]

@@ -1,7 +1,7 @@
 
 import { z } from 'zod'
 import { emailField } from './user.ts'
-import { ValidationErrorDetails as E } from '@transcendence/shared/errors/validation-error-details'
+import { ErrorDetails as E } from '@transcendence/shared/errors/error-details'
 
 export const openSessionSchema = z.object({
     email: emailField,

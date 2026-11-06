@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ValidationErrorDetails as E } from '@transcendence/shared/errors/validation-error-details'
+import { ErrorDetails as E } from '@transcendence/shared/errors/error-details'
 
 export const usernameField = z.string({ error: E.USERNAME_REQUIRED })
     .min(3, E.USERNAME_TOO_SHORT)

@@ -7,12 +7,15 @@ import { BadRequestError, ConflictError, NotFoundError } from '../errors/HttpErr
 import { formatZodErrors } from '../utils/zod.ts'
 import { UserEmailConflictError, UserNameConflictError, UserNotFoundError } from '../errors/userErrors.ts'
 import type { AuthenticatedRequest } from '../types/express/Request.js'
+import { ErrorCodes } from '@transcendence/shared/errors/error-codes'
+import { ErrorDetails } from '@transcendence/shared/errors/error-details'
 
 async function registerUser(req: Request, res: Response): Promise<void> {
     const parsed = registerUserSchema.safeParse(req.body)
 
     if (!parsed.success) {
         throw new BadRequestError({
+            code: ErrorCodes.VALIDATION_ERROR,
             message: 'Input contains invalid fields',
             details: formatZodErrors(parsed.error)
         })
@@ -26,12 +29,12 @@ async function registerUser(req: Request, res: Response): Promise<void> {
         
         if (e instanceof UserEmailConflictError)
             throw new ConflictError({ message: 'User already exists', details: {
-                'email': 'email is in use'
+                'email': ErrorDetails.EMAIL_IN_USE
             }})
 
         if (e instanceof UserNameConflictError)
             throw new ConflictError({ message: 'User already exists', details: {
-                'username': 'username is in use'
+                'username': ErrorDetails.USERNAME_IN_USE
             }})
 
         throw e

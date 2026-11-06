@@ -1,7 +1,7 @@
 
 import { z } from 'zod'
 import { orderSchema } from '@transcendence/shared/schemas/common'
-import { ValidationErrorDetails as E } from '@transcendence/shared/errors/validation-error-details'
+import { ErrorDetails as E } from '@transcendence/shared/errors/error-details'
 
 export const listUsersQuerySchema = z.object({
     order: orderSchema.optional(),
