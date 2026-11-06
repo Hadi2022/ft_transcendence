@@ -29,6 +29,7 @@ interface ListUserProfilesInput {
 async function prepareUser(input: CreateUserInput): Promise<NewUserData> {
     const passwordHash = await hashPassword(input.password)
 
+
     return {
         username: input.username,
         email: input.email,
@@ -126,7 +127,7 @@ async function createGoogleUser(profile: ProfileGoogle) {
         return checkGoogleId;
     const checkEmail = await userRepository.findByEmail(profile.email);
     if (checkEmail)
-        throw new GoogleAuthError("This email address is already registered using another authentication method.", "EMAIL_CONFLICT");
+        throw new GoogleAuthError("User already registered.", "EMAIL_CONFLICT");
     try {
         return await userRepository.createGoogleUser(profile);
     } catch (error) {

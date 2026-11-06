@@ -155,15 +155,19 @@ export async function findUserByGoogleId(
 
 export async function createGoogleUser(
     _data: NewUserDataGoogle
-): Promise<UserProfile> {
+): Promise<UserProfile | null> {
 
-    let username = generateBaseUsername(_data.email);
-    let check = null;
+    let username;
+    try {
+        username = generateBaseUsername(_data.email);
+    } catch (error) {
+        throw error;
+    }
     let randomSuffix = 0;
     let attemps = 0;
     let limit = 15;
-    while (check != null && attemps < limit){
-        check = await prisma.user.findUnique({
+    while (attemps < limit){
+        let check = await prisma.user.findUnique({
             where: { username: username}
         });
         if (check != null)
@@ -172,6 +176,8 @@ export async function createGoogleUser(
             username = `${username}_${randomSuffix}`;
             attemps++;
         }
+        else
+            break ;
     }
     if (attemps == 15)
         throw new UserNameConflictError('A unique username could not be generated after several attempts due to high concurrency.')
@@ -183,6 +189,8 @@ export async function createGoogleUser(
                 passwordHash: _data.passwordHash,
                 googleId: _data.googleId,
                 isVerified: true,
+                name:_data.name,
+                avatarUrl: _data.picture,
             },
             omit: userProfileOmit
         });
@@ -191,11 +199,12 @@ export async function createGoogleUser(
     catch (error: unknown) {
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2002') {
             const target = (error.message as string);
-            if (target.includes('users_email_key')) {
+            if (target.includes('users_email_key'))
                 throw new UniqueConstraintError('Unique constraint violation: record already exists', 'email');
-            }
             if (target.includes('googleId') || target.includes('users_googleid_key'))
-                throw new UniqueConstraintError('Unique constraint violation: record already exists', 'googleId')
+                return await findUserByGoogleId(_data.googleId);
+            if (target.includes('username') || target.includes('users_username_key'))
+                throw new UniqueConstraintError('Unique constraint violation: record already exists', 'username')
         }
         throw error;
     }
