@@ -39,6 +39,8 @@
         "feed": "Feed",
         "search": "Buscar",
         "messages": "Mensajes",
-        "profile": "Perfil"
+        "profile": "Perfil",
+        "logout": "Cerrar Sesión",
+        "logoutError": "No se ha podido cerrar sesión. Intentalo de nuevo."
     }
 }

@@ -39,6 +39,8 @@
         "feed": "Feed",
         "search": "Search",
         "messages": "Messages",
-        "profile": "Profile"
+        "profile": "Profile",
+        "logout": "Logout",
+        "logoutError": "It was not possible to log out. Try again."
     }
 }
