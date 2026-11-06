@@ -4,11 +4,20 @@ import { hashPassword, verifyPassword } from './passwordService.ts'
 import * as userRepository from '../repositories/userRepository.ts'
 import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts'
 import type { Order } from '../types/query.ts'
+import { GoogleAuth } from 'google-auth-library'
+import { GoogleAuthError } from '../errors/googleOAuthErrors.ts'
 
 type CreateUserInput = {
     username: string
     email: string
     password: string
+}
+
+type ProfileGoogle = {
+    googleId: string
+    email: string
+    emailVerified: boolean
+    passwordHash: null
 }
 
 interface ListUserProfilesInput {
@@ -66,7 +75,7 @@ async function isValidCredentials(
 }
 
 async function listUserProfiles(params: ListUserProfilesInput): Promise<UserProfile[]> {
-    
+
     return userRepository.findMany({
         order: params.order,
         orderBy: params.orderBy,
@@ -106,6 +115,33 @@ async function updateUser(
     }
 }
 
+async function createGoogleUser(profile: ProfileGoogle) {
+
+    if ( !profile.email )
+        throw new GoogleAuthError("An email address could not be obtained from the Google provider.", "EMAIL_MISSING")
+    if ( !profile.emailVerified)
+        throw new GoogleAuthError("The Google email address is not verified. The account cannot be provisioned.", "EMAIL_NOT_VERIFIED")
+    const checkGoogleId = await userRepository.findUserByGoogleId(profile.googleId);
+    if (checkGoogleId)
+        return checkGoogleId;
+    const checkEmail = await userRepository.findByEmail(profile.email);
+    if (checkEmail)
+        throw new GoogleAuthError("This email address is already registered using another authentication method.", "EMAIL_CONFLICT");
+
+    try {
+        const newGoogleUser = await userRepository.createGoogleUser(profile);
+
+    } catch (error) {
+        if (error instanceof UniqueConstraintError)
+             if (error?.field === 'email')
+                throw new UserEmailConflictError('The email address is already registered');
+            else if (error?.field === 'username')
+                throw new UserNameConflictError('The username is already in use');
+        throw error;
+    }
+
+}
+
 export {
     prepareUser,
     createUser,
@@ -114,5 +150,6 @@ export {
     findUserById,
     findUserProfileById,
     findUserOwnProfileById,
-	updateUser
+	updateUser,
+    createGoogleUser,
 }

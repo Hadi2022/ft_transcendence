@@ -4,6 +4,7 @@ import type { NewUserData, UpdateUserData, User, UserProfile, OwnProfile, UserOr
 import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts';
 import type { Order } from '../types/query.ts';
 import { generateBaseUsername } from '../utils/username.ts';
+import { UserNameConflictError } from '../errors/userErrors.ts';
 
 export const ownProfileOmit = {
     googleId: true,
@@ -173,7 +174,7 @@ export async function createGoogleUser(
         }
     }
     if (attemps == 15)
-        throw new Error('No se pudo generar un nombre de usuario único tras varios intentos debido a alta concurrencia.');
+        throw new UserNameConflictError('A unique username could not be generated after several attempts due to high concurrency.')
     try {
         const user = await prisma.user.create({
             data: {
