@@ -34,11 +34,13 @@ export const usernameSchema = z.object({
     username: usernameField,
 })
 
-export const updateUserSchema = z.strictObject({
-    name: z.string().max(100, E.NAME_TOO_LONG).nullable().optional(),
-    biography: z.string().nullable().optional(),
+export const updateUserSchema = z.object({
+    name: z.string(E.INVALID_VALUE).max(100, E.NAME_TOO_LONG).nullable().optional(),
+    biography: z.string(E.INVALID_VALUE).nullable().optional(),
     avatarUrl: z.url({ error: E.AVATAR_URL_INVALID }).max(500, E.AVATAR_URL_TOO_LONG).nullable().optional(),
+}, {
+    error: E.INVALID
 }).refine(
     (data) => Object.keys(data).length > 0,
     { message: E.NO_FIELDS_PROVIDED }
-)
+).strict()

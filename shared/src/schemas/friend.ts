@@ -7,7 +7,7 @@ export const openFriendRequestSchema = z.object({
 })
 
 export const acceptFriendRequestSchema = z.object({
-    status: z.literal('accepted', {error: E.INVALID_VALUE})
+    status: z.literal('accepted', { error: E.INVALID_VALUE })
 }, {
-    error: () => E.INVALID
+    error: E.INVALID
 }).strict()

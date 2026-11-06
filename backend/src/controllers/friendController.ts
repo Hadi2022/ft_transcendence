@@ -32,7 +32,7 @@ export const openFriendRequest = async (req: AuthenticatedRequest, res: Response
 			throw new BadRequestError({
 				message: error.message,
 				code: ErrorCodes.VALIDATION_ERROR,
-				details: { userId: ErrorDetails.CANNOT_TARGET_SELF }
+				details: { receiverId: ErrorDetails.CANNOT_TARGET_SELF }
 			})
 
 		if (error instanceof AlreadyFriendsError)
@@ -111,15 +111,18 @@ export const patchFriendRequest = async (
 
     if (!parsedId.success)
         throw new BadRequestError({
-            message: 'Invalid UUID in route parameter'
+            code: ErrorCodes.VALIDATION_ERROR,
+            message: 'Invalid UUID in route parameter',
+            details: formatZodErrors(parsedId.error),
         })
 
     const parsedBody = acceptFriendRequestSchema.safeParse(req.body)
 
     if (!parsedBody.success)
         throw new BadRequestError({
+            code: ErrorCodes.VALIDATION_ERROR,
             message: 'Invalid friend request status',
-            details: formatZodErrors(parsedBody.error)
+            details: formatZodErrors(parsedBody.error),
         })
 
     const friendRequest = await acceptFriendRequest(

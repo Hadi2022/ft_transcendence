@@ -1,10 +1,11 @@
 
 import { ErrorCodes } from '@transcendence/shared/errors/error-codes'
+import { ErrorDetails } from '@transcendence/shared/errors/error-details'
 
 interface ErrorOptions {
 	message?: string,
-	details?: Record<string, string>,
-	code?: string
+	details?: Record<string, ErrorDetails>,
+	code?: ErrorCodes
 }
 
 export class HttpError extends Error {
