@@ -157,23 +157,24 @@ export async function createGoogleUser(
     _data: NewUserDataGoogle
 ): Promise<UserProfile | null> {
 
-    let username;
+    let username_base;
     try {
-        username = generateBaseUsername(_data.email);
+        username_base = generateBaseUsername(_data.email);
     } catch (error) {
         throw error;
     }
     let randomSuffix = 0;
     let attemps = 0;
     let limit = 15;
+    let username_atempt = username_base;
     while (attemps < limit){
         let check = await prisma.user.findUnique({
-            where: { username: username}
+            where: { username: username_atempt}
         });
         if (check != null)
         {
             randomSuffix = Math.floor(1000 + Math.random() * 9000); // 4 dígitos aleatorios
-            username = `${username}_${randomSuffix}`;
+            username_atempt = `${username_base}_${randomSuffix}`;
             attemps++;
         }
         else
@@ -184,7 +185,7 @@ export async function createGoogleUser(
     try {
         const user = await prisma.user.create({
             data: {
-                username: username,
+                username: username_atempt,
                 email: _data.email,
                 passwordHash: _data.passwordHash,
                 googleId: _data.googleId,
