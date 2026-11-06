@@ -10,16 +10,21 @@ import * as userService from '../services/userService.ts'
 import * as sessionConstants from '../constants/session.ts'
 import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'
+import { ErrorCodes } from '@transcendence/shared/errors/error-codes'
+import { ValidationErrorDetails } from '@transcendence/shared/errors/validation-error-details'
 
 export const openSession = async (req: Request, res: Response) => {
 
 	if (req.session)
-		throw new ConflictError({ message: 'You are already logged in' })
+		throw new ConflictError({
+			message: 'You are already logged in'
+		})
 
 	const parsed = openSessionSchema.safeParse(req.body)
 	
 	if (!parsed.success)
 		throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
 			message: 'Input contains invalid fields',
 			details: formatZodErrors(parsed.error)
 	})
@@ -29,7 +34,10 @@ export const openSession = async (req: Request, res: Response) => {
 	const user = await userService.isValidCredentials(email, password)	
 
 	if (!user)
-		throw new UnauthorizedError({ message: 'Invalid credentials' })
+		throw new UnauthorizedError({
+			code: ErrorCodes.INVALID_CREDENTIALS,
+			message: 'Invalid credentials'
+		})
 
 	const session = await sessionService.openSession(user.id, {
 		ipOrigin: req.ip ?? null,
@@ -61,10 +69,16 @@ export const closeSession = async (req: AuthenticatedRequest, res: Response) => 
 	const parsed = idParamSchema.safeParse(req.params)
 
 	if (!parsed.success)
-		throw new BadRequestError({ message: 'Invalid UUID in route parameter' })
+		throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			message: 'Invalid UUID in route parameter',
+			details: formatZodErrors(parsed.error),
+		})
 
 	if (!await sessionService.closeUserSessionById({userId: req.user.id, sessionId: parsed.data.id}))
-		throw new NotFoundError({ message: 'Session could not be found' })
+		throw new NotFoundError({
+			message: 'Session could not be found'
+		})
 
 	if (parsed.data.id === req.session.id)
 		res.clearCookie(sessionConstants.COOKIE_NAME, {
