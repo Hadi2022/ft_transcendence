@@ -119,6 +119,9 @@ export async function googleCallback(req: Request, res: Response) {
 		})
 	}
 
+	throw error;
+	}
+
 	let user;
 	try {
 		user = await createGoogleUser(googleProfile)
