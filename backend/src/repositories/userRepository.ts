@@ -153,6 +153,7 @@ export async function findUserByGoogleId(
     return user;
 }
 
+
 export async function createGoogleUser(
     _data: NewUserDataGoogle
 ): Promise<UserProfile | null> {
@@ -173,7 +174,7 @@ export async function createGoogleUser(
         });
         if (check != null)
         {
-            randomSuffix = Math.floor(1000 + Math.random() * 9000); // 4 dígitos aleatorios
+			randomSuffix = Math.floor(1000 + Math.random() * 9000); // 4 random digits
             username_atempt = `${username_base}_${randomSuffix}`;
             attemps++;
         }
@@ -182,31 +183,49 @@ export async function createGoogleUser(
     }
     if (attemps == 15)
         throw new UserNameConflictError('A unique username could not be generated after several attempts due to high concurrency.')
-    try {
-        const user = await prisma.user.create({
-            data: {
-                username: username_atempt,
-                email: _data.email,
-                passwordHash: _data.passwordHash,
-                googleId: _data.googleId,
-                isVerified: true,
-                name:_data.name,
-                avatarUrl: _data.picture,
-            },
-            omit: userProfileOmit
-        });
-        return user;
-    }
-    catch (error: unknown) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2002') {
-            const target = (error.message as string);
-            if (target.includes('users_email_key'))
-                throw new UniqueConstraintError('Unique constraint violation: record already exists', 'email');
-            if (target.includes('googleId') || target.includes('users_googleid_key'))
-                return await findUserByGoogleId(_data.googleId);
-            if (target.includes('username') || target.includes('users_username_key'))
-                throw new UniqueConstraintError('Unique constraint violation: record already exists', 'username')
+
+    while (attemps < limit) {
+        try {
+            const user = await prisma.user.create({
+                data: {
+                    username: username_atempt,
+                    email: _data.email,
+                    passwordHash: _data.passwordHash,
+                    googleId: _data.googleId,
+                    isVerified: true,
+                    name: _data.name,
+                    avatarUrl: _data.picture,
+                },
+                omit: userProfileOmit
+            });
+            return user;
         }
-        throw error;
+        catch (error: unknown) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2002') {
+                const target = error.message as string;
+
+                if (target.includes('users_email_key'))
+                    throw new UniqueConstraintError('Unique constraint violation: record already exists', 'email');
+
+				if (target.includes('googleId') || target.includes('users_google_id_key')) {
+					const existingUser = await findUserByGoogleId(_data.googleId);
+					if (existingUser)
+						return existingUser;
+					throw error;
+				}
+
+                if (target.includes('username') || target.includes('users_username_key')) {
+                    randomSuffix = Math.floor(1000 + Math.random() * 9000);
+                    username_atempt = `${username_base}_${randomSuffix}`;
+                    attemps++;
+                    continue;
+                }
+            }
+            throw error;
+        }
     }
+
+    throw new UserNameConflictError(
+        'A unique username could not be generated after several attempts.'
+    );
 }

@@ -4,8 +4,8 @@ import { hashPassword, verifyPassword } from './passwordService.ts'
 import * as userRepository from '../repositories/userRepository.ts'
 import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts'
 import type { Order } from '../types/query.ts'
-import { GoogleAuthError } from '../errors/googleOAuthErrors.ts'
-import { ConflictError } from '../errors/HttpErrors.ts'
+import { ConflictError, BadRequestError, UnauthorizedError } from '../errors/HttpErrors.ts'
+import { ErrorDetails } from '@transcendence/shared/errors/error-details'
 
 type CreateUserInput = {
     username: string
@@ -119,29 +119,50 @@ async function updateUser(
 
 async function createGoogleUser(profile: ProfileGoogle) {
 
-    if ( !profile.email )
-        throw new ConflictError({
-            message:"An email address could not be obtained from the Google provider.",})
-    if ( !profile.emailVerified)
-        throw new ConflictError({
-            message:"The Google email address is not verified. The account cannot be provisioned.",})
+    if (!profile.email)
+        throw new BadRequestError({
+            message: 'An email address could not be obtained from the Google provider.'
+        });
+
+    if (!profile.emailVerified)
+        throw new UnauthorizedError({
+            message: 'The Google email address is not verified. The account cannot be provisioned.'
+        });
+
     const checkGoogleId = await userRepository.findUserByGoogleId(profile.googleId);
     if (checkGoogleId)
         return checkGoogleId;
     const checkEmail = await userRepository.findByEmail(profile.email);
     if (checkEmail)
         throw new ConflictError({
-            message:"User already registered.",});
+            message: 'The email address is already registered.',
+            details: { email: ErrorDetails.EMAIL_IN_USE }
+        });
     try {
         return await userRepository.createGoogleUser(profile);
-    } catch (error) {
-        if (error instanceof UniqueConstraintError)
-             if (error?.field === 'email')
-                throw new ConflictError({message:'The count is already registered.',});
-            else if (error?.field === 'username')
-                throw new ConflictError({message:'The count is already registered.',});
-        throw error;
-    }
+	} catch (error) {
+		if (error instanceof UniqueConstraintError) {
+			if (error.field === 'email')
+				throw new ConflictError({
+					message: 'The email address is already registered.',
+					details: { email: ErrorDetails.EMAIL_IN_USE }
+				});
+
+			if (error.field === 'username')
+				throw new ConflictError({
+					message: 'The username is already in use.',
+					details: { username: ErrorDetails.USERNAME_IN_USE }
+				});
+		}
+
+		if (error instanceof UserNameConflictError)
+			throw new ConflictError({
+				message: 'A unique username could not be generated after several attempts.',
+				details: { username: ErrorDetails.USERNAME_IN_USE }
+			});
+
+		throw error;
+	}
 }
 
 export {
