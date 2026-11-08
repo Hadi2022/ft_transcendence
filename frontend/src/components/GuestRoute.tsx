@@ -1,15 +1,21 @@
 import { useEffect, useState } from "react"
 import { getCurrentUser } from "../services/auth"
 import { Navigate, Outlet } from "react-router"
+import { ApiError } from "../services/api";
 
 export default function GuestRoute() {
     
-    const [status, setStatus] = useState<"loading"|"guest"|"auth">("loading")
+    const [status, setStatus] = useState<"loading"|"guest"|"auth"|"error">("loading")
 
     useEffect(() => {
         getCurrentUser()
             .then(() => setStatus("auth"))
-            .catch(() => setStatus("guest"))
+			.catch((err: unknown) => {
+				if (err instanceof ApiError && err.status === 401)
+					setStatus("guest")
+				else
+					setStatus("error")
+			})
     }, [])
 
     return (status === "loading" ? (
