@@ -53,6 +53,8 @@ paths:
         Redirects the browser to Google for authentication.
         Sets a temporary HttpOnly cookie containing the OAuth state
         used to validate the callback. Does not require a local session.
+        Requests the openid, email and profile scopes and always asks the
+        user to choose a Google account.
       operationId: authorizeGoogle
       security: []
 
@@ -67,7 +69,10 @@ paths:
                 type: string
                 format: uri
             Set-Cookie:
-              description: Temporary OAuth state cookie
+              description: >-
+                Temporary OAuth state cookie (google_oauth_state). HttpOnly,
+                Secure, SameSite=Lax, scoped to /api/auth/google and valid
+                for 10 minutes
               required: true
               schema:
                 type: string
@@ -84,6 +89,8 @@ paths:
         for Google tokens and verifies the Google ID token.
         The current implementation returns a temporary success response.
         It does not create a local user or session.
+        The temporary state cookie is cleared on every callback response,
+        including error responses.
       operationId: googleCallback
       security: []
 
@@ -157,7 +164,10 @@ paths:
                       details: {}
 
         '401':
-          description: Google authorization code or identity verification failed
+          description: >-
+            Google rejected the authorization code, did not return an ID
+            token, or the ID token failed verification (including an
+            unverified Google email address)
           content:
             application/json:
               schema:
@@ -172,7 +182,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
         '502':
-          description: Google authentication provider failed
+          description: Google was unreachable or failed while exchanging the authorization code
           content:
             application/json:
               schema:
@@ -186,7 +196,10 @@ paths:
   /sessions:
     post:
       summary: User login endpoint
-      description: Creates a new session and returns a cookie
+      description: >-
+        Creates a new session and sets an HttpOnly session cookie that
+        expires together with the session. Fails with 409 if the request
+        already carries a valid session.
       operationId: openSession
       security: []
 
@@ -201,11 +214,14 @@ paths:
                 - password
               properties:
                 email:
-                  description: Email
+                  description: Email address. Trimmed and lowercased by the server
                   type: string
+                  format: email
+                  maxLength: 254
                 password:
                   type: string
                   format: password
+                  minLength: 1
             example:
               email: john.doe@selfhosted.es
               password: s3cret-passw0rd
@@ -225,21 +241,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error:
-                  code: BAD_REQUEST
-                  message: Input contains invalid fields
-                  details:
-                    password: Password is required.
+              examples:
+                validation:
+                  summary: Invalid or missing fields
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Input contains invalid fields
+                      details:
+                        password: PASSWORD_REQUIRED
+                invalidJson:
+                  $ref: '#/components/examples/InvalidJson'
         '401':
-          description: Invalid credentials
+          description: Unknown email, wrong password, or an account with no password set
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 error:
-                  code: UNAUTHORIZED
+                  code: INVALID_CREDENTIALS
                   message: Invalid credentials
                   details: {}
         '409':
@@ -280,8 +301,16 @@ paths:
               example:
                 data:
                   - id: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
+                    userId: c86c401f-7405-456f-ab6f-0ad2ffa2f462
+                    expiresAt: '2026-11-13T12:00:00.000Z'
+                    ipOrigin: 203.0.113.7
+                    userAgent: Mozilla/5.0 (X11; Linux x86_64) Firefox/131.0
                     current: true
                   - id: a41d80c5-92b7-4f3e-8a15-c0d9e6b72f14
+                    userId: c86c401f-7405-456f-ab6f-0ad2ffa2f462
+                    expiresAt: '2026-11-12T09:30:00.000Z'
+                    ipOrigin: null
+                    userAgent: null
                     current: false
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -369,9 +398,10 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 error:
-                  code: BAD_REQUEST
+                  code: VALIDATION_ERROR
                   message: Invalid UUID in route parameter
-                  details: {}
+                  details:
+                    id: INVALID_UUID
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -408,14 +438,21 @@ paths:
               properties:
                 username:
                   type: string
-                  description: Unique username
+                  minLength: 3
+                  maxLength: 30
+                  pattern: '^[a-zA-Z0-9_]+$'
+                  description: Unique username. Letters, digits and underscores only
                 email:
                   type: string
                   format: email
-                  description: Unique email address
+                  maxLength: 254
+                  description: Unique email address. Trimmed and lowercased by the server
                 password:
                   type: string
                   format: password
+                  minLength: 6
+                  maxLength: 128
+                  description: Must contain at least one special character
             example:
               username: jdoe
               email: jdoe@example.com
@@ -448,12 +485,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error:
-                  code: BAD_REQUEST
-                  message: Input contains invalid fields
-                  details:
-                    email: Invalid email address.
+              examples:
+                validation:
+                  summary: Invalid or missing fields
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Input contains invalid fields
+                      details:
+                        email: EMAIL_INVALID_FORMAT
+                        password: PASSWORD_NO_SPECIAL_CHAR
+                invalidJson:
+                  $ref: '#/components/examples/InvalidJson'
         '409':
           description: Username or email is already in use
           content:
@@ -468,7 +511,7 @@ paths:
                       code: CONFLICT
                       message: User already exists
                       details:
-                        email: email is in use
+                        email: EMAIL_IN_USE
                 usernameConflict:
                   summary: Username already taken
                   value:
@@ -476,13 +519,16 @@ paths:
                       code: CONFLICT
                       message: User already exists
                       details:
-                        username: username is in use
+                        username: USERNAME_IN_USE
         '500':
           $ref: '#/components/responses/InternalServerError'
 
     get:
       summary: Retrieve a list of users 
-      description: Returns a list of users, by default, sorted by creation time in descending order
+      description: >-
+        Returns a list of users, by default sorted by creation time in
+        descending order. Ties are broken by user ID. At most 100 users are
+        returned (temporary cap until pagination is implemented).
       operationId: getUserList
       security: []
 
@@ -530,12 +576,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error:
-                  code: BAD_REQUEST
-                  message: Invalid query parameters
-                  details:
-                    order: Invalid option
+              examples:
+                invalidOrder:
+                  summary: Invalid sort direction
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid query parameters
+                      details:
+                        order: INVALID_ORDER
+                invalidOrderBy:
+                  summary: Invalid sort field
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid query parameters
+                      details:
+                        order_by: INVALID_ORDER_BY
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -645,12 +702,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error:
-                  code: BAD_REQUEST
-                  message: Input contains invalid fields
-                  details:
-                    _root: At least one field must be provided
+              examples:
+                noFields:
+                  summary: Empty request body
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Input contains invalid fields
+                      details:
+                        _root: NO_FIELDS_PROVIDED
+                invalidField:
+                  summary: Invalid field value
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Input contains invalid fields
+                      details:
+                        avatarUrl: AVATAR_URL_INVALID
+                invalidJson:
+                  $ref: '#/components/examples/InvalidJson'
 
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -663,7 +733,7 @@ paths:
               example:
                 error:
                   code: NOT_FOUND
-                  message: You do not exist! (wow!)
+                  message: User not found
                   details: {}
         '500':
           $ref: '#/components/responses/InternalServerError'
@@ -714,10 +784,10 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 error:
-                  code: BAD_REQUEST
+                  code: VALIDATION_ERROR
                   message: Invalid user ID
                   details:
-                    id: User ID must be a valid UUID
+                    id: INVALID_UUID
 
         '404':
           description: User not found
@@ -801,17 +871,30 @@ paths:
                   status: pending
                   createdAt: '2026-11-03T12:00:00.000Z'
         '400':
-          description: Request contains invalid fields
+          description: Request contains invalid fields or targets the sender themselves
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error:
-                  code: BAD_REQUEST
-                  message: Input contains invalid fields
-                  details:
-                    receiverId: User id has to be valid UUID
+              examples:
+                validation:
+                  summary: Invalid receiver ID
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Input contains invalid fields
+                      details:
+                        receiverId: INVALID_UUID
+                selfTarget:
+                  summary: Sender and receiver are the same user
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Cannot friend yourself
+                      details:
+                        receiverId: CANNOT_TARGET_SELF
+                invalidJson:
+                  $ref: '#/components/examples/InvalidJson'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '404':
@@ -824,39 +907,28 @@ paths:
                 error:
                   code: NOT_FOUND
                   message: Resource not found
-                  details:
-                    reason: cannot send friend request because the user does not exist
+                  details: {}
         '409':
-          description: The friend request conflicts with the current state
+          description: Users are already friends or a request from the sender is already open
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               examples:
-                self:
-                  summary: Sender and receiver are the same user
-                  value:
-                    error:
-                      code: CONFLICT
-                      message: Conflict
-                      details:
-                        reason: Cannot friend yourself
                 alreadyFriends:
                   summary: Users are already friends
                   value:
                     error:
-                      code: CONFLICT
-                      message: Conflict
-                      details:
-                        reason: Already friends
+                      code: ALREADY_FRIENDS
+                      message: Already friends
+                      details: {}
                 requestExists:
                   summary: A request from the sender is already open
                   value:
                     error:
                       code: CONFLICT
-                      message: Conflict
-                      details:
-                        reason: Friend request already open
+                      message: Friend request already open
+                      details: {}
         '500':
           $ref: '#/components/responses/InternalServerError'
     get:
@@ -885,10 +957,10 @@ paths:
                         - $ref: '#/components/schemas/FriendRequest'
                         - type: object
                           required:
-                            - userProfile
-                    properties:
-                      userProfile:
-                        $ref: '#/components/schemas/UserProfile'
+                            - sender
+                          properties:
+                            sender:
+                              $ref: '#/components/schemas/UserProfile'
               example:
                 data:
                   - id: 62f19da2-4142-4a61-9f6b-a353dc9e9337
@@ -903,7 +975,7 @@ paths:
                       biography: null
                       avatarUrl: null
                       isVerified: false
-                      createdAt: 2026-11-03T14:05:57.879Z
+                      createdAt: '2026-11-03T14:05:57.879Z'
 
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -911,8 +983,111 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-
   /friend-requests/{id}:
+    patch:
+      tags:
+        - Friends
+      summary: Accept a pending friend request
+      description: >-
+        Allows the authenticated receiver to accept a pending
+        friend request. Only the receiver can accept it.
+        Changes the status from pending to accepted.
+        Does not create a new friendship record.
+      operationId: patchFriendRequest
+      security:
+        - sessionCookie: []
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the friend request to accept
+          schema:
+            type: string
+            format: uuid
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              additionalProperties: false
+              properties:
+                status:
+                  type: string
+                  const: accepted
+            example:
+              status: accepted
+
+      responses:
+        '200':
+          description: Friend request successfully accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/FriendRequest'
+              example:
+                data:
+                  id: 5d6f7cbc-6f44-4da9-9ea3-38627ba59b47
+                  senderId: 8d665cf3-2375-48bd-8095-b1205265db4b
+                  receiverId: 93083e19-a059-48c6-a566-b6c161895562
+                  status: accepted
+                  createdAt: '2026-11-06T12:00:00.000Z'
+
+        '400':
+          description: Invalid friend request ID or request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidId:
+                  summary: Invalid friend request ID
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid UUID in route parameter
+                      details:
+                        id: INVALID_UUID
+                invalidStatus:
+                  summary: Invalid status in request body
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid friend request status
+                      details:
+                        status: INVALID_VALUE
+                invalidJson:
+                  $ref: '#/components/examples/InvalidJson'
+
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+        '404':
+          description: >-
+            Friend request not found, not pending,
+            or not addressed to the authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Pending friend request could not be found
+                  details: {}
+
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
     delete:
       tags:
         - Friends
@@ -944,6 +1119,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: Invalid UUID in route parameter
+                  details:
+                    id: INVALID_UUID
 
         '401':
           $ref: '#/components/responses/Unauthorized'
@@ -956,6 +1137,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Friend request could not be found
+                  details: {}
 
         '500':
           $ref: '#/components/responses/InternalServerError'
@@ -988,9 +1174,18 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
           example:
             error:
-              code: INTERNAL
+              code: INTERNAL_SERVER_ERROR
               message: Internal server error
               details: {}
+
+  examples:
+    InvalidJson:
+      summary: Malformed JSON body
+      value:
+        error:
+          code: BAD_REQUEST
+          message: Error parsing JSON
+          details: {}
 
   schemas:
     UserProfile:
@@ -1072,14 +1267,34 @@ components:
 
     Session:
       type: object
+      description: A login session of the user. The session token is never returned.
       required:
         - id
+        - userId
+        - expiresAt
+        - ipOrigin
+        - userAgent
         - current
       properties:
         id:
           type: string
           format: uuid
           description: Session ID
+        userId:
+          type: string
+          format: uuid
+          description: ID of the user who owns the session
+        expiresAt:
+          type: string
+          format: date-time
+          description: When the session expires
+        ipOrigin:
+          type: [string, 'null']
+          description: IP address the session was opened from, if known
+        userAgent:
+          type: [string, 'null']
+          maxLength: 255
+          description: User agent the session was opened with, if known. Truncated to 255 characters
         current:
           type: boolean
           description: Whether this is the current session
@@ -1103,9 +1318,11 @@ components:
               description: Human-readable error message
             details:
               type: object
-              description: Per-field error messages, keyed by field name. Empty when the error is not tied to specific fields
+              description: >-
+                Per-field error codes, keyed by field name. Empty when the
+                error is not tied to specific fields
               additionalProperties:
-                type: string
+                $ref: '#/components/schemas/ErrorDetail'
 
     ErrorCode:
       type: string
@@ -1113,24 +1330,64 @@ components:
         Machine-readable error code. Clients must tolerate unknown
         values and fall back to the HTTP status and message.
       enum:
+        - VALIDATION_ERROR
         - BAD_REQUEST
         - UNAUTHORIZED
+        - FORBIDDEN
         - NOT_FOUND
         - CONFLICT
-        - INTERNAL
+        - BAD_GATEWAY
+        - INTERNAL_SERVER_ERROR
+        - INVALID_CREDENTIALS
         - INVALID_OAUTH_STATE
         - MISSING_AUTHORIZATION_CODE
         - GOOGLE_AUTHORIZATION_DENIED
         - GOOGLE_AUTHENTICATION_FAILED
         - GOOGLE_PROVIDER_ERROR
+        - ALREADY_FRIENDS
       x-enumDescriptions:
-        BAD_REQUEST: Request failed validation.
-        UNAUTHORIZED: Missing or invalid session, or wrong credentials.
+        VALIDATION_ERROR: Request body, query or route parameters failed validation. See details for the offending fields.
+        BAD_REQUEST: The request could not be processed (for example, malformed JSON).
+        UNAUTHORIZED: Missing or invalid session.
+        FORBIDDEN: The user is not allowed to perform this action.
         NOT_FOUND: The referenced resource does not exist.
-        CONFLICT: The request conflicts with current state (session or user already exists, or the friend request is not allowed).
-        INTERNAL: Unexpected server failure.
+        CONFLICT: The request conflicts with current state (already logged in, user already exists, or a friend request is already open).
+        BAD_GATEWAY: An external provider failed.
+        INTERNAL_SERVER_ERROR: Unexpected server failure.
+        INVALID_CREDENTIALS: Wrong email or password.
         INVALID_OAUTH_STATE: Missing or invalid OAuth state.
         MISSING_AUTHORIZATION_CODE: Google callback has no authorization code.
         GOOGLE_AUTHORIZATION_DENIED: Google authorization was not completed.
         GOOGLE_AUTHENTICATION_FAILED: Google authentication or identity verification failed.
         GOOGLE_PROVIDER_ERROR: Google authentication provider failed.
+        ALREADY_FRIENDS: The two users are already friends.
+
+    ErrorDetail:
+      type: string
+      description: >-
+        Machine-readable reason a single field was rejected. Clients must
+        tolerate unknown values.
+      enum:
+        - INVALID
+        - INVALID_VALUE
+        - USERNAME_IN_USE
+        - USERNAME_REQUIRED
+        - USERNAME_TOO_SHORT
+        - USERNAME_TOO_LONG
+        - USERNAME_INVALID_CHARS
+        - EMAIL_IN_USE
+        - EMAIL_REQUIRED
+        - EMAIL_TOO_LONG
+        - EMAIL_INVALID_FORMAT
+        - PASSWORD_REQUIRED
+        - PASSWORD_TOO_SHORT
+        - PASSWORD_TOO_LONG
+        - PASSWORD_NO_SPECIAL_CHAR
+        - NAME_TOO_LONG
+        - AVATAR_URL_INVALID
+        - AVATAR_URL_TOO_LONG
+        - NO_FIELDS_PROVIDED
+        - INVALID_UUID
+        - INVALID_ORDER
+        - INVALID_ORDER_BY
+        - CANNOT_TARGET_SELF

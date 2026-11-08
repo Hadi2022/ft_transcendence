@@ -1,5 +1,5 @@
 // src/db/seed.ts
-import { prisma } from './prisma/prisma.js'
+import { prisma } from './prisma/prisma.ts'
 
 async function main() {
   await prisma.user.createMany({

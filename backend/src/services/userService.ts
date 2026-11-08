@@ -4,11 +4,22 @@ import { hashPassword, verifyPassword } from './passwordService.ts'
 import * as userRepository from '../repositories/userRepository.ts'
 import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts'
 import type { Order } from '../types/query.ts'
+import { ConflictError, BadRequestError, UnauthorizedError } from '../errors/HttpErrors.ts'
+import { ErrorDetails } from '@transcendence/shared/errors/error-details'
 
 type CreateUserInput = {
     username: string
     email: string
     password: string
+}
+
+type ProfileGoogle = {
+    googleId: string
+    email: string
+    emailVerified: boolean
+    passwordHash: null
+    picture:string|null
+    name:string|null
 }
 
 interface ListUserProfilesInput {
@@ -18,6 +29,7 @@ interface ListUserProfilesInput {
 
 async function prepareUser(input: CreateUserInput): Promise<NewUserData> {
     const passwordHash = await hashPassword(input.password)
+
 
     return {
         username: input.username,
@@ -30,8 +42,7 @@ async function createUser(input: CreateUserInput): Promise<UserProfile> {
 
     const userData = await prepareUser(input)
     try {
-        const userPublic = await userRepository.createUser(userData);
-        return userPublic;
+        return await userRepository.createUser(userData);
     }
     catch (error) {
         if (error instanceof UniqueConstraintError) {
@@ -66,7 +77,7 @@ async function isValidCredentials(
 }
 
 async function listUserProfiles(params: ListUserProfilesInput): Promise<UserProfile[]> {
-    
+
     return userRepository.findMany({
         order: params.order,
         orderBy: params.orderBy,
@@ -106,6 +117,54 @@ async function updateUser(
     }
 }
 
+async function createGoogleUser(profile: ProfileGoogle) {
+
+    if (!profile.email)
+        throw new BadRequestError({
+            message: 'An email address could not be obtained from the Google provider.'
+        });
+
+    if (!profile.emailVerified)
+        throw new UnauthorizedError({
+            message: 'The Google email address is not verified. The account cannot be provisioned.'
+        });
+
+    const checkGoogleId = await userRepository.findUserByGoogleId(profile.googleId);
+    if (checkGoogleId)
+        return checkGoogleId;
+    const checkEmail = await userRepository.findByEmail(profile.email);
+    if (checkEmail)
+        throw new ConflictError({
+            message: 'The email address is already registered.',
+            details: { email: ErrorDetails.EMAIL_IN_USE }
+        });
+    try {
+        return await userRepository.createGoogleUser(profile);
+	} catch (error) {
+		if (error instanceof UniqueConstraintError) {
+			if (error.field === 'email')
+				throw new ConflictError({
+					message: 'The email address is already registered.',
+					details: { email: ErrorDetails.EMAIL_IN_USE }
+				});
+
+			if (error.field === 'username')
+				throw new ConflictError({
+					message: 'The username is already in use.',
+					details: { username: ErrorDetails.USERNAME_IN_USE }
+				});
+		}
+
+		if (error instanceof UserNameConflictError)
+			throw new ConflictError({
+				message: 'A unique username could not be generated after several attempts.',
+				details: { username: ErrorDetails.USERNAME_IN_USE }
+			});
+
+		throw error;
+	}
+}
+
 export {
     prepareUser,
     createUser,
@@ -114,5 +173,6 @@ export {
     findUserById,
     findUserProfileById,
     findUserOwnProfileById,
-	updateUser
+	updateUser,
+    createGoogleUser,
 }

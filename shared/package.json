@@ -4,10 +4,14 @@
 	"private": true,
 	"type": "module",
 	"exports": {
-	"./schemas/user": "./schemas/user.ts",
-	"./schemas/common": "./schemas/common.ts",
-	"./schemas/friend": "./schemas/friend.ts",
-  	"./schemas/session": "./schemas/session.ts"
+	"./schemas/user": "./src/schemas/user.ts",
+	"./schemas/common": "./src/schemas/common.ts",
+	"./schemas/friend": "./src/schemas/friend.ts",
+  	"./schemas/session": "./src/schemas/session.ts",
+
+	"./errors/error-details": "./src/error-codes/ErrorDetails.ts",
+	"./errors/error-codes": "./src/error-codes/ErrorCodes.ts"
+
 	},
 	"peerDependencies": {
 		"zod": "^4.6.7"

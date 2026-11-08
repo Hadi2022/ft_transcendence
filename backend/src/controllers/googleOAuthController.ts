@@ -1,5 +1,6 @@
 import { randomBytes, timingSafeEqual } from 'node:crypto'
 import type { Request, Response } from 'express'
+import { ErrorCodes as E } from '@transcendence/shared/errors/error-codes'
 
 import {
 	getGoogleAuthorizationUrl,
@@ -7,8 +8,9 @@ import {
 } from '../services/googleOAuthService.ts'
 
 import {
-    GoogleInvalidCredentialsError,
-    GoogleProviderError,
+	GoogleAuthError,
+	GoogleInvalidCredentialsError,
+	GoogleProviderError,
 } from '../errors/googleOAuthErrors.ts'
 
 import {
@@ -16,6 +18,11 @@ import {
 	UnauthorizedError,
 	BadGatewayError
 } from '../errors/HttpErrors.ts'
+
+import { createGoogleUser } from '../services/userService.ts'
+import type { GoogleProfile } from '../types/user.ts'
+import { emailSchema } from '@transcendence/shared/schemas/user'
+import { formatZodErrors } from '../utils/zod.ts'
 
 const STATE_COOKIE = 'google_oauth_state'
 const STATE_MAX_AGE = 10 * 60 * 1000
@@ -31,11 +38,11 @@ export function authorizeGoogle(_req: Request, res: Response) {
 	const state = randomBytes(32).toString('hex')
 
 	res.cookie(STATE_COOKIE, state, {
-    	...cookieOptions,
-    	maxAge: STATE_MAX_AGE,
-  	})
+		...cookieOptions,
+		maxAge: STATE_MAX_AGE,
+	})
 
-  	res.redirect(getGoogleAuthorizationUrl(state))
+	res.redirect(getGoogleAuthorizationUrl(state))
 }
 
 
@@ -54,54 +61,84 @@ export async function googleCallback(req: Request, res: Response) {
 		!/^[a-f0-9]{64}$/.test(storedState) ||
 		!/^[a-f0-9]{64}$/.test(state) ||
 		!timingSafeEqual(
-		Buffer.from(storedState, 'hex'),
-		Buffer.from(state, 'hex')
+			Buffer.from(storedState, 'hex'),
+			Buffer.from(state, 'hex')
 		)
 	) {
 		throw new BadRequestError({
-		code: 'INVALID_OAUTH_STATE',
+		code: E.INVALID_OAUTH_STATE,
 		message: 'Invalid or missing OAuth state',
 		})
 	}
 
 	if (req.query.error) {
 		throw new BadRequestError({
-		code: 'GOOGLE_AUTHORIZATION_DENIED',
+		code: E.GOOGLE_AUTHORIZATION_DENIED,
 		message: 'Google authorization was not completed',
 		})
 	}
 
 	if (typeof code !== 'string' || !code) {
 		throw new BadRequestError({
-		code: 'MISSING_AUTHORIZATION_CODE',
+		code: E.MISSING_AUTHORIZATION_CODE,
 		message: 'Missing Google authorization code',
 		})
 	}
 
-
+	let googleProfileResponse;
+	let googleProfile: GoogleProfile;
 	try {
-		await verifyGoogleAuthorizationCode(code)
+		googleProfileResponse = await verifyGoogleAuthorizationCode(code);
+		const parsed = emailSchema.safeParse(googleProfileResponse.email);
+		if (parsed.error) {
+			throw new BadRequestError({
+				message: "Input contains invalid fields",
+				details: formatZodErrors(parsed.error),
+			})
+		}
+		googleProfile = {
+			googleId: googleProfileResponse.googleId,
+			email: parsed.data.email,
+			name: googleProfileResponse.name,
+			picture: googleProfileResponse.picture,
+			passwordHash: null,
+			emailVerified: true,
+		}
 	} catch (error) {
 	if (error instanceof GoogleInvalidCredentialsError) {
 		throw new UnauthorizedError({
-		code: 'GOOGLE_AUTHENTICATION_FAILED',
+		code: E.GOOGLE_AUTHENTICATION_FAILED,
 		message: 'Google authentication could not be completed',
 		})
 	}
 
 	if (error instanceof GoogleProviderError) {
 		throw new BadGatewayError({
-			code: 'GOOGLE_PROVIDER_ERROR',
+			code: E.GOOGLE_PROVIDER_ERROR,
 			message: 'Google authentication service is unavailable',
 		})
 	}
 
-	throw error
+	throw error;
 	}
 
+	let user;
+	try {
+		user = await createGoogleUser(googleProfile)
+	} catch (error) {
+		if (error instanceof GoogleAuthError) {
+			throw new BadRequestError({
+				message: error.message,
+			})
+		}
+		throw error;
+	}
 	// Temporary response until user/session integration.
 	res.status(200).json({
 		success: true,
 		message: 'Google identity verified successfully',
+		data: user,
 	})
 }
+
+
