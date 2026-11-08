@@ -151,6 +151,8 @@ paths:
                   value: /login?error=GOOGLE_AUTHORIZATION_DENIED
                 conflict:
                   value: /login?error=CONFLICT
+                emailConflict:
+                  value: /login?error=EMAIL_CONFLICT
 
             Set-Cookie:
               description: >-
