@@ -17,7 +17,7 @@ import {
 	BadRequestError,
 	UnauthorizedError,
 	BadGatewayError,
-	ConflictError ,
+	ConflictError,
 	InternalError
 } from '../errors/HttpErrors.ts'
 
@@ -99,7 +99,9 @@ export async function googleCallback(req: Request, res: Response) {
 	let googleProfile: GoogleProfile;
 	try {
 		googleProfileResponse = await verifyGoogleAuthorizationCode(code);
-		const parsed = emailSchema.safeParse({email: googleProfileResponse.email})
+		const parsed = emailSchema.safeParse({
+			email: googleProfileResponse.email,
+		})
 		if (parsed.error) {
 			throw new BadRequestError({
 				message: "Input contains invalid fields",
@@ -150,8 +152,8 @@ export async function googleCallback(req: Request, res: Response) {
 	}
 
 	const session = await sessionService.openSession(user.id, {
-	ipOrigin: req.ip ?? null,
-	userAgent: req.get('user-agent')?.slice(0, 255) ?? null,
+		ipOrigin: req.ip ?? null,
+		userAgent: req.get('user-agent')?.slice(0, 255) ?? null,
 	})
 
 	setSessionCookie(res, session)

@@ -10,7 +10,7 @@ import * as userService from '../services/userService.ts'
 import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'
 import { ErrorCodes } from '@transcendence/shared/errors/error-codes'
-import { setSessionCookie,  clearSessionCookie } from '../utils/sessionCookie.ts'
+import { setSessionCookie, clearSessionCookie } from '../utils/sessionCookie.ts'
 
 export const openSession = async (req: Request, res: Response) => {
 
