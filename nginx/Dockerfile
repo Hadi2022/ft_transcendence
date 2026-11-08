@@ -7,12 +7,12 @@ COPY frontend/package*.json ./frontend/
 WORKDIR /app/shared
 RUN npm ci
 
-WORKDIR /app
-COPY shared/ ./shared/
-COPY frontend/ ./frontend
-
 WORKDIR /app/frontend
 RUN npm ci
+
+WORKDIR /app
+COPY shared/ ./shared/
+COPY frontend/ ./frontend/
 
 WORKDIR /app/frontend
 RUN npm run build
