@@ -39,6 +39,8 @@
         "feed": "Feed",
         "search": "Zoeken",
         "messages": "Berichten",
-        "profile": "Profiel"
+        "profile": "Profiel",
+        "logout": "Logout",
+        "logoutError": "It was not possible to logout. Try again."
     }
 }
