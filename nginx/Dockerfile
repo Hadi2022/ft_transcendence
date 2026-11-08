@@ -15,9 +15,6 @@ WORKDIR /app/frontend
 RUN npm ci
 
 WORKDIR /app/frontend
-COPY shared/ ./shared/
-COPY frontend/ ./frontend/
-
 RUN npm run build
 
 FROM nginx:1.31.7-trixie
