@@ -54,7 +54,8 @@ paths:
         Sets a temporary HttpOnly cookie containing the OAuth state
         used to validate the callback. Does not require a local session.
         Requests the openid, email and profile scopes and always asks the
-        user to choose a Google account.
+        user to choose a Google account. If authorization cannot be 
+        started, redirects the browser to /login?error=CODE.
       operationId: authorizeGoogle
       security: []
 
@@ -76,8 +77,17 @@ paths:
               required: true
               schema:
                 type: string
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        '303':
+          description: >-
+            Redirects to /login?error=CODE when Google OAuth
+            authorization cannot be started.
+          headers:
+            Location:
+              description: Frontend login URL containing an error code
+              required: true
+              schema:
+                type: string
+              example: /login?error=INTERNAL_SERVER_ERROR
 
   /auth/google/callback:
     get:

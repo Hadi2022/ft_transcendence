@@ -10,6 +10,6 @@ const router = express.Router()
 router.get('/', authorizeGoogle)
 router.get('/callback', googleCallback)
 
-router.use('/callback', googleOAuthErrorHandler)
+router.use(googleOAuthErrorHandler)
 
 export default router
