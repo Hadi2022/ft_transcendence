@@ -99,7 +99,7 @@ export async function googleCallback(req: Request, res: Response) {
 	let googleProfile: GoogleProfile;
 	try {
 		googleProfileResponse = await verifyGoogleAuthorizationCode(code);
-		const parsed = emailSchema.safeParse(googleProfileResponse.email);
+		const parsed = emailSchema.safeParse({email: googleProfileResponse.email})
 		if (parsed.error) {
 			throw new BadRequestError({
 				message: "Input contains invalid fields",
