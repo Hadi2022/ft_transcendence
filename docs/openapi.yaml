@@ -144,10 +144,11 @@ paths:
 
             Set-Cookie:
               description: >-
-                On success, sets the HttpOnly sessionID cookie
-                with the existing session expiration and path /.
-                The temporary google_oauth_state cookie is cleared
-                when the callback is processed.
+                The callback clears the temporary google_oauth_state
+                cookie. On successful authentication, it also sets
+                the HttpOnly sessionID cookie with the existing
+                session expiration and path /.
+                Multiple Set-Cookie headers may be returned.
               schema:
                 type: string
 
