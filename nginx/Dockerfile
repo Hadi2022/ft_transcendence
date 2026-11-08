@@ -1,18 +1,22 @@
-FROM node:20-alpine AS frontend-builder
+FROM node:24-alpine AS frontend-builder
 WORKDIR /app
 
 COPY shared/package*.json ./shared/
-COPY frontend/package*.json ./
+COPY frontend/package*.json ./frontend/
 
 WORKDIR /app/shared
-RUN npm install
+RUN npm ci
 
 WORKDIR /app
 COPY shared/ ./shared/
 COPY frontend/ ./frontend
 
 WORKDIR /app/frontend
-RUN npm install
+RUN npm ci
+
+WORKDIR /app/frontend
+COPY shared/ ./shared/
+COPY frontend/ ./frontend/
 
 RUN npm run build
 
