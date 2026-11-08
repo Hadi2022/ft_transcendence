@@ -16,13 +16,17 @@ import {
 import {
 	BadRequestError,
 	UnauthorizedError,
-	BadGatewayError
+	BadGatewayError,
+	ConflictError,
+	InternalError
 } from '../errors/HttpErrors.ts'
 
 import { createGoogleUser } from '../services/userService.ts'
 import type { GoogleProfile } from '../types/user.ts'
 import { emailSchema } from '@transcendence/shared/schemas/user'
 import { formatZodErrors } from '../utils/zod.ts'
+import * as sessionService from '../services/sessionService.ts'
+import { setSessionCookie } from '../utils/sessionCookie.ts'
 
 const STATE_COOKIE = 'google_oauth_state'
 const STATE_MAX_AGE = 10 * 60 * 1000
@@ -51,6 +55,12 @@ export async function googleCallback(req: Request, res: Response) {
 
 	// Clear the temporary state cookie on every callback.
 	res.clearCookie(STATE_COOKIE, cookieOptions)
+	
+	if (req.session) {
+		throw new ConflictError({
+			message: 'You are already logged in',
+		})
+	}
 
 	const state = req.query.state
 	const code = req.query.code
@@ -89,7 +99,9 @@ export async function googleCallback(req: Request, res: Response) {
 	let googleProfile: GoogleProfile;
 	try {
 		googleProfileResponse = await verifyGoogleAuthorizationCode(code);
-		const parsed = emailSchema.safeParse(googleProfileResponse.email);
+		const parsed = emailSchema.safeParse({
+			email: googleProfileResponse.email,
+		})
 		if (parsed.error) {
 			throw new BadRequestError({
 				message: "Input contains invalid fields",
@@ -133,12 +145,20 @@ export async function googleCallback(req: Request, res: Response) {
 		}
 		throw error;
 	}
-	// Temporary response until user/session integration.
-	res.status(200).json({
-		success: true,
-		message: 'Google identity verified successfully',
-		data: user,
+	if (!user) {
+		throw new InternalError({
+			message: 'Google user could not be retrieved or created',
+		})
+	}
+
+	const session = await sessionService.openSession(user.id, {
+		ipOrigin: req.ip ?? null,
+		userAgent: req.get('user-agent')?.slice(0, 255) ?? null,
 	})
+
+	setSessionCookie(res, session)
+
+	res.redirect(303, '/')
 }
 
 

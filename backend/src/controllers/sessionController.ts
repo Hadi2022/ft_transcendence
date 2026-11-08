@@ -7,10 +7,10 @@ import { openSessionSchema } from '@transcendence/shared/schemas/session'
 import * as sessionService from '../services/sessionService.ts'
 import * as userService from '../services/userService.ts'
 
-import * as sessionConstants from '../constants/session.ts'
 import { BadRequestError, ConflictError, NotFoundError, UnauthorizedError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'
 import { ErrorCodes } from '@transcendence/shared/errors/error-codes'
+import { setSessionCookie, clearSessionCookie } from '../utils/sessionCookie.ts'
 
 export const openSession = async (req: Request, res: Response) => {
 
@@ -43,12 +43,7 @@ export const openSession = async (req: Request, res: Response) => {
 		userAgent: req.get('user-agent')?.slice(0, 255) ?? null,
 	})
 
-	res.cookie(sessionConstants.COOKIE_NAME, session.token, {
-		httpOnly: true,
-		expires: session.expiresAt,
-		path: '/'
-		// Will add more later, currently just for production and testing
-	})
+	setSessionCookie(res, session)
 
 	res.status(201).end()
 }
@@ -80,10 +75,7 @@ export const closeSession = async (req: AuthenticatedRequest, res: Response) => 
 		})
 
 	if (parsed.data.id === req.session.id)
-		res.clearCookie(sessionConstants.COOKIE_NAME, {
-			httpOnly: true,
-			path: '/'
-	})
+		clearSessionCookie(res)
 
 	res.status(204).end();
 }
@@ -92,10 +84,7 @@ export const closeCurrentSession = async (req: AuthenticatedRequest, res: Respon
 
 	await sessionService.closeUserSessionById({userId: req.user.id, sessionId: req.session.id});
 
-	res.clearCookie(sessionConstants.COOKIE_NAME, {
-		httpOnly: true,
-		path: '/'
-	})
+	clearSessionCookie(res)
 
 	res.status(204).end();
 }
@@ -104,10 +93,7 @@ export const closeAllUserSessions = async (req: AuthenticatedRequest, res: Respo
 
 	await sessionService.closeAllUserSessions(req.user.id)
 
-	res.clearCookie(sessionConstants.COOKIE_NAME, {
-		httpOnly: true,
-		path: '/'
-	})
+	clearSessionCookie(res)
 
 	res.status(204).end()
 }

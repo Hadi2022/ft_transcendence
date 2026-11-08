@@ -54,7 +54,8 @@ paths:
         Sets a temporary HttpOnly cookie containing the OAuth state
         used to validate the callback. Does not require a local session.
         Requests the openid, email and profile scopes and always asks the
-        user to choose a Google account.
+        user to choose a Google account. If authorization cannot be 
+        started, redirects the browser to /login?error=CODE.
       operationId: authorizeGoogle
       security: []
 
@@ -76,8 +77,17 @@ paths:
               required: true
               schema:
                 type: string
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        '303':
+          description: >-
+            Redirects to /login?error=CODE when Google OAuth
+            authorization cannot be started.
+          headers:
+            Location:
+              description: Frontend login URL containing an error code
+              required: true
+              schema:
+                type: string
+              example: /login?error=INTERNAL_SERVER_ERROR
 
   /auth/google/callback:
     get:
@@ -87,10 +97,15 @@ paths:
       description: >-
         Validates the OAuth state, exchanges the authorization code
         for Google tokens and verifies the Google ID token.
-        The current implementation returns a temporary success response.
-        It does not create a local user or session.
-        The temporary state cookie is cleared on every callback response,
-        including error responses.
+        Retrieves or creates the local user, opens a session using
+        the existing session service, sets the HttpOnly sessionID
+        cookie and redirects the browser to the frontend.
+        If the request already has an active session, authentication
+        is rejected. The temporary OAuth state cookie is cleared
+        when the callback is processed.
+        On failure, the browser is redirected to the login page
+        with an error code.
+
       operationId: googleCallback
       security: []
 
@@ -101,12 +116,14 @@ paths:
           description: State value returned by Google
           schema:
             type: string
+
         - name: code
           in: query
           required: false
           description: Authorization code returned by Google on success
           schema:
             type: string
+
         - name: error
           in: query
           required: false
@@ -115,83 +132,37 @@ paths:
             type: string
 
       responses:
-        '200':
-          description: Google identity successfully verified
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - success
-                  - message
-                properties:
-                  success:
-                    type: boolean
-                    const: true
-                  message:
-                    type: string
-              example:
-                success: true
-                message: Google identity verified successfully
-
-        '400':
-          description: Invalid state, missing code or denied authorization
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                invalidState:
-                  summary: Invalid OAuth state
-                  value:
-                    error:
-                      code: INVALID_OAUTH_STATE
-                      message: Invalid or missing OAuth state
-                      details: {}
-                missingCode:
-                  summary: Missing authorization code
-                  value:
-                    error:
-                      code: MISSING_AUTHORIZATION_CODE
-                      message: Missing Google authorization code
-                      details: {}
-                deniedAuthorization:
-                  summary: Google authorization denied
-                  value:
-                    error:
-                      code: GOOGLE_AUTHORIZATION_DENIED
-                      message: Google authorization was not completed
-                      details: {}
-
-        '401':
+        '303':
           description: >-
-            Google rejected the authorization code, did not return an ID
-            token, or the ID token failed verification (including an
-            unverified Google email address)
-          content:
-            application/json:
+            Redirects to / after successful authentication,
+            or to /login?error=CODE when authentication fails.
+          headers:
+            Location:
+              description: Frontend destination URL
+              required: true
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error:
-                  code: GOOGLE_AUTHENTICATION_FAILED
-                  message: Google authentication could not be completed
-                  details: {}
+                type: string
+              examples:
+                success:
+                  value: /
+                invalidState:
+                  value: /login?error=INVALID_OAUTH_STATE
+                denied:
+                  value: /login?error=GOOGLE_AUTHORIZATION_DENIED
+                conflict:
+                  value: /login?error=CONFLICT
+                emailConflict:
+                  value: /login?error=EMAIL_CONFLICT
 
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-        '502':
-          description: Google was unreachable or failed while exchanging the authorization code
-          content:
-            application/json:
+            Set-Cookie:
+              description: >-
+                The callback clears the temporary google_oauth_state
+                cookie. On successful authentication, it also sets
+                the HttpOnly sessionID cookie with the existing
+                session expiration and path /.
+                Multiple Set-Cookie headers may be returned.
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error:
-                  code: GOOGLE_PROVIDER_ERROR
-                  message: Google authentication service is unavailable
-                  details: {}
+                type: string
 
   /sessions:
     post:
