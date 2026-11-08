@@ -1,8 +1,12 @@
 
 services:
   nginx:
-    build: ./nginx
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+
     restart: unless-stopped
+
 
     environment:
       INTERNAL_PORT: ${INTERNAL_PORT}
