@@ -1,6 +1,6 @@
 {
     "auth": {
-
+        "or": "o",
         "email": "Correo electrónico",
         "emailPlaceholder": "tu@correo.es",
         "password": "Contraseña",
@@ -33,6 +33,19 @@
             "invalidFields": "Hay campos inválidos",
             "invalidCredentials": "Credenciales inválidos",
             "unexpected": "Error inesperado, inténtalo más tarde"
+        },
+        "googleButton": "Continuar con Google",
+        "googleErrors": {
+            "GOOGLE_AUTHORIZATION_DENIED": "Has cancelado el inicio de sesión con Google",
+            "GOOGLE_AUTHENTICATION_FAILED": "No se ha podido verificar tu cuenta de Google",
+            "GOOGLE_PROVIDER_ERROR": "Google no está disponible ahora mismo, inténtalo más tarde",
+            "INVALID_OAUTH_STATE": "La sesión de inicio con Google ha caducado, inténtalo de nuevo",
+            "MISSING_AUTHORIZATION_CODE": "Google no ha completado el inicio de sesión, inténtalo de nuevo",
+            "EMAIL_CONFLICT": "Ya existe una cuenta con este correo",
+            "CONFLICT": "Ya tienes una sesión abierta",
+            "BAD_REQUEST": "No se han podido procesar los datos de tu cuenta de Google",
+            "INTERNAL_SERVER_ERROR": "Error del servidor, intentalo mas tarde",
+            "default": "No se ha podido iniciar sesión con Google"
         }
     },
     "nav": {

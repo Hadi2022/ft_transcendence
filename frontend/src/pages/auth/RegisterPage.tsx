@@ -6,6 +6,7 @@ import { useState, type SubmitEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { ApiError } from "../../services/api";
 import { registerUserSchema } from "@transcendence/shared/schemas/user";
+import GoogleButtonComponent from "./components/GoogleButtonComponent";
 
 const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/
 
@@ -97,7 +98,7 @@ export default function RegisterPage() {
             </div>
 
             <form onSubmit={handleSubmit}
-                className="flex flex-col gap-5 mb-2">
+                className="flex flex-col gap-5">
                 
                 { /* Username input*/ }
                 <InputComponent label={ t("auth.username") } type="text"
@@ -147,9 +148,21 @@ export default function RegisterPage() {
                 { /* Register button */ }
                 <ButtonComponent text={ t("auth.registerButton") } isLoading={isLoading}/>
             </form>
-            <Link to="/login" className="text-sm underline text-blue-400 hover:no-underline">
-                { t("auth.haveAccount") }
-            </Link>
+
+            {/* Divider */}
+            <div className="flex items-center gap-4 my-6 text-sm text-soft-text">
+                <span className="h-px flex-1 bg-zinc-700"></span>
+                { t("auth.or") }
+                <span className="h-px flex-1 bg-zinc-700"></span>
+            </div>
+
+            <GoogleButtonComponent />
+
+            <p className="mt-8 text-center">
+                <Link to="/login" className="text-sm underline text-blue-400 hover:no-underline">
+                    { t("auth.haveAccount") }
+                </Link>
+            </p>
         </div>
     )
 }
