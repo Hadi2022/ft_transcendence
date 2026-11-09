@@ -9,13 +9,6 @@ datasource db {
 // ----------------------------------------------------
 // ENUMS
 // ----------------------------------------------------
-enum StatePost {
-  published
-  draft
-  filed
-
-  @@map("state_post")
-}
 
 enum FriendStatus {
   pending
@@ -45,7 +38,7 @@ model User {
   // Relaciones
   session        Session[]
   posts          Post[]
-  comments       Comments[]
+  comments       Comment[]
   likes          PostLike[]
 
   // Relaciones auto-referenciales para seguidores / seguidos
@@ -103,7 +96,7 @@ model Follow_up {
   @@index([continuedId])
   @@map("follow-ups")
 }
-
+/*
 model Category {
   id          Int             @id @default(autoincrement())
   name        String          @unique @db.VarChar(50)
@@ -116,27 +109,24 @@ model Category {
 
   @@map("categories")
 }
-
+*/
 model Post {
   id             String          @id @default(uuid()) @db.Uuid
   userId         String          @map("user_id") @db.Uuid
-  content        String          @db.Text
-  multimediaUrl  String?         @map("multimedia_url") @db.VarChar(500)
-  typeMultimedia String?         @map("type_multimedia") @db.VarChar(20)
-  state          StatePost       @default(published)
+  multimediaUrl  String          @map("multimedia_url") @db.VarChar(500)
+  caption        String?          @db.VarChar(400)
   createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz
   updatedAt      DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   // Relaciones
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  categories     PostCategory[]
-  comments       Comments[]
+  comments       Comment[]
   likes          PostLike[]
 
   @@index([userId, createdAt(sort: Desc)])
   @@map("posts")
 }
-
+/*
 model PostCategory {
   postId      String    @map("post_id") @db.Uuid
   categoryId  Int       @map("category_id")
@@ -149,8 +139,8 @@ model PostCategory {
   @@index([categoryId])
   @@map("post_categories")
 }
-
-model Comments {
+*/
+model Comment {
   id                 String       @id @default(uuid()) @db.Uuid
   postId             String       @map("post_id") @db.Uuid
   userId             String       @map("user_id") @db.Uuid
@@ -163,11 +153,11 @@ model Comments {
   user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Auto-relación para respuestas jerárquicas
-  parentComment      Comments?  @relation("Thread", fields: [parentCommentId], references: [id], onDelete: Cascade)
-  reply              Comments[] @relation("Thread")
+  parentComment      Comment?  @relation("Thread", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  reply              Comment[] @relation("Thread")
 
   @@index([postId, createdAt(sort: Asc)])
-  @@map("comentarios")
+  @@map("comments")
 }
 
 model PostLike {
@@ -177,7 +167,7 @@ model PostLike {
 
   // Relaciones
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-  usuario   User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([postId, userId])
   @@map("post_likes")
