@@ -1,7 +1,7 @@
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import ButtonComponent from "./components/ButtonComponent";
 import InputComponent from "./components/InputComponent";
-import { useState, type SubmitEvent } from "react";
+import { useEffect, useState, type SubmitEvent } from "react";
 import { login } from "../../services/auth";
 import { useTranslation } from "react-i18next";
 import { ApiError } from "../../services/api";
@@ -22,6 +22,23 @@ function getLoginErrorKey(err: unknown) : string {
     return "auth.errors.unexpected"
 }
 
+const GOOGLE_ERROR_CODES = [
+    "GOOGLE_AUTHORIZATION_DENIED",
+    "GOOGLE_AUTHENTICATION_FAILED",
+    "GOOGLE_PROVIDER_ERROR",
+    "INVALID_OAUTH_STATE",
+    "MISSING_AUTHORIZATION_CODE",
+    "EMAIL_CONFLICT",
+]
+
+function getGoogleErrorKey(code: string | null) : string | null {
+    if (!code)
+        return (null)
+    if (GOOGLE_ERROR_CODES.includes(code))
+        return `auth.googleErrors.${code}`
+    return "auth.googleErrors.default"
+}
+
 export default function LoginPage() {
 
     const navigate = useNavigate()
@@ -31,7 +48,19 @@ export default function LoginPage() {
     const [password, setPassword] = useState("")
 
     const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+
+    const [searchParams, setSearchParams] = useSearchParams()
+    const [error, setError] = useState<string | null>(
+        () => getGoogleErrorKey(searchParams.get("error"))
+    )
+
+    useEffect(() => {
+        if (!searchParams.has("error"))
+            return
+        const params = new URLSearchParams(searchParams)
+        params.delete("error")
+        setSearchParams(params, { replace: true })
+    }, [searchParams, setSearchParams])
 
     async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
