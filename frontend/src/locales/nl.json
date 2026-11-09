@@ -42,6 +42,9 @@
             "INVALID_OAUTH_STATE": "Your Google session expired, try again",
             "MISSING_AUTHORIZATION_CODE": "Google did not complete the sign in, try again",
             "EMAIL_CONFLICT": "An account with this email already exists",
+            "CONFLICT": "You are already logged in",
+            "BAD_REQUEST": "We could not process your Google accoutn data",
+            "INTERNAL_SERVER_ERROR": "Server error, please try again later",
             "default": "It was not possible to sign in with Google."
         }
     },

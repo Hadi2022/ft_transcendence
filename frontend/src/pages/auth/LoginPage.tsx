@@ -29,6 +29,9 @@ const GOOGLE_ERROR_CODES = [
     "INVALID_OAUTH_STATE",
     "MISSING_AUTHORIZATION_CODE",
     "EMAIL_CONFLICT",
+    "CONFLICT",
+    "BAD_REQUEST",
+    "INTERNAL_SERVER_ERROR",
 ]
 
 function getGoogleErrorKey(code: string | null) : string | null {
