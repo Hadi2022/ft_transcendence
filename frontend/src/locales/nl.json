@@ -1,6 +1,6 @@
 {
     "auth": {
-
+        "or": "or",
         "email": "Email",
         "emailPlaceholder": "jouw@email.com",
         "password": "Wachtwoord",

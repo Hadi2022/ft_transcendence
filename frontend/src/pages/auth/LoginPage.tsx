@@ -6,6 +6,7 @@ import { login } from "../../services/auth";
 import { useTranslation } from "react-i18next";
 import { ApiError } from "../../services/api";
 import { openSessionSchema } from "@transcendence/shared/schemas/session";
+import GoogleButtonComponent from "./components/GoogleButtonComponent";
 
 function getLoginErrorKey(err: unknown) : string {
     if (err instanceof TypeError)
@@ -61,7 +62,7 @@ export default function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit}
-                className="flex flex-col gap-5 mb-2" >
+                className="flex flex-col gap-5" >
                 
                 { /* Email input*/ }
                 <InputComponent label={ t("auth.email") } type="email"
@@ -90,9 +91,20 @@ export default function LoginPage() {
                 <ButtonComponent text={ t("auth.loginButton") } isLoading={isLoading} />
             </form>
 
-            <Link to="/register" className="text-sm underline text-blue-400 hover:no-underline">
-                { t("auth.dontHaveAccount") }
-            </Link>
+            { /* Divider */ }
+            <div className="flex items-center gap-4 my-6 text-sm text-soft-text">
+                <span className="h-px flex-1 bg-zinc-700"></span>
+                { t("auth.or") }
+                <span className="h-px flex-1 bg-zinc-700"></span>
+            </div>
+
+            <GoogleButtonComponent />
+
+            <p className="mt-8 text-center">
+                <Link to="/register" className="text-sm underline text-blue-400 hover:no-underline">
+                    { t("auth.dontHaveAccount") }
+                </Link>
+            </p>
         </div>
     )
 }

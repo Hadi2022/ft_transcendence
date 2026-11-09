@@ -1,6 +1,6 @@
 {
     "auth": {
-
+        "or": "o",
         "email": "Correo electrónico",
         "emailPlaceholder": "tu@correo.es",
         "password": "Contraseña",
