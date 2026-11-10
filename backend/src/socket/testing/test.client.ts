@@ -1,7 +1,10 @@
 
 import { io } from 'socket.io-client';   // npm i -D socket.io-client
 
-const socket = io('http://localhost:3000');
+const socket = io('https://localhost', {
+    path: '/api/socket.io',
+    rejectUnauthorized: false,
+})
 
 socket.connect()
 

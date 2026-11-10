@@ -8,7 +8,7 @@ let io: Server
 
 export const initSocket = (server: http.Server) => {
 
-	io = new Server(server)
+	io = new Server(server, {path: '/api/socket.io'})
 
 	io.use(loadSession)
 
