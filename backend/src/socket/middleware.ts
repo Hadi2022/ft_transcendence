@@ -23,8 +23,8 @@ export const loadSession = async (socket: Socket, next: Function) => {
 	next();
 }
 
-export const isAuthenticated = (socket: Socket, next: Function) => {
+export const requireAuth = (socket: Socket, next: Function) => {
 	if (!socket.data.user || !socket.data.session)
-		return false 
-	return true
+		next(new Error('unauthenticated'))
+	next()
 }
