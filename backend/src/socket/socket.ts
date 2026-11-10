@@ -1,14 +1,14 @@
 
 import { Server, Socket } from 'socket.io'
 import type http from 'node:http'
-import { connectionHandler } from './handler.ts'
+import { connectionHandler } from './connectionHandler.ts'
 import { loadSession, requireAuth } from './middleware.ts'
 
 let io: Server
 
 export const initSocket = (server: http.Server) => {
 
-	io = new Server(server, {path: '/api/socket.io'})
+	io = new Server(server, { path: '/api/socket.io' })
 
 	io.use(loadSession)
 	io.use(requireAuth)
