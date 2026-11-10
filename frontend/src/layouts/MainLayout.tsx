@@ -2,7 +2,8 @@ import { useTranslation } from "react-i18next";
 import { NavLink, Outlet, useNavigate } from "react-router";
 import LanguageSelector from "../components/LanguageSelector";
 import { getCurrentUser, logout } from "../services/auth";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ApiError } from "../services/api";
 
 export default function MainLayout() {
     
@@ -14,10 +15,26 @@ export default function MainLayout() {
     const [isLoggingOut, setIsLoggingOut] = useState(false)
     const [logoutError, setLogoutError] = useState<string|null>(null)
 
-    useEffect(() => {
+    const lastRequest = useRef(0)
+
+    function checkSession() {
+        lastRequest.current += 1
+        const requestId = lastRequest.current
+
         getCurrentUser()
-            .then(() => setIsAuth(true))
-            .catch(() => setIsAuth(false))
+            .then(() => {
+                if (requestId !== lastRequest.current) return
+                setIsAuth(true)
+            })
+            .catch((err: unknown) => {
+                if (requestId !== lastRequest.current) return
+                if (err instanceof ApiError && err.status === 401)
+                    setIsAuth(false)
+            })
+    }
+
+    useEffect(() => {
+        checkSession()
     }, [])
 
     async function handleLogout() {
