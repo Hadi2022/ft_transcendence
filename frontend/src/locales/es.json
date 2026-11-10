@@ -32,7 +32,8 @@
             "sessionExists": "Ya hay una sesión abierta",
             "invalidFields": "Hay campos inválidos",
             "invalidCredentials": "Credenciales inválidos",
-            "unexpected": "Error inesperado, inténtalo más tarde"
+            "unexpected": "Error inesperado, inténtalo más tarde",
+            "sessionCheck": "No se ha podido verificar tu sesión"
         },
         "googleButton": "Continuar con Google",
         "googleErrors": {

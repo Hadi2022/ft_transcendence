@@ -32,7 +32,8 @@
             "sessionExists": "The session already exists",
             "invalidFields": "Invalid fields",
             "invalidCredentials": "Invalid credentials",
-            "unexpected": "Unexpected error, try again later"
+            "unexpected": "Unexpected error, try again later",
+            "sessionCheck": "We couldn't verify your session"
         },
         "googleButton": "Continue with Google",
         "googleErrors": {
