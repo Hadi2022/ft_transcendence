@@ -53,7 +53,7 @@
         "search": "Buscar",
         "messages": "Mensajes",
         "profile": "Perfil",
-        "logout": "Cerrar Sesión",
+        "logout": "Cerrar sesión",
         "logoutError": "No se ha podido cerrar sesión. Intentalo de nuevo."
     }
 }
