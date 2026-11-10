@@ -55,5 +55,6 @@
         "profile": "Perfil",
         "logout": "Cerrar sesión",
         "logoutError": "No se ha podido cerrar sesión. Inténtalo de nuevo."
-    }
+    },
+    "retry": "Reintentar"
 }

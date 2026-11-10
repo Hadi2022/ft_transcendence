@@ -55,5 +55,6 @@
         "profile": "Profiel",
         "logout": "Logout",
         "logoutError": "It was not possible to logout. Try again."
-    }
+    },
+    "retry": "Retry"
 }
