@@ -49,8 +49,13 @@ export default function MainLayout() {
             await logout()
             setIsAuth(false)
             navigate("/login", {replace: true})
-        } catch {
-            setLogoutError("nav.logoutError")
+        } catch (err: unknown) {
+            if (err instanceof ApiError && err.status === 401) {
+                setIsAuth(false)
+                navigate("/login", {replace: true})
+            } else {
+                setLogoutError("nav.logoutError")
+            }
         } finally {
             setIsLoggingOut(false)
         }
