@@ -35,6 +35,9 @@ export default function MainLayout() {
 
     useEffect(() => {
         checkSession()
+
+        window.addEventListener("focus", checkSession)
+        return () => window.removeEventListener("focus", checkSession)
     }, [])
 
     async function handleLogout() {
