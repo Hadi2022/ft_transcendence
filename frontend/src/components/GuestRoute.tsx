@@ -2,8 +2,11 @@ import { useEffect, useState } from "react"
 import { getCurrentUser } from "../services/auth"
 import { Navigate, Outlet } from "react-router"
 import { ApiError } from "../services/api";
+import { useTranslation } from "react-i18next";
 
 export default function GuestRoute() {
+
+    const { t } = useTranslation()
     
     const [status, setStatus] = useState<"loading"|"guest"|"auth"|"error">("loading")
 
@@ -29,6 +32,10 @@ export default function GuestRoute() {
 
             ) : status === "auth" ? (
                 <Navigate replace to="/" />
+            ) : status === "error" ? (
+                <div className="flex flex-col gap-4">
+                    <p className="text-sm text-red-500">{ t("auth.errors.sessionCheck") }</p>
+                </div>
             ) : (
                 <Outlet />
             ))
