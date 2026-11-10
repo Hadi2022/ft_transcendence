@@ -73,10 +73,11 @@ export default function MainLayout() {
                     <NavLink to="#" className="navlink">{ t("nav.messages") }</NavLink>
                     <NavLink to="#" className="navlink">{ t("nav.profile") }</NavLink>
                     { isAuth && (
-                        <button className="navlink disabled:opacity-50"
+                        <button className="navlink disabled:opacity-50 hover:cursor-pointer
+                                                border border-soft-text/30 px-3 py-2 rounded-md"
                                 onClick={handleLogout}
                                 disabled={isLoggingOut}>
-                            { t("nav.logout") }
+                            { isLoggingOut ? t("nav.loggingOut") : t("nav.logout")}
                         </button>
                     )}
                     { logoutError && (
