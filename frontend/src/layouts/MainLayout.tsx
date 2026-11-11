@@ -43,6 +43,7 @@ export default function MainLayout() {
     async function handleLogout() {
         if (isLoggingOut) return
         
+        lastRequest.current += 1
         setIsLoggingOut(true)
         setLogoutError(null)
         try {
@@ -57,6 +58,7 @@ export default function MainLayout() {
                 setLogoutError("nav.logoutError")
             }
         } finally {
+            lastRequest.current += 1
             setIsLoggingOut(false)
         }
     }
