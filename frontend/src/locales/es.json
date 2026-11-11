@@ -32,7 +32,8 @@
             "sessionExists": "Ya hay una sesión abierta",
             "invalidFields": "Hay campos inválidos",
             "invalidCredentials": "Credenciales inválidos",
-            "unexpected": "Error inesperado, inténtalo más tarde"
+            "unexpected": "Error inesperado, inténtalo más tarde",
+            "sessionCheck": "No se ha podido verificar tu sesión"
         },
         "googleButton": "Continuar con Google",
         "googleErrors": {
@@ -44,7 +45,7 @@
             "EMAIL_CONFLICT": "Ya existe una cuenta con este correo",
             "CONFLICT": "Ya tienes una sesión abierta",
             "BAD_REQUEST": "No se han podido procesar los datos de tu cuenta de Google",
-            "INTERNAL_SERVER_ERROR": "Error del servidor, intentalo mas tarde",
+            "INTERNAL_SERVER_ERROR": "Error del servidor, inténtalo más tarde",
             "default": "No se ha podido iniciar sesión con Google"
         }
     },
@@ -53,7 +54,9 @@
         "search": "Buscar",
         "messages": "Mensajes",
         "profile": "Perfil",
-        "logout": "Cerrar Sesión",
-        "logoutError": "No se ha podido cerrar sesión. Intentalo de nuevo."
-    }
+        "loggingOut": "Cerrando sesión...",
+        "logout": "Cerrar sesión",
+        "logoutError": "No se ha podido cerrar sesión. Inténtalo de nuevo."
+    },
+    "retry": "Reintentar"
 }

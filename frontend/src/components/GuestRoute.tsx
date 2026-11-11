@@ -1,22 +1,46 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { getCurrentUser } from "../services/auth"
 import { Navigate, Outlet } from "react-router"
 import { ApiError } from "../services/api";
+import { useTranslation } from "react-i18next";
 
 export default function GuestRoute() {
+
+    const { t } = useTranslation()
     
     const [status, setStatus] = useState<"loading"|"guest"|"auth"|"error">("loading")
+    const lastRequest = useRef(0)
 
-    useEffect(() => {
+    function checkSession() {
+        lastRequest.current += 1
+        const requestId = lastRequest.current
+
         getCurrentUser()
-            .then(() => setStatus("auth"))
+            .then(() => {
+                if (requestId !== lastRequest.current) return
+                setStatus("auth")
+            })
 			.catch((err: unknown) => {
+                if (requestId !== lastRequest.current) return
 				if (err instanceof ApiError && err.status === 401)
 					setStatus("guest")
 				else
 					setStatus("error")
 			})
+    }
+
+    useEffect(() => {
+        checkSession()
+
+        return () => {
+            lastRequest.current += 1
+        }
     }, [])
+
+    function handleRetry() {
+        setStatus("loading")
+        checkSession()
+    }
 
     return (status === "loading" ? (
             <div className="animate-pulse flex flex-col gap-4">
@@ -29,6 +53,14 @@ export default function GuestRoute() {
 
             ) : status === "auth" ? (
                 <Navigate replace to="/" />
+            ) : status === "error" ? (
+                <div className="flex flex-col gap-4">
+                    <p className="text-sm text-red-500">{ t("auth.errors.sessionCheck") }</p>
+                    <button onClick={handleRetry} className="rounded bg-soft-text/20 py-2
+                                                                hover:bg-soft-text/30">
+                        { t("retry") }
+                    </button>
+                </div>
             ) : (
                 <Outlet />
             ))
