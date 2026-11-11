@@ -31,6 +31,10 @@ export default function GuestRoute() {
 
     useEffect(() => {
         checkSession()
+
+        return () => {
+            lastRequest.current += 1
+        }
     }, [])
 
     function handleRetry() {
