@@ -3,6 +3,7 @@ import type { NewPostData, Post } from "../types/post.ts";
 import { Prisma } from '@prisma/client';
 import { userProfileOmit } from "./userRepository.ts";
 import { UserNotFoundError } from "../errors/userErrors.ts";
+import { RecordNotFoundError } from "../errors/RepositoryErrors.ts";
 
 
 export async function createPost(
@@ -26,8 +27,10 @@ export async function createPost(
 	}
 	catch (error: unknown) {
 		if (error instanceof Prisma.PrismaClientKnownRequestError) {
-			if (error.code === 'P2003' || error.code === 'P2025')
+			if (error.code === 'P2003')
 				throw new UserNotFoundError('User not found');
+			else if (error.code === 'P2003')
+				throw new RecordNotFoundError(error.message);
 		}
 		throw error;
 	}
