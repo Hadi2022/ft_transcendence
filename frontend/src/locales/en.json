@@ -54,7 +54,7 @@
         "search": "Search",
         "messages": "Messages",
         "profile": "Profile",
-        "loggingOut": "Loggin out...",
+        "loggingOut": "Logging out...",
         "logout": "Logout",
         "logoutError": "It was not possible to log out. Try again."
     },
