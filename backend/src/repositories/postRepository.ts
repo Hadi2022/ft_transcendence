@@ -29,7 +29,7 @@ export async function createPost(
 		if (error instanceof Prisma.PrismaClientKnownRequestError) {
 			if (error.code === 'P2003')
 				throw new UserNotFoundError('User not found');
-			else if (error.code === 'P2003')
+			else if (error.code === 'P2025')
 				throw new RecordNotFoundError(error.message);
 		}
 		throw error;
