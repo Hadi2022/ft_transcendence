@@ -15,3 +15,10 @@ export type Post = {
   updatedAt : Date;
   user:UserProfile;
 }
+
+export type PostDelete = Omit<Post,
+    'caption'   |
+    'createdAt' |
+    'updatedAt' |
+    'user'
+>
