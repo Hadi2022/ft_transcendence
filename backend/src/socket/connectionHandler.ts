@@ -8,11 +8,11 @@ const isAuthenticated = (socket: Socket) => {
 	return true
 }
 
-let	connectedUsers = new Map<string, Set<string>>()
+const	connectedUsers = new Map<string, Set<string>>()
 
 const	addUserConnection = (user: User, socket: Socket): number => {
 
-	let userSockets = connectedUsers.get(user.id)
+	const userSockets = connectedUsers.get(user.id)
 
 	if (!userSockets) {
 		const	newUserSockets = new Set<string>()
@@ -28,9 +28,9 @@ const	addUserConnection = (user: User, socket: Socket): number => {
 
 const removeUserConnection = (user: User, socket: Socket): number => {
 
-	let userSockets = connectedUsers.get(user.id)
+	const	userSockets = connectedUsers.get(user.id)
 	if (!userSockets)
-		throw new Error ('Fuck')
+		return 0
 
 	userSockets.delete(socket.id)
 
@@ -43,6 +43,13 @@ const removeUserConnection = (user: User, socket: Socket): number => {
 	return userSocketAmount
 }
 
+const informSocket = (socket: Socket) => {
+
+	socket.emit('user:online-list', {
+		userIds: [...connectedUsers.keys()],
+	})
+}
+
 export const connectionHandler = (io: Server, socket: Socket) => {
 
 	if (!isAuthenticated(socket)) {
@@ -52,20 +59,18 @@ export const connectionHandler = (io: Server, socket: Socket) => {
 
 	const	user = socket.data.user
 
-	if (addUserConnection(user, socket) == 1)
-		socket.broadcast.emit('status', 'hello')
+	if (addUserConnection(user, socket) === 1)
+		socket.broadcast.emit('user:online', {
+			userId: user.id,
+		})
 
-	socket.emit('status', 'You are logged in')
+	informSocket(socket)
 	
 	socket.on('disconnect', () => {
 		const connectionAmount = removeUserConnection(user, socket)
 		if (connectionAmount < 1)
-			socket.broadcast.emit('status', 'bye')
-
+			socket.broadcast.emit('user:offline', {
+				userId: user.id,
+			})
 	})
-	
-	socket.on('status', (status: string) => {
-		console.log(status)
-	})
-	
 }
