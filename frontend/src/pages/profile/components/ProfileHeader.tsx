@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next"
 import type { UserProfile } from "../../../services/auth"
+import { Link } from "react-router"
 
 const DEFAULT_AVATAR = "/img/default-avatar.svg"
 
@@ -47,8 +48,28 @@ export default function ProfileHeader({profile, relation} : ProfileHeaderProps) 
                 )}
 
                 <p className="text-sm text-soft-text">{ t("profile.joined", { date: joinedDate }) }</p>
-                {relation === "own" && <p>Mi perfil</p>}
-                {relation === "other" && <p>De otro</p>}
+                
+                {
+                    relation === "own" && (
+                        <Link to="/settings/profile"
+                                className="rounded-md bg-soft-text/20 px-4 py-2
+                                            text-sm font-medium hover:bg-soft-text/30
+                                            transition-colors">
+                            { t("profile.editProfile") }
+                        </Link>
+                    )
+                }
+
+                {
+                    relation === "other" && (
+                        <button type="button"
+                                className=" rounded-md bg-cyan-400 px-6 py-2 text-sm 
+                                            font-medium text-white hover:bg-cyan-300
+                                            transition-colors cursor-pointer">
+                            { t("profile.follow") }
+                        </button>
+                    )
+                }
             </div>
             
         </section>

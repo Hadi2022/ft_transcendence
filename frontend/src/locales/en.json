@@ -64,7 +64,9 @@
         "backHome": "Go home",
         "loadError": "It was not possible to load the profile",
         "avatarAlt": "{{username}}'s avatar",
-        "joined": "Joined {{date}}"
+        "joined": "Joined {{date}}",
+        "editProfile": "Edit profile",
+        "follow": "Follow"
     },
     "retry": "Retry"
 }

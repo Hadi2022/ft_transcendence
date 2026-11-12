@@ -64,7 +64,9 @@
         "backHome": "Volver a inicio",
         "loadError": "No se ha podido cargar el perfil",
         "avatarAlt": "Avatar de {{username}}",
-        "joined": "Se unió en {{date}}"
+        "joined": "Se unió en {{date}}",
+        "editProfile": "Editar perfil",
+        "follow": "Seguir"
     },
     "retry": "Reintentar"
 }
