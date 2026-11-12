@@ -43,7 +43,7 @@ export default function ProfileHeader({profile} : ProfileHeaderProps) {
                     </p>
                 )}
 
-                <p>{ t("profile.joined", { date: joinedDate }) }</p>
+                <p className="text-sm text-soft-text">{ t("profile.joined", { date: joinedDate }) }</p>
             </div>
             
         </section>
