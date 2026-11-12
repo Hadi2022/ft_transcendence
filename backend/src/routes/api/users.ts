@@ -10,7 +10,7 @@ router.post('/', registerUser)
 router.get('/', getUsers)
 router.get('/me', requireAuth, authed(getCurrentUser))
 router.patch('/me', requireAuth, authed(updateCurrentUser))
-router.get('/:id', loadUser, getUserById)
 router.get('/by-username/:username', getUserByUsername)
+router.get('/:id', loadUser, getUserById)
 
 export default router
