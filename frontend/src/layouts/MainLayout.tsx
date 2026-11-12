@@ -5,6 +5,10 @@ import { getCurrentUser, logout } from "../services/auth";
 import { useEffect, useRef, useState } from "react";
 import { ApiError } from "../services/api";
 
+export type MainLayoutContext = {
+    myUsername: string | null
+}
+
 export default function MainLayout() {
     
     const { t } = useTranslation()
@@ -101,7 +105,7 @@ export default function MainLayout() {
             <main className="mx-auto w-full
                             max-w-5xl flex-1
                             px-4 py-6">
-                <Outlet />
+                <Outlet context={{myUsername}}/>
             </main>
 
             <footer className="bg-surface py-10 px-5">

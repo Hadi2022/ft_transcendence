@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react"
-import { Link, useParams } from "react-router"
+import { Link, useOutletContext, useParams } from "react-router"
 import { getUserByUsername } from "../../services/users"
 import { ApiError } from "../../services/api"
 import type { UserProfile } from "../../services/auth"
 import ProfileSkeleton from "./components/ProfileSkeleton"
 import { useTranslation } from "react-i18next"
-import ProfileHeader from "./components/ProfileHeader"
+import ProfileHeader, { type ProfileRelation } from "./components/ProfileHeader"
+import type { MainLayoutContext } from "../../layouts/MainLayout"
 
 type ProfileResult =
     | { username: string, status: "ready", profile: UserProfile }
@@ -17,6 +18,7 @@ export default function ProfilePage() {
     const { t } = useTranslation()
 
     const { username } = useParams()
+    const { myUsername } = useOutletContext<MainLayoutContext>()
 
     const [result, setResult] = useState<ProfileResult|null>(null)
     const lastRequest = useRef(0)
@@ -77,7 +79,12 @@ export default function ProfilePage() {
             </div>
         )
 
+    const relation: ProfileRelation = myUsername === null ? "guest"
+                                        : myUsername === result.profile.username ? "own"
+                                        : "other"
     return (
-        <ProfileHeader profile={result.profile} />
+        <>
+            <ProfileHeader profile={result.profile} relation={relation} />
+        </>
     )
 }

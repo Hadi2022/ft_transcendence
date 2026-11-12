@@ -3,11 +3,14 @@ import type { UserProfile } from "../../../services/auth"
 
 const DEFAULT_AVATAR = "/img/default-avatar.svg"
 
+export type ProfileRelation = "own" | "other" | "guest"
+
 type ProfileHeaderProps = {
     profile: UserProfile
+    relation: ProfileRelation
 }
 
-export default function ProfileHeader({profile} : ProfileHeaderProps) {
+export default function ProfileHeader({profile, relation} : ProfileHeaderProps) {
 
     const { t, i18n } = useTranslation()
 
@@ -44,6 +47,8 @@ export default function ProfileHeader({profile} : ProfileHeaderProps) {
                 )}
 
                 <p className="text-sm text-soft-text">{ t("profile.joined", { date: joinedDate }) }</p>
+                {relation === "own" && <p>Mi perfil</p>}
+                {relation === "other" && <p>De otro</p>}
             </div>
             
         </section>
