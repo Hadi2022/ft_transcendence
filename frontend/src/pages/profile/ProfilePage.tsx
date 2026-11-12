@@ -6,11 +6,10 @@ import type { UserProfile } from "../../services/auth"
 import ProfileSkeleton from "./components/ProfileSkeleton"
 import { useTranslation } from "react-i18next"
 
-type ProfileResult = {
-    username: string
-    status: "ready" | "notFound" | "error"
-    profile: UserProfile | null
-}
+type ProfileResult =
+    | { username: string, status: "ready", profile: UserProfile }
+    | { username: string, status: "notFound" }
+    | { username: string, status: "error" }
 
 export default function ProfilePage() {
 
@@ -32,10 +31,10 @@ export default function ProfilePage() {
             })
             .catch((err: unknown) => {
                 if (requestId !== lastRequest.current) return
-                if (err instanceof ApiError && (err.status === 404 || err.status === 400))
-                    setResult({ username: profileUsername, status: "notFound", profile: null })
-                else
-                    setResult({ username: profileUsername, status: "error", profile: null })
+                  if (err instanceof ApiError && (err.status === 404 || err.status === 400))
+                      setResult({ username: profileUsername, status: "notFound" })
+                  else
+                      setResult({ username: profileUsername, status: "error" })
             })
     }
 
@@ -79,7 +78,7 @@ export default function ProfilePage() {
 
     return (
         <div>
-            { result.status } {result.profile?.username }
+            { result.status } {result.profile.username }
         </div>
     )
 }
