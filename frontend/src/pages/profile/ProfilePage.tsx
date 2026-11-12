@@ -3,6 +3,7 @@ import { useParams } from "react-router"
 import { getUserById } from "../../services/users"
 import { ApiError } from "../../services/api"
 import type { UserProfile } from "../../services/auth"
+import ProfileSkeleton from "./components/ProfileSkeleton"
 
 type ProfileResult = {
     id: string
@@ -45,7 +46,7 @@ export default function ProfilePage() {
     }, [id])
 
     if (!result || result.id !== id)
-        return <p>Cargando...</p>
+        return <ProfileSkeleton />
 
     return (
         <div>
