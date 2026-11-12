@@ -14,7 +14,7 @@ export default function MainLayout() {
     const [isAuth, setIsAuth] = useState(false)
     const [isLoggingOut, setIsLoggingOut] = useState(false)
     const [logoutError, setLogoutError] = useState<string|null>(null)
-    const [myId, setMyId] = useState<string|null>(null)
+    const [myUsername, setMyUsername] = useState<string|null>(null)
 
     const lastRequest = useRef(0)
 
@@ -26,7 +26,7 @@ export default function MainLayout() {
             .then((user) => {
                 if (requestId !== lastRequest.current) return
                 setIsAuth(true)
-                setMyId(user.id)
+                setMyUsername(user.username)
             })
             .catch((err: unknown) => {
                 if (requestId !== lastRequest.current) return
@@ -51,12 +51,12 @@ export default function MainLayout() {
         try {
             await logout()
             setIsAuth(false)
-            setMyId(null)
+            setMyUsername(null)
             navigate("/login", {replace: true})
         } catch (err: unknown) {
             if (err instanceof ApiError && err.status === 401) {
                 setIsAuth(false)
-                setMyId(null)
+                setMyUsername(null)
                 navigate("/login", {replace: true})
             } else {
                 setLogoutError("nav.logoutError")
@@ -78,10 +78,10 @@ export default function MainLayout() {
                     <NavLink to="#" className="navlink">{ t("nav.feed") }</NavLink>
                     <NavLink to="#" className="navlink">{ t("nav.messages") }</NavLink>
 
-                    { myId && (
-                        <NavLink to={`/users/${myId}`} className="navlink">{ t("nav.profile") }</NavLink>
+                    { myUsername && (
+                        <NavLink to={`/users/${myUsername}`} className="navlink">{ t("nav.profile") }</NavLink>
                     )}
-                    
+
                     { isAuth && (
                         <button className="navlink disabled:opacity-50 hover:cursor-pointer
                                                 border border-soft-text/30 px-3 py-2 rounded-md"

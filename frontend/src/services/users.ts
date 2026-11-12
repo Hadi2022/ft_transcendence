@@ -1,8 +1,8 @@
 import { throwApiError } from "./api"
 import type { UserProfile } from "./auth"
 
-export async function getUserById(id: string) : Promise<UserProfile> {
-    const res = await fetch(`/api/users/${encodeURIComponent(id)}`, {
+export async function getUserByUsername(username: string) : Promise<UserProfile> {
+    const res = await fetch(`/api/users/by-username/${encodeURIComponent(username)}`, {
         credentials: "include"
     })
 
