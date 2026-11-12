@@ -1,6 +1,7 @@
 
 import type { Socket, Server } from "socket.io";
 import type { User } from "../types/user.ts";
+import { userRoom, sessionRoom } from "../services/socketService.ts";
 
 const isAuthenticated = (socket: Socket) => {
 	if (!socket.data.user || !socket.data.session)
@@ -57,7 +58,15 @@ export const connectionHandler = (io: Server, socket: Socket) => {
 		return 
 	}
 
-	const	user = socket.data.user
+	const	user = socket.data.user	
+	const	session = socket.data.session
+	
+	const expiryTimer = setTimeout(() => {
+		socket.disconnect(true)
+	}, session.expiresAt - Date.now())
+
+	socket.join(userRoom(user.id))
+	socket.join(sessionRoom(session.id))
 
 	if (addUserConnection(user, socket) === 1)
 		socket.broadcast.emit('user:online', {
@@ -67,6 +76,7 @@ export const connectionHandler = (io: Server, socket: Socket) => {
 	informSocket(socket)
 	
 	socket.on('disconnect', () => {
+		clearTimeout(expiryTimer)
 		const connectionAmount = removeUserConnection(user, socket)
 		if (connectionAmount < 1)
 			socket.broadcast.emit('user:offline', {

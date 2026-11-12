@@ -8,7 +8,11 @@ export const loadSession = async (socket: Socket, next: Function) => {
 	const cookies = parse(socket.handshake.headers.cookie || "");
 	const token = cookies?.sessionID
 
-	if (typeof token === 'string') {
+	if (typeof token !== 'string')
+		return next()
+
+	try {
+
 		const session = await sessionService.findActiveSessionByToken(token)
 
 		if (session) {
@@ -19,10 +23,13 @@ export const loadSession = async (socket: Socket, next: Function) => {
 			if (user) {
 				socket.data.user = user
 			}
-		}
+		}		
+			
+	} catch (error) {
+		console.log(error)
+		return next(new Error('internal'))
 	}
-
-	next();
+	next()
 }
 
 export const requireAuth = (socket: Socket, next: Function) => {
