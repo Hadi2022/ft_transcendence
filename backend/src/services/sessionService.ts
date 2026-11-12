@@ -1,6 +1,8 @@
 import { hashToken, generateToken } from "../utils/hash.ts"
 import * as sessionRepository from '../repositories/sessionRepository.ts'
 import * as sessionConstants from '../constants/session.ts'
+import { getIo } from "../socket/socket.ts"
+import { disconnectSession, disconnectUser, userRoom } from "./socketService.ts"
 
 type CreateSessionMeta = {
 	ipOrigin?: string | null
@@ -39,11 +41,14 @@ export const openSession = async (userId: string, meta?: CreateSessionMeta) => {
 
 export const closeUserSessionById = async ({ userId, sessionId }: { userId: string; sessionId: string }) => {
 	const { count } = await sessionRepository.deleteByIdAndUserId({ sessionId, userId })
+	if (count !== 0)
+		disconnectSession(sessionId)
 	return count > 0
 }
 
 export const closeAllUserSessions = async (userId: string) => {
 	await sessionRepository.deleteByUserId(userId)
+	disconnectUser(userId)
 }
 
 export const purgeExpiredSessionsJob = async()=>{
