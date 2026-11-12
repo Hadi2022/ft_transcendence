@@ -58,5 +58,11 @@
         "logout": "Logout",
         "logoutError": "It was not possible to log out. Try again."
     },
+    "profile": {
+        "notFoundTitle": "This profile don't exist",
+        "notFoundText": "Maybe the link is broken or the user has changed his username",
+        "backHome": "Go home",
+        "loadError": "It was not possible to load the profile"
+    },
     "retry": "Retry"
 }

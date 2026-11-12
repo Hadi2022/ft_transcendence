@@ -58,5 +58,11 @@
         "logout": "Cerrar sesión",
         "logoutError": "No se ha podido cerrar sesión. Inténtalo de nuevo."
     },
+    "profile": {
+        "notFoundTitle": "Este perfil no existe",
+        "notFoundText": "Puede que el enlace esté roto o que el usuario haya cambiado su nombre",
+        "backHome": "Volver a inicio",
+        "loadError": "No se ha podido cargar el perfil"
+    },
     "retry": "Reintentar"
 }
