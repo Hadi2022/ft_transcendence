@@ -5,6 +5,7 @@ import LoginPage from "../pages/auth/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage";
 import MainLayout from "../layouts/MainLayout";
 import GuestRoute from "../components/GuestRoute";
+import ProfilePage from "../pages/profile/ProfilePage";
 
 export const router = createBrowserRouter([
     {
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
         element: <MainLayout />,
         children: [
             { index: true, element: <HomePage /> },
+            { path: "users/:id", element: <ProfilePage />}
         ]
     }
 ])
