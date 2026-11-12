@@ -42,7 +42,7 @@ export const openSession = async (userId: string, meta?: CreateSessionMeta) => {
 export const closeUserSessionById = async ({ userId, sessionId }: { userId: string; sessionId: string }) => {
 	const { count } = await sessionRepository.deleteByIdAndUserId({ sessionId, userId })
 	if (count !== 0)
-		disconnectSession(userId)
+		disconnectSession(sessionId)
 	return count > 0
 }
 
