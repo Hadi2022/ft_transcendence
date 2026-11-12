@@ -62,7 +62,9 @@
         "notFoundTitle": "This profile don't exist",
         "notFoundText": "Maybe the link is broken or the user has changed his username",
         "backHome": "Go home",
-        "loadError": "It was not possible to load the profile"
+        "loadError": "It was not possible to load the profile",
+        "avatarAlt": "{{username}}'s avatar",
+        "joined": "Joined {{date}}"
     },
     "retry": "Retry"
 }

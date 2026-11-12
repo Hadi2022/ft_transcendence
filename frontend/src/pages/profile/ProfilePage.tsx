@@ -5,6 +5,7 @@ import { ApiError } from "../../services/api"
 import type { UserProfile } from "../../services/auth"
 import ProfileSkeleton from "./components/ProfileSkeleton"
 import { useTranslation } from "react-i18next"
+import ProfileHeader from "./components/ProfileHeader"
 
 type ProfileResult =
     | { username: string, status: "ready", profile: UserProfile }
@@ -77,8 +78,6 @@ export default function ProfilePage() {
         )
 
     return (
-        <div>
-            { result.status } {result.profile.username }
-        </div>
+        <ProfileHeader profile={result.profile} />
     )
 }
