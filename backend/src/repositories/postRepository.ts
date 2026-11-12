@@ -61,3 +61,29 @@ export async function deletePost(
 		throw error;
 	}
 }
+
+export async function getPostById(
+	_idPost:string):Promise<PostDelete|null> {
+
+	try {
+		const post = await prisma.post.findUnique({
+			where: {id : _idPost},
+			select: {
+				id:true,
+				userId:true,
+				multimediaUrl:true,
+			}
+		})
+		return post
+	} catch (error) {
+		if (error instanceof Prisma.PrismaClientKnownRequestError) {
+				if (error.code === 'P2025'){
+					throw new RecordNotFoundError('Post not found');
+				}//foreing key constrain
+				if (error.code === 'P2003') {
+					throw new GenericConstraintError(error.message);
+				}
+		}
+		throw error;
+	}
+}
