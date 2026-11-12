@@ -1,6 +1,6 @@
 {
     "auth": {
-
+        "or": "or",
         "email": "Email",
         "emailPlaceholder": "your@email.com",
         "password": "Password",
@@ -32,7 +32,21 @@
             "sessionExists": "The session already exists",
             "invalidFields": "Invalid fields",
             "invalidCredentials": "Invalid credentials",
-            "unexpected": "Unexpected error, try again later"
+            "unexpected": "Unexpected error, try again later",
+            "sessionCheck": "We couldn't verify your session"
+        },
+        "googleButton": "Continue with Google",
+        "googleErrors": {
+            "GOOGLE_AUTHORIZATION_DENIED": "You have canceled the login with Google account",
+            "GOOGLE_AUTHENTICATION_FAILED": "It was not possible to verify your Google account",
+            "GOOGLE_PROVIDER_ERROR": "Google is not available right now, try later",
+            "INVALID_OAUTH_STATE": "Your Google session expired, try again",
+            "MISSING_AUTHORIZATION_CODE": "Google did not complete the sign in, try again",
+            "EMAIL_CONFLICT": "An account with this email already exists",
+            "CONFLICT": "You are already logged in",
+            "BAD_REQUEST": "We could not process your Google accoutn data",
+            "INTERNAL_SERVER_ERROR": "Server error, please try again later",
+            "default": "It was not possible to sign in with Google."
         }
     },
     "nav": {
@@ -40,7 +54,9 @@
         "search": "Search",
         "messages": "Messages",
         "profile": "Profile",
+        "loggingOut": "Logging out...",
         "logout": "Logout",
         "logoutError": "It was not possible to log out. Try again."
-    }
+    },
+    "retry": "Retry"
 }

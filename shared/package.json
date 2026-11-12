@@ -8,7 +8,7 @@
 	"./schemas/common": "./src/schemas/common.ts",
 	"./schemas/friend": "./src/schemas/friend.ts",
   	"./schemas/session": "./src/schemas/session.ts",
-
+	"./schemas/post": "./src/schemas/post.ts",
 	"./errors/error-details": "./src/error-codes/ErrorDetails.ts",
 	"./errors/error-codes": "./src/error-codes/ErrorCodes.ts"
 

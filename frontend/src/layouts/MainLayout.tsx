@@ -2,7 +2,8 @@ import { useTranslation } from "react-i18next";
 import { NavLink, Outlet, useNavigate } from "react-router";
 import LanguageSelector from "../components/LanguageSelector";
 import { getCurrentUser, logout } from "../services/auth";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { ApiError } from "../services/api";
 
 export default function MainLayout() {
     
@@ -14,24 +15,50 @@ export default function MainLayout() {
     const [isLoggingOut, setIsLoggingOut] = useState(false)
     const [logoutError, setLogoutError] = useState<string|null>(null)
 
-    useEffect(() => {
+    const lastRequest = useRef(0)
+
+    function checkSession() {
+        lastRequest.current += 1
+        const requestId = lastRequest.current
+
         getCurrentUser()
-            .then(() => setIsAuth(true))
-            .catch(() => setIsAuth(false))
+            .then(() => {
+                if (requestId !== lastRequest.current) return
+                setIsAuth(true)
+            })
+            .catch((err: unknown) => {
+                if (requestId !== lastRequest.current) return
+                if (err instanceof ApiError && err.status === 401)
+                    setIsAuth(false)
+            })
+    }
+
+    useEffect(() => {
+        checkSession()
+
+        window.addEventListener("focus", checkSession)
+        return () => window.removeEventListener("focus", checkSession)
     }, [])
 
     async function handleLogout() {
         if (isLoggingOut) return
         
+        lastRequest.current += 1
         setIsLoggingOut(true)
         setLogoutError(null)
         try {
             await logout()
             setIsAuth(false)
             navigate("/login", {replace: true})
-        } catch {
-            setLogoutError("nav.logoutError")
+        } catch (err: unknown) {
+            if (err instanceof ApiError && err.status === 401) {
+                setIsAuth(false)
+                navigate("/login", {replace: true})
+            } else {
+                setLogoutError("nav.logoutError")
+            }
         } finally {
+            lastRequest.current += 1
             setIsLoggingOut(false)
         }
     }
@@ -48,10 +75,11 @@ export default function MainLayout() {
                     <NavLink to="#" className="navlink">{ t("nav.messages") }</NavLink>
                     <NavLink to="#" className="navlink">{ t("nav.profile") }</NavLink>
                     { isAuth && (
-                        <button className="navlink disabled:opacity-50"
+                        <button className="navlink disabled:opacity-50 hover:cursor-pointer
+                                                border border-soft-text/30 px-3 py-2 rounded-md"
                                 onClick={handleLogout}
                                 disabled={isLoggingOut}>
-                            { t("nav.logout") }
+                            { isLoggingOut ? t("nav.loggingOut") : t("nav.logout")}
                         </button>
                     )}
                     { logoutError && (

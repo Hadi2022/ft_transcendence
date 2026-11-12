@@ -11,6 +11,7 @@ secrets
 dist/
 build/
 coverage/
+uploads/
 
 # Logs
 *.log
