@@ -34,8 +34,10 @@ export default function MainLayout() {
             })
             .catch((err: unknown) => {
                 if (requestId !== lastRequest.current) return
-                if (err instanceof ApiError && err.status === 401)
+                if (err instanceof ApiError && err.status === 401) {
                     setIsAuth(false)
+                    setMyUsername(null)
+                }
             })
     }
 
