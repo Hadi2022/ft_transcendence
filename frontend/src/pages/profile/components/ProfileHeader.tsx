@@ -51,12 +51,12 @@ export default function ProfileHeader({profile, relation} : ProfileHeaderProps) 
                 
                 {
                     relation === "own" && (
-                        <Link to="/settings/profile"
+                        <button type="button"
                                 className="rounded-md bg-soft-text/20 px-4 py-2
                                             text-sm font-medium hover:bg-soft-text/30
                                             transition-colors">
                             { t("profile.editProfile") }
-                        </Link>
+                        </button>
                     )
                 }
 
