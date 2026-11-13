@@ -59,9 +59,9 @@
         "logoutError": "It was not possible to logout. Try again."
     },
     "profile": {
-        "notFoundTitle": "This profile don't exist",
-        "notFoundText": "Maybe the link is broken or the user has changed his username",
-        "backHome": "Go home",
+        "notFoundTitle": "This profile doesn't exist",
+        "notFoundText": "Maybe the link is broken or the username may have changed",
+        "backHome": "Back to home",
         "loadError": "It was not possible to load the profile",
         "avatarAlt": "{{username}}'s avatar",
         "joined": "Joined {{date}}",
