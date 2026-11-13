@@ -5,6 +5,10 @@ import { getCurrentUser, logout } from "../services/auth";
 import { useEffect, useRef, useState } from "react";
 import { ApiError } from "../services/api";
 
+export type MainLayoutContext = {
+    myUsername: string | null
+}
+
 export default function MainLayout() {
     
     const { t } = useTranslation()
@@ -14,6 +18,7 @@ export default function MainLayout() {
     const [isAuth, setIsAuth] = useState(false)
     const [isLoggingOut, setIsLoggingOut] = useState(false)
     const [logoutError, setLogoutError] = useState<string|null>(null)
+    const [myUsername, setMyUsername] = useState<string|null>(null)
 
     const lastRequest = useRef(0)
 
@@ -22,14 +27,17 @@ export default function MainLayout() {
         const requestId = lastRequest.current
 
         getCurrentUser()
-            .then(() => {
+            .then((user) => {
                 if (requestId !== lastRequest.current) return
                 setIsAuth(true)
+                setMyUsername(user.username)
             })
             .catch((err: unknown) => {
                 if (requestId !== lastRequest.current) return
-                if (err instanceof ApiError && err.status === 401)
+                if (err instanceof ApiError && err.status === 401) {
                     setIsAuth(false)
+                    setMyUsername(null)
+                }
             })
     }
 
@@ -49,10 +57,12 @@ export default function MainLayout() {
         try {
             await logout()
             setIsAuth(false)
+            setMyUsername(null)
             navigate("/login", {replace: true})
         } catch (err: unknown) {
             if (err instanceof ApiError && err.status === 401) {
                 setIsAuth(false)
+                setMyUsername(null)
                 navigate("/login", {replace: true})
             } else {
                 setLogoutError("nav.logoutError")
@@ -73,7 +83,11 @@ export default function MainLayout() {
                 <nav className="flex flex-row gap-4 items-center">
                     <NavLink to="#" className="navlink">{ t("nav.feed") }</NavLink>
                     <NavLink to="#" className="navlink">{ t("nav.messages") }</NavLink>
-                    <NavLink to="#" className="navlink">{ t("nav.profile") }</NavLink>
+
+                    { myUsername && (
+                        <NavLink to={`/users/${myUsername}`} className="navlink">{ t("nav.profile") }</NavLink>
+                    )}
+
                     { isAuth && (
                         <button className="navlink disabled:opacity-50 hover:cursor-pointer
                                                 border border-soft-text/30 px-3 py-2 rounded-md"
@@ -93,7 +107,7 @@ export default function MainLayout() {
             <main className="mx-auto w-full
                             max-w-5xl flex-1
                             px-4 py-6">
-                <Outlet />
+                <Outlet context={{myUsername}}/>
             </main>
 
             <footer className="bg-surface py-10 px-5">
