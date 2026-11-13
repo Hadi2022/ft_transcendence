@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next"
 import type { UserProfile } from "../../../services/auth"
-import { Link } from "react-router"
 
 const DEFAULT_AVATAR = "/img/default-avatar.svg"
 
