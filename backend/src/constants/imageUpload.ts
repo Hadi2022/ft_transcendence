@@ -31,3 +31,6 @@ export const UPLOAD_DIRECTORIES = {
     avatars: 'avatars',
     posts: 'posts',
 } as const;
+
+// The maximum size that an image will be allowed to have during decoding (25MB)
+export const MAX_IMAGE_PIXELS = 25_000_000;
