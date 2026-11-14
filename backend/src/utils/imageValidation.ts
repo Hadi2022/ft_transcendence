@@ -25,39 +25,41 @@ export async function validateImage(
     field: string
 ): Promise<ValidatedImage> {
 
-    const image = sharp(buffer, {
-        failOn: 'warning',
-        limitInputPixels: MAX_IMAGE_PIXELS,
-    });
-
-	let metadata: Metadata;
+    let image: ReturnType<typeof sharp>
+    let metadata: Metadata
 
     try {
-        metadata = await image.metadata();
+        image = sharp(buffer, {
+            failOn: 'warning',
+            limitInputPixels: MAX_IMAGE_PIXELS,
+        })
+
+        metadata = await image.metadata()
+
     } catch {
-        throw new ImageInvalidContentError(field);
+        throw new ImageInvalidContentError(field)
     }
 
     if (!isAllowedFormat(metadata.format)) {
-        throw new ImageInvalidFormatError(field);
+        throw new ImageInvalidFormatError(field)
     }
 
     if (!metadata.width || !metadata.height) {
-        throw new ImageInvalidContentError(field);
+        throw new ImageInvalidContentError(field)
     }
 
     if (metadata.pages && metadata.pages > 1) {
-        throw new ImageInvalidContentError(field);
+        throw new ImageInvalidContentError(field)
     }
 
     try {
         await image.raw().toBuffer();
     } catch {
-        throw new ImageInvalidContentError(field);
+        throw new ImageInvalidContentError(field)
     }
 
     return {
         buffer,
         format: metadata.format,
-    };
+    }
 }
