@@ -12,7 +12,7 @@ export const UPLOAD_PUBLIC_PATH = '/uploads'
 // Maximum avatar size (2MB)
 export const AVATAR_MAX_SIZE = 2 * 1024 * 1024
 
-// Formats that will be accept after verifying the actual content
+// Formats accepted after verifying the actual image content
 export const ALLOWED_IMAGE_FORMATS = [
     'jpeg',
     'png',
@@ -32,5 +32,5 @@ export const UPLOAD_DIRECTORIES = {
     posts: 'posts',
 } as const
 
-// The maximum size that an image will be allowed to have during decoding (25MB)
+// Maximum number of pixels allowed during image decoding (25 megapixels)
 export const MAX_IMAGE_PIXELS = 25_000_000
