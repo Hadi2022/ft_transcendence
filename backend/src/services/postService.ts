@@ -2,6 +2,7 @@ import * as postRepository from '../repositories/postRepository.ts'
 import { UnauthorizedError } from "../errors/HttpErrors.ts";
 import { ErrorCodes } from '@transcendence/shared/errors/error-codes';
 import { RecordNotFoundError } from '../errors/RepositoryErrors.ts';
+import { deleteImage } from '../utils/imageStorage.ts';
 
 export const getPostById = async(postId:string) => {
 	return postRepository.getPostById(postId);
@@ -20,16 +21,8 @@ export const deletePost = async(postId:string, userId:string) => {
 			message: 'Only the author of the post can delete it.',
 		})
 	}
-	try {
-		const deletedPost = await postRepository.deletePost(postId)
-		try {
-
-		} catch (error) {
-
-		}
-		return deletePost
-	} catch (error) {
-		throw error
-	}
-
+	const deletedPost = await postRepository.deletePost(postId)
+	if (deletedPost.multimediaUrl)
+		await deleteImage(deletedPost.multimediaUrl,'posts')
+	return deletedPost
 }
