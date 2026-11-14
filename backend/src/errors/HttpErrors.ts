@@ -85,6 +85,32 @@ export class ConflictError extends HttpError {
 
 }
 
+// 413
+export class PayloadTooLargeError extends HttpError {
+
+    constructor({
+        message = 'Payload too large',
+        details = {},
+        code = ErrorCodes.PAYLOAD_TOO_LARGE
+    }: ErrorOptions = {}) {
+        super(message, details, 413, code)
+    }
+
+}
+
+// 415
+export class UnsupportedMediaTypeError extends HttpError {
+
+    constructor({
+        message = 'Unsupported media type',
+        details = {},
+        code = ErrorCodes.UNSUPPORTED_MEDIA_TYPE
+    }: ErrorOptions = {}) {
+        super(message, details, 415, code)
+    }
+
+}
+
 // 500
 export class InternalError extends HttpError {
 

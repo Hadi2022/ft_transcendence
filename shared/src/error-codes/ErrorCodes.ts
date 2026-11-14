@@ -19,6 +19,9 @@ export const ErrorCodes = {
 	GOOGLE_PROVIDER_ERROR: 'GOOGLE_PROVIDER_ERROR',
 
 	ALREADY_FRIENDS: 'ALREADY_FRIENDS',
+
+	PAYLOAD_TOO_LARGE: 'PAYLOAD_TOO_LARGE',
+	UNSUPPORTED_MEDIA_TYPE: 'UNSUPPORTED_MEDIA_TYPE',
 } as const
 
 export type ErrorCodes = (typeof ErrorCodes)[keyof typeof ErrorCodes]
