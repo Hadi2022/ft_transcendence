@@ -1,6 +1,7 @@
 import * as postRepository from '../repositories/postRepository.ts'
 import { UnauthorizedError } from "../errors/HttpErrors.ts";
 import { ErrorCodes } from '@transcendence/shared/errors/error-codes';
+import { RecordNotFoundError } from '../errors/RepositoryErrors.ts';
 
 export const getPostById = async(postId:string) => {
 	return postRepository.getPostById(postId);
@@ -9,16 +10,26 @@ export const getPostById = async(postId:string) => {
 export const deletePost = async(postId:string, userId:string) => {
 
 	const post = await getPostById(postId)
-	if (userId != post?.userId){
+	if (!post)
+	{
+		throw new RecordNotFoundError('Post not found');
+	}
+	if (userId != post.userId){
 		throw new UnauthorizedError({
 			code: ErrorCodes.VALIDATION_ERROR,
 			message: 'Only the author of the post can delete it.',
 		})
 	}
 	try {
-		const postDeleted = await postRepository.deletePost(postId)
-	} catch (error) {
+		const deletedPost = await postRepository.deletePost(postId)
+		try {
 
+		} catch (error) {
+
+		}
+		return deletePost
+	} catch (error) {
+		throw error
 	}
 
 }
