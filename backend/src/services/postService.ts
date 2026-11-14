@@ -13,7 +13,7 @@ export const deletePost = async(postId:string, userId:string) => {
 	const post = await getPostById(postId)
 	if (!post)
 	{
-		throw new RecordNotFoundError('Post not found');
+		throw new RecordNotFoundError();
 	}
 	if (userId != post.userId){
 		throw new UnauthorizedError({

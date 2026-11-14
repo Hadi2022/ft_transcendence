@@ -9,5 +9,11 @@ type AuthenticatedHandler = (
 ) => unknown;
 
 export const authed = (handler: AuthenticatedHandler): RequestHandler => {
-	return (req, res, next) => handler(req as AuthenticatedRequest, res, next);
+	return async (req, res, next) =>{
+		try {
+            await handler(req as AuthenticatedRequest, res, next);
+        } catch (error) {
+            next(error); // 👈 CRUCIAL: Esto le dice a Express "ocurrió este error, envíaselo al manejador global"
+        }
+	}
 }
