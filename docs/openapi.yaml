@@ -775,6 +775,74 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /users/by-username/{username}:
+    get:
+      summary: Get a user by username
+      description: Returns the public profile of a user by their unique username
+      operationId: getUserByUsername
+      security: []
+
+      parameters:
+        - name: username
+          in: path
+          required: true
+          description: Username of the user to retrieve
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 30
+            pattern: '^[a-zA-Z0-9_]+$'
+
+      responses:
+        '200':
+          description: User profile returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+              example:
+                data:
+                  id: 2c5e3619-cbed-4a02-a1e3-9807f0b2989c
+                  username: testuser1
+                  name: null
+                  biography: null
+                  avatarUrl: null
+                  isVerified: false
+                  createdAt: '2026-11-12T10:00:00.000Z'
+
+        '400':
+          description: Invalid username
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: Invalid username
+                  details:
+                    username: USERNAME_INVALID_CHARS
+
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: User not found
+                  details: {}
+
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /friend-requests:
     post:
       summary: Send or accept a friend request

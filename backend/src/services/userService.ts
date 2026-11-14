@@ -95,6 +95,11 @@ async function findUserProfileById(id: string): Promise<UserProfile | null> {
     return userRepository.findProfileById(id)
 }
 
+// Returns only public user fields by username
+async function findUserProfileByUsername(username: string): Promise<UserProfile | null> {
+    return userRepository.findProfileByUsername(username)
+}
+
 // Public profile + email
 async function findUserOwnProfileById(id: string): Promise<OwnProfile | null> {
     return userRepository.findOwnProfileById(id)
@@ -172,6 +177,7 @@ export {
     listUserProfiles,
     findUserById,
     findUserProfileById,
+	findUserProfileByUsername,
     findUserOwnProfileById,
 	updateUser,
     createGoogleUser,

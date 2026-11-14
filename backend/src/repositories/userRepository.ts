@@ -69,6 +69,19 @@ export async function findProfileById(
     return user;
 }
 
+export async function findProfileByUsername(
+    _username: string
+): Promise<UserProfile | null> {
+
+    const user = await prisma.user.findUnique(
+        {
+            where: { username: _username },
+            omit: userProfileOmit
+        }
+    )
+    return user;
+}
+
 export async function findOwnProfileById(
     _id: string
 ): Promise<OwnProfile | null> {
@@ -152,7 +165,6 @@ export async function findUserByGoogleId(
     )
     return user;
 }
-
 
 export async function createGoogleUser(
     _data: NewUserDataGoogle

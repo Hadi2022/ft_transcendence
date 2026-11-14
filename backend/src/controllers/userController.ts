@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express'
 
-import { registerUserSchema, updateUserSchema } from '@transcendence/shared/schemas/user'
+import { registerUserSchema, updateUserSchema, usernameSchema } from '@transcendence/shared/schemas/user'
 import { listUsersQuerySchema } from '../schemas/user.ts'
-import { createUser, listUserProfiles, findUserOwnProfileById, updateUser } from '../services/userService.ts'
+import { createUser, listUserProfiles, findUserOwnProfileById, updateUser, findUserProfileByUsername } from '../services/userService.ts'
 import { BadRequestError, ConflictError, NotFoundError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'
 import { UserEmailConflictError, UserNameConflictError, UserNotFoundError } from '../errors/userErrors.ts'
@@ -104,6 +104,34 @@ const getUserById = (req: Request, res: Response): void => {
     })
 }
 
+const getUserByUsername = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+
+    const parsed = usernameSchema.safeParse(req.params)
+
+    if (!parsed.success) {
+        throw new BadRequestError({
+            code: ErrorCodes.VALIDATION_ERROR,
+            message: 'Invalid username',
+            details: formatZodErrors(parsed.error)
+        })
+    }
+
+    const user = await findUserProfileByUsername(parsed.data.username)
+
+    if (!user) {
+        throw new NotFoundError({
+            message: 'User not found'
+        })
+    }
+
+    res.status(200).json({
+        data: user
+    })
+}
+
 const updateCurrentUser = async (
     req: AuthenticatedRequest,
     res: Response
@@ -140,4 +168,4 @@ const updateCurrentUser = async (
     })
 }
 
-export { registerUser, getUsers, getCurrentUser, getUserById, updateCurrentUser }
+export { registerUser, getUsers, getCurrentUser, getUserById, getUserByUsername, updateCurrentUser }
