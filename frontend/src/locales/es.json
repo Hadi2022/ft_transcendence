@@ -84,6 +84,18 @@
             "cancel": "Cancelar",
             "saved": "Cambios guardados",
             "saveError": "No se han podido guardar los cambios"
+        },
+        "avatar": {
+            "alt": "Tu avatar",
+            "change": "Cambiar foto",
+            "uploading": "Subiendo...",
+            "remove": "Quitar foto",
+            "removing": "Quitando...",
+            "hint": "JPG, PNG o WEBP. Máximo 2 MB",
+            "invalidType": "Formato no válido. Usa JPG, PNG o WEBP",
+            "tooLarge": "La imagen pesa más de 2 MB",
+            "uploadError": "No se ha podido subir la imagen",
+            "removeError": "No se ha podido quitar la imagen"
         }
     },
     "retry": "Reintentar"

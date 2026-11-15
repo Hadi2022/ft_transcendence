@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { getCurrentUser, type UserProfile } from "../../services/auth"
 import InputComponent from "../../components/InputComponent"
 import ProfileTextForm from "./components/ProfileTextForm"
+import AvatarSection from "./components/AvatarSection"
 
 type LoadState = 
     | { status: "loading" }
@@ -68,6 +69,8 @@ export default function EditProfilePage() {
         <div className="flex flex-col gap-6">
             <h3 className="text-lg font-semibold">{ t("settings.profile.title") }</h3>
 
+            <AvatarSection user={state.user} />
+
             <div className="flex flex-col gap-1">
                 <InputComponent label={ t("auth.username") }
                                 value={state.user.username}
@@ -75,6 +78,7 @@ export default function EditProfilePage() {
                                 className="text-zinc-500 cursor-default" />
                 <p className="text-xs text-soft-text">{ t("settings.profile.usernameHint") }</p>
             </div>
+
             <ProfileTextForm user={state.user} />
         </div>
     )

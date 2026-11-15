@@ -84,6 +84,18 @@
             "cancel": "Cancel",
             "saved": "Changes saved",
             "saveError": "Couldn't save your changes"
+        },
+        "avatar": {
+            "alt": "Your avatar",
+            "change": "Change photo",
+            "uploading": "Uploading...",
+            "remove": "Remove photo",
+            "removing": "Removing...",
+            "hint": "JPG, PNG or WEBP. Max 2 MB",
+            "invalidType": "Invalid format. Use JPG, PNG or WEBP",
+            "tooLarge": "The image is larger than 2 MB",
+            "uploadError": "Couldn't upload the image",
+            "removeError": "Couldn't remove the image"
         }
     },
     "retry": "Retry"
