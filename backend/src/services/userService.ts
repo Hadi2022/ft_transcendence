@@ -111,6 +111,8 @@ async function updateUser(
 ): Promise<OwnProfile> {
 
     try {
+        if (data.biography?.trim() == "")
+            data.biography = null
         return await userRepository.updateUser(id, data)
     }
     catch (error) {
