@@ -65,8 +65,7 @@ export async function deletePost(
 export async function getPostById(
 	_idPost:string):Promise<PostDelete|null> {
 
-	try {
-		const post = await prisma.post.findUnique({
+	return await prisma.post.findUnique({
 			where: {id : _idPost},
 			select: {
 				id:true,
@@ -74,16 +73,4 @@ export async function getPostById(
 				multimediaUrl:true,
 			}
 		})
-		return post
-	} catch (error) {
-		if (error instanceof Prisma.PrismaClientKnownRequestError) {
-				if (error.code === 'P2025'){
-					throw new RecordNotFoundError();
-				}//foreing key constrain
-				if (error.code === 'P2003') {
-					throw new GenericConstraintError(error.message);
-				}
-		}
-		throw error;
-	}
 }
