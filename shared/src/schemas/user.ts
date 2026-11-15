@@ -20,6 +20,14 @@ export const passwordField = z.string({ error: E.PASSWORD_REQUIRED })
         E.PASSWORD_NO_SPECIAL_CHAR
     )
 
+export const nameField = z.string(E.INVALID_VALUE)
+    .max(100, E.NAME_TOO_LONG)
+    .nullable().optional()
+
+export const biographyField = z.string(E.INVALID_VALUE)
+    .max(1000, E.BIOGRAPHY_TOO_LONG)
+    .nullable().optional()
+
 export const registerUserSchema = z.object({
     username: usernameField,
     email: emailField,
@@ -35,9 +43,8 @@ export const usernameSchema = z.object({
 })
 
 export const updateUserSchema = z.object({
-    name: z.string(E.INVALID_VALUE).max(100, E.NAME_TOO_LONG).nullable().optional(),
-    biography: z.string(E.INVALID_VALUE).nullable().optional(),
-    avatarUrl: z.url({ error: E.AVATAR_URL_INVALID }).max(500, E.AVATAR_URL_TOO_LONG).nullable().optional(),
+    name: nameField,
+    biography: biographyField,
 }, {
     error: E.INVALID
 }).refine(

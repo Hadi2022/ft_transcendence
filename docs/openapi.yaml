@@ -616,7 +616,10 @@ paths:
 
     patch:
       summary: Update the current user profile
-      description: Updates one or more editable profile fields of the logged in user
+      description: >-
+        Updates one or more editable profile fields (name, biography) of the
+        logged in user. At least one field is required and unknown fields are
+        rejected. A biography that is empty or only whitespace is stored as null.
       operationId: updateCurrentUser
       security:
         - sessionCookie: []
@@ -636,10 +639,10 @@ paths:
                   description: Display name
                 biography:
                   type: [string, 'null']
-                avatarUrl:
-                  type: [string, 'null']
-                  format: uri
-                  maxLength: 500
+                  maxLength: 1000
+                  description: >-
+                    Profile biography. An empty or whitespace-only string is
+                    stored as null
             example:
               name: CrazyIgor
               biography: Updated profile biography
@@ -668,7 +671,7 @@ paths:
                   createdAt: '2026-10-31T12:00:00.000Z'
 
         '400':
-          description: Invalid profile fields or empty request body
+          description: Invalid profile fields, unknown fields or empty request body
           content:
             application/json:
               schema:
@@ -682,14 +685,30 @@ paths:
                       message: Input contains invalid fields
                       details:
                         _root: NO_FIELDS_PROVIDED
-                invalidField:
-                  summary: Invalid field value
+                nameTooLong:
+                  summary: Name longer than 100 characters
                   value:
                     error:
                       code: VALIDATION_ERROR
                       message: Input contains invalid fields
                       details:
-                        avatarUrl: AVATAR_URL_INVALID
+                        name: NAME_TOO_LONG
+                biographyTooLong:
+                  summary: Biography longer than 1000 characters
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Input contains invalid fields
+                      details:
+                        biography: BIOGRAPHY_TOO_LONG
+                invalidType:
+                  summary: Field is not a string or null
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Input contains invalid fields
+                      details:
+                        name: INVALID_VALUE
                 invalidJson:
                   $ref: '#/components/examples/InvalidJson'
 
@@ -1252,6 +1271,7 @@ components:
           description: Display name
         biography:
           type: [string, 'null']
+          maxLength: 1000
         avatarUrl:
           type: [string, 'null']
           maxLength: 500
@@ -1423,8 +1443,7 @@ components:
         - PASSWORD_TOO_LONG
         - PASSWORD_NO_SPECIAL_CHAR
         - NAME_TOO_LONG
-        - AVATAR_URL_INVALID
-        - AVATAR_URL_TOO_LONG
+        - BIOGRAPHY_TOO_LONG
         - NO_FIELDS_PROVIDED
         - INVALID_UUID
         - INVALID_ORDER

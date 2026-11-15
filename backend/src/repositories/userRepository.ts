@@ -136,12 +136,11 @@ export async function updateUser(
             data: {
                 ...(_data.name !== undefined && { name: _data.name }),
                 ...(_data.biography !== undefined && { biography: _data.biography }),
-                ...(_data.avatarUrl !== undefined && { avatarUrl: _data.avatarUrl })
             },
             omit: ownProfileOmit
         })
     }
-    catch (error: unknown) {
+    catch (error: any) {
         if (
             error instanceof Prisma.PrismaClientKnownRequestError &&
             error.code === 'P2025'
