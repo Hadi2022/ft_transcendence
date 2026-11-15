@@ -12,3 +12,23 @@ export async function getUserByUsername(username: string) : Promise<UserProfile>
 
     return (body.data)
 }
+
+export type UpdateProfileData = {
+    name: string | null
+    biography: string | null
+}
+
+export async function updateCurrentUser(data: UpdateProfileData): Promise<UserProfile> {
+    const res = await fetch("/api/users/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(data)
+    })
+
+    if (!res.ok) await throwApiError(res)
+
+    const body = await res.json()
+
+    return (body.data)
+}

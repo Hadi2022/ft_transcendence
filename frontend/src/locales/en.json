@@ -78,7 +78,12 @@
             "biography": "Biography",
             "title": "Edit profile",
             "usernameHint": "Your username can't be changed",
-            "loadError": "Couldn't load your data"
+            "loadError": "Couldn't load your data",
+            "save": "Save changes",
+            "saving": "Saving...",
+            "cancel": "Cancel",
+            "saved": "Changes saved",
+            "saveError": "Couldn't save your changes"
         }
     },
     "retry": "Retry"
