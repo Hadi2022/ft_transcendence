@@ -1201,11 +1201,17 @@ paths:
       responses:
         '204':
           description: Post successfully deleted.
+        '400':
+          description: Invalid request (e.g., manipulated image path or invalid filename).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
           description: Forbidden
-          $ref: '#/components/responses/Forbidden
+          $ref: '#/components/responses/Forbidden'
         '404':
           description: Post not found
           content:
@@ -1217,6 +1223,9 @@ paths:
                   code: NOT_FOUND
                   message: Post not found
                   details: {}
+        '500':
+          description: Internal server error (unexpected disk failure, file or database rollback).
+          $ref: '#/components/schemas/ErrorResponse'
 
 components:
   securitySchemes:
