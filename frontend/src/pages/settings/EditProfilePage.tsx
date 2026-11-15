@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { getCurrentUser, type UserProfile } from "../../services/auth"
 import InputComponent from "../../components/InputComponent"
+import ProfileTextForm from "./components/ProfileTextForm"
 
 type LoadState = 
     | { status: "loading" }
@@ -74,6 +75,7 @@ export default function EditProfilePage() {
                                 className="text-zinc-500 cursor-default" />
                 <p className="text-xs text-soft-text">{ t("settings.profile.usernameHint") }</p>
             </div>
+            <ProfileTextForm user={state.user} />
         </div>
     )
 }

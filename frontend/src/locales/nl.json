@@ -74,6 +74,8 @@
             "profile": "Profile"
         },
         "profile": {
+            "name": "Name",
+            "biography": "Biography",
             "title": "Edit profile",
             "usernameHint": "Your username can't be changed",
             "loadError": "Couldn't load your data"
