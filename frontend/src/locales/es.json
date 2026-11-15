@@ -68,5 +68,11 @@
         "editProfile": "Editar perfil",
         "follow": "Seguir"
     },
+    "settings": {
+        "title": "Ajustes",
+        "nav": {
+            "profile": "Perfil"
+        }
+    },
     "retry": "Reintentar"
 }
