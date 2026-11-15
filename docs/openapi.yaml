@@ -54,7 +54,7 @@ paths:
         Sets a temporary HttpOnly cookie containing the OAuth state
         used to validate the callback. Does not require a local session.
         Requests the openid, email and profile scopes and always asks the
-        user to choose a Google account. If authorization cannot be 
+        user to choose a Google account. If authorization cannot be
         started, redirects the browser to /login?error=CODE.
       operationId: authorizeGoogle
       security: []
@@ -495,7 +495,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
     get:
-      summary: Retrieve a list of users 
+      summary: Retrieve a list of users
       description: >-
         Returns a list of users, by default sorted by creation time in
         descending order. Ties are broken by user ID. At most 100 users are
@@ -524,7 +524,7 @@ paths:
 
       responses:
         '200':
-          description: Sucessfully returned list of users 
+          description: Sucessfully returned list of users
           content:
             application/json:
               schema:
@@ -534,9 +534,9 @@ paths:
                 properties:
                   data:
                     type: object
-                    required: 
+                    required:
                       - users
-                    properties: 
+                    properties:
                       users:
                         type: array
                         items:
@@ -1184,6 +1184,39 @@ paths:
 
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /posts/{id}:
+    delete:
+      summary: Delete a post.
+      description: Safely delete a post and its associated image.
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Publication UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Post successfully deleted.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden
+          $ref: '#/components/responses/Forbidden
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Post not found
+                  details: {}
 
 components:
   securitySchemes:
@@ -1203,6 +1236,17 @@ components:
             error:
               code: UNAUTHORIZED
               message: You are not authorized to access this resource
+              details: {}
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: FORBIDDEN
+              message: Only the author of the post can delete it
               details: {}
 
     InternalServerError:
@@ -1337,7 +1381,21 @@ components:
         current:
           type: boolean
           description: Whether this is the current session
-
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        multimediaUrl:
+          type: string
+          nullable: false
+        caption:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
     ErrorResponse:
       type: object
       required:
