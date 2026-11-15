@@ -12,3 +12,11 @@ export class ForbiddenAccessPostError extends Error {
     }
 
 }
+
+export class InternalPostError extends Error {
+
+    constructor(message = 'Internal server error') {
+        super(message)
+    }
+
+}
