@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-// Physical directory where the backend will store the images. 
+// Physical directory where the backend will store the images.
 // This matches the volume defined in docker-compose.yml
 export const UPLOAD_ROOT = path.resolve(
     process.env.UPLOAD_ROOT ?? '/app/uploads'

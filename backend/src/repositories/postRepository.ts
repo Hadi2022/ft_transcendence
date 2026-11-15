@@ -30,7 +30,7 @@ export async function createPost(
 			if (error.code === 'P2003')
 				throw new UserNotFoundError('User not found');
 			else if (error.code === 'P2025')
-				throw new RecordNotFoundError(error.message);
+				throw new RecordNotFoundError();
 		}
 		throw error;
 	}
@@ -52,7 +52,7 @@ export async function deletePost(
 		} catch (error) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				if (error.code === 'P2025'){
-					throw new RecordNotFoundError('Post not found');
+					throw new RecordNotFoundError();
 				}//foreing key constrain
 				if (error.code === 'P2003') {
 					throw new GenericConstraintError(error.message);
@@ -78,7 +78,7 @@ export async function getPostById(
 	} catch (error) {
 		if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				if (error.code === 'P2025'){
-					throw new RecordNotFoundError('Post not found');
+					throw new RecordNotFoundError();
 				}//foreing key constrain
 				if (error.code === 'P2003') {
 					throw new GenericConstraintError(error.message);

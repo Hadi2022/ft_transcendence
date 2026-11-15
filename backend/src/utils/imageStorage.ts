@@ -106,7 +106,7 @@ export async function deleteImage(
 
     try {
         await unlink(filePath);
-
+        console.log(filePath);
     } catch (error) {
 
         if (
