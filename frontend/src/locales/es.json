@@ -75,7 +75,7 @@
         },
         "profile": {
             "name": "Nombre",
-            "biography": "Biografia",
+            "biography": "Biografía",
             "title": "Editar perfil",
             "usernameHint": "El nombre de usuario no se puede cambiar",
             "loadError": "No se han podido cargar tus datos",
