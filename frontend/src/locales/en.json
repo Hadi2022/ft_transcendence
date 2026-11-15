@@ -72,6 +72,11 @@
         "title": "Settings",
         "nav": {
             "profile": "Profile"
+        },
+        "profile": {
+            "title": "Edit profile",
+            "usernameHint": "Your username can't be changed",
+            "loadError": "Couldn't load your data"
         }
     },
     "retry": "Retry"
