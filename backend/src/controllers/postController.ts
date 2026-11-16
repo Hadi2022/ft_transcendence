@@ -5,7 +5,11 @@ import { BadRequestError, ConflictError, ForbiddenError, NotFoundError} from "..
 import { ErrorCodes } from "@transcendence/shared/errors/error-codes";
 import { formatZodErrors } from "../utils/zod.ts";
 import * as postService from '../services/postService.ts'
+<<<<<<< HEAD
 import { ForbiddenAccessPostError, InternalPostError, PostNotFoundError } from "../errors/postErrors.ts";
+=======
+import { ConflictPostError, ForbiddenAccessPostError, InternalPostError, PostNotFoundError } from "../errors/postErrors.ts";
+>>>>>>> c9a7472 (fix:conflictError, openapi)
 
 const deletePost = async (
 	req:AuthenticatedRequest,
@@ -27,7 +31,11 @@ const deletePost = async (
 			throw new ForbiddenError({message:error.message})
 		else if (error instanceof PostNotFoundError)
 			throw new NotFoundError({message:error.message})
+<<<<<<< HEAD
 		else if (error instanceof InternalPostError)
+=======
+		else if (error instanceof ConflictPostError)
+>>>>>>> c9a7472 (fix:conflictError, openapi)
 			throw new ConflictError({
 				message:error.message,
 				code:ErrorCodes.CONFLICT})

@@ -1223,9 +1223,23 @@ paths:
                   code: NOT_FOUND
                   message: Post not found
                   details: {}
+        '409':
+          description: Conflict. A deletion operation is already underway for this same post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 409
+                message: "A deletion for this post is already in progress."
+                errors: null
         '500':
           description: Internal server error (unexpected disk failure, file or database rollback).
+<<<<<<< HEAD
           $ref: '#/components/schemas/InternalServerError'
+=======
+          $ref: '#/components/responses/InternalServerError'
+>>>>>>> c9a7472 (fix:conflictError, openapi)
 
 components:
   securitySchemes:
