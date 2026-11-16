@@ -1235,11 +1235,7 @@ paths:
                 errors: null
         '500':
           description: Internal server error (unexpected disk failure, file or database rollback).
-<<<<<<< HEAD
-          $ref: '#/components/schemas/InternalServerError'
-=======
           $ref: '#/components/responses/InternalServerError'
->>>>>>> c9a7472 (fix:conflictError, openapi)
 
 components:
   securitySchemes:
