@@ -36,4 +36,9 @@ const deletePost = async (
 
 }
 
-export {deletePost}
+const uploadPost = (req: AuthenticatedRequest, res: Response) =>{
+
+	return res.status(201).send();
+}
+
+export {deletePost,uploadPost}
