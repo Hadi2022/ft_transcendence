@@ -21,8 +21,8 @@ services:
       backend:
         condition: service_healthy
     volumes:
-      - ./uploads:/usr/share/nginx/html/uploads/posts:ro
-      - ./uploads:/usr/share/nginx/html/uploads/avatars:ro
+      - ./uploads/posts:/usr/share/nginx/html/uploads/posts:ro
+      - ./uploads/avatars:/usr/share/nginx/html/uploads/avatars:ro
 
   backend:
     build:
