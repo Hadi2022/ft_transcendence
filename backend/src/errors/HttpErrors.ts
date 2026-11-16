@@ -71,6 +71,19 @@ export class NotFoundError extends HttpError {
 
 }
 
+export class ForbiddenError extends HttpError {
+
+	constructor({
+			message = 'Permission denied',
+			details = {},
+			code = ErrorCodes.FORBIDDEN
+		}: ErrorOptions = {}
+	) {
+		super(message, details, 403, code)
+	}
+
+}
+
 // 409
 export class ConflictError extends HttpError {
 
