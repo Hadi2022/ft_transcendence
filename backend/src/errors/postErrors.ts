@@ -13,10 +13,27 @@ export class ForbiddenAccessPostError extends Error {
 
 }
 
+interface InternalPostErrorOptions{
+    message?: string;
+    details?: string;
+    filePath?: string;
+}
+
 export class InternalPostError extends Error {
 
-    constructor({message = 'Internal server error',details={}}) {
-        super(message,details)
+    public readonly details?: string;
+    public readonly filePath?: string;
+
+    constructor({
+        message = 'Internal server error',
+        details= '',
+        filePath= '',
+    }:InternalPostErrorOptions={}) {
+        super(message);
+        this.name='InternalPostError';
+        this.details = details;
+        this.filePath=filePath;
+
     }
 
 }

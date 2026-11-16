@@ -1,11 +1,11 @@
 import { idParamSchema } from "@transcendence/shared/schemas/common";
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "../types/express/Request.js";
-import { BadRequestError, ForbiddenError, NotFoundError} from "../errors/HttpErrors.ts";
+import { BadRequestError, ConflictError, ForbiddenError, NotFoundError} from "../errors/HttpErrors.ts";
 import { ErrorCodes } from "@transcendence/shared/errors/error-codes";
 import { formatZodErrors } from "../utils/zod.ts";
 import * as postService from '../services/postService.ts'
-import { ForbiddenAccessPostError, PostNotFoundError } from "../errors/postErrors.ts";
+import { ForbiddenAccessPostError, InternalPostError, PostNotFoundError } from "../errors/postErrors.ts";
 
 const deletePost = async (
 	req:AuthenticatedRequest,
@@ -27,6 +27,10 @@ const deletePost = async (
 			throw new ForbiddenError({message:error.message})
 		else if (error instanceof PostNotFoundError)
 			throw new NotFoundError({message:error.message})
+		else if (error instanceof InternalPostError)
+			throw new ConflictError({
+				message:error.message,
+				code:ErrorCodes.CONFLICT})
 		throw error;
 	}
 

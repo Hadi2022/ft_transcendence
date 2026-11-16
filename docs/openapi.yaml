@@ -1225,7 +1225,7 @@ paths:
                   details: {}
         '500':
           description: Internal server error (unexpected disk failure, file or database rollback).
-          $ref: '#/components/schemas/ErrorResponse'
+          $ref: '#/components/schemas/InternalServerError'
 
 components:
   securitySchemes:

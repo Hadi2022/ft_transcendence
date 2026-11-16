@@ -95,7 +95,8 @@ export const deletePost = async (postId: string, userId: string) => {
 				}
 
 				throw new InternalPostError({ message: 'Failed to delete image',
-					details: `The following file must be deleted manually: ${stagedFilePath}`})
+					details: 'The image must be deleted manually.',
+					filePath:stagedFilePath});
 			}
 
 			return deletedPost
