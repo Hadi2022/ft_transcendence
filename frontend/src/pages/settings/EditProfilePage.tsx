@@ -15,6 +15,7 @@ export default function EditProfilePage() {
     const { t } = useTranslation()
 
     const [state, setState] = useState<LoadState>({status: "loading"})
+    const [isPending, setIsPending] = useState(false)
     const lastRequest = useRef(0)
 
     function loadUser() {
@@ -78,7 +79,9 @@ export default function EditProfilePage() {
             <h3 className="text-lg font-semibold">{ t("settings.profile.title") }</h3>
 
             <AvatarSection avatarUrl={state.user.avatarUrl}
-                            onAvatarChange={(avatarUrl) => updateUser({avatarUrl})} />
+                            onAvatarChange={(avatarUrl) => updateUser({avatarUrl})}
+                            disabled={isPending}
+                            onPendingChange={setIsPending} />
 
             <div className="flex flex-col gap-1">
                 <InputComponent label={ t("auth.username") }
@@ -89,7 +92,9 @@ export default function EditProfilePage() {
             </div>
 
             <ProfileTextForm user={state.user}
-                                onSaved={(updated) => updateUser(updated)} />
+                                onSaved={(updated) => updateUser(updated)}
+                                disabled={isPending}
+                                onPendingChange={setIsPending} />
         </div>
     )
 }

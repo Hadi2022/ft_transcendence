@@ -9,11 +9,13 @@ const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"]
 type AvatarSectionProps = {
     avatarUrl: string | null
     onAvatarChange: (url: string | null) => void
+    disabled: boolean
+    onPendingChange: (pending: boolean) => void
 }
 
 type AvatarStatus = "idle" | "uploading" | "removing"
 
-export default function AvatarSection({ avatarUrl, onAvatarChange } : AvatarSectionProps) {
+export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onPendingChange } : AvatarSectionProps) {
 
     const { t } = useTranslation()
 
@@ -22,7 +24,7 @@ export default function AvatarSection({ avatarUrl, onAvatarChange } : AvatarSect
 
     const inputRef = useRef<HTMLInputElement>(null)
 
-    const isBusy = status !== "idle"
+    const isBusy = status !== "idle" || disabled
 
     useEffect(() => {
         return () => {
@@ -47,6 +49,7 @@ export default function AvatarSection({ avatarUrl, onAvatarChange } : AvatarSect
         
         setError(null)
         setStatus("uploading")
+        onPendingChange(true)
         try {
             const url = await uploadAvatar(file)
             onAvatarChange(url)
@@ -54,12 +57,14 @@ export default function AvatarSection({ avatarUrl, onAvatarChange } : AvatarSect
             setError("settings.avatar.uploadError")
         } finally {
             setStatus("idle")
+            onPendingChange(false)
         }
     }
 
     async function handleRemove() {
         setError(null)
         setStatus("removing")
+        onPendingChange(true)
         try {
             await removeAvatar()
             onAvatarChange(null)
@@ -67,6 +72,7 @@ export default function AvatarSection({ avatarUrl, onAvatarChange } : AvatarSect
             setError("settings.avatar.removeError")
         } finally {
             setStatus("idle")
+            onPendingChange(false)
         }
     }
 

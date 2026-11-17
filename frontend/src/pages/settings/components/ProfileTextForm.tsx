@@ -10,11 +10,13 @@ const BIO_MAX_LENGTH = 1000
 type ProfileTextFormProps = {
     user: UserProfile
     onSaved: (user: UserProfile) => void
+    disabled: boolean
+    onPendingChange: (pending: boolean) => void
 }
 
 type SaveStatus = "idle" | "saving" | "saved" | "error"
 
-export default function ProfileTextForm({user, onSaved}: ProfileTextFormProps) {
+export default function ProfileTextForm({user, onSaved, disabled, onPendingChange}: ProfileTextFormProps) {
 
     const { t } = useTranslation()
 
@@ -34,9 +36,10 @@ export default function ProfileTextForm({user, onSaved}: ProfileTextFormProps) {
 
     async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
-        if (!isDirty || isSaving) return
+        if (!isDirty || isSaving || disabled) return
 
         setSaveStatus("saving")
+        onPendingChange(true)
         try {
             const updated = await updateCurrentUser({
                 name: name.trim() || null,
@@ -49,6 +52,8 @@ export default function ProfileTextForm({user, onSaved}: ProfileTextFormProps) {
             setSaveStatus("saved")
         } catch {
             setSaveStatus("error")
+        } finally {
+            onPendingChange(false)
         }
     }
 
@@ -98,7 +103,7 @@ export default function ProfileTextForm({user, onSaved}: ProfileTextFormProps) {
                         { t("settings.profile.cancel") }
                     </button>
 
-                    <button type="submit" disabled={!isDirty}
+                    <button type="submit" disabled={!isDirty || disabled}
                             className="rounded-md bg-cyan-400 px-4 py-2 text-sm font-medium text-white
                                         hover:bg-cyan-300 transition-colors cursor-pointer
                                         disabled:opacity-50 disabled:cursor-not-allowed
