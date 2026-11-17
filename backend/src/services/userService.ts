@@ -6,6 +6,8 @@ import { UniqueConstraintError, RecordNotFoundError } from '../errors/Repository
 import type { Order } from '../types/query.ts'
 import { ConflictError, BadRequestError, UnauthorizedError } from '../errors/HttpErrors.ts'
 import { ErrorDetails } from '@transcendence/shared/errors/error-details'
+import type { ValidatedImage } from '../types/image.ts'
+import { deleteImage, saveImage } from '../utils/imageStorage.ts'
 
 type CreateUserInput = {
     username: string
@@ -174,6 +176,16 @@ async function createGoogleUser(profile: ProfileGoogle) {
 	}
 }
 
+const saveAvatar = async (image: ValidatedImage, userId: string) => {
+
+    const path = await saveImage(image, 'avatars')
+
+    await userRepository.updateUserAvatarUrl(userId, path)
+
+    // deleteImage(oldImagePath, 'avatars')
+
+}
+
 export {
     prepareUser,
     createUser,
@@ -185,4 +197,5 @@ export {
     findUserOwnProfileById,
 	updateUser,
     createGoogleUser,
+    saveAvatar,
 }

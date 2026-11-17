@@ -240,3 +240,15 @@ export async function createGoogleUser(
         'A unique username could not be generated after several attempts.'
     );
 }
+
+export async function updateUserAvatarUrl(id: string, avatarUrl: string) {
+
+    return prisma.user.updateMany({
+        where: {
+            id,
+        },
+        data: {
+            avatarUrl
+        }
+    })
+}
