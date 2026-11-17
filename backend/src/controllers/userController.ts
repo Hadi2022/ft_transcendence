@@ -2,7 +2,7 @@ import type { Request, Response } from 'express'
 
 import { registerUserSchema, updateUserSchema, usernameSchema } from '@transcendence/shared/schemas/user'
 import { listUsersQuerySchema } from '../schemas/user.ts'
-import { createUser, listUserProfiles, findUserOwnProfileById, updateUser, findUserProfileByUsername, saveAvatar } from '../services/userService.ts'
+import { createUser, listUserProfiles, findUserOwnProfileById, updateUser, findUserProfileByUsername, saveAvatar, deleteAvatar } from '../services/userService.ts'
 import { BadRequestError, ConflictError, NotFoundError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'
 import { UserEmailConflictError, UserNameConflictError, UserNotFoundError } from '../errors/userErrors.ts'
@@ -171,17 +171,35 @@ const updateCurrentUser = async (
 
 const setAvatar = async (req: AuthenticatedRequest, res: Response) => {
 
-    const image = await validateImage(req.file!.buffer, 'avatar')
-    
+    const   image = await validateImage(req.file!.buffer, 'avatar')
+    let     newAvatarUrl: string
+
     try {
-        saveAvatar(image, req.user)
+        newAvatarUrl = await saveAvatar(image, req.user)
     } catch (error: any) {
         throw error
     }
     
     res.status(200).json({
-        avatarUrl: 'yeah it exists now'
+        avatarUrl: newAvatarUrl
     })
 }
 
-export { registerUser, getUsers, getCurrentUser, getUserById, getUserByUsername, updateCurrentUser, setAvatar }
+const clearAvatar = async (req: AuthenticatedRequest, res: Response) => {
+
+    deleteAvatar(req.user)
+
+    res.status(204).send()
+
+}
+
+export { 
+    registerUser,
+    getUsers,
+    getCurrentUser,
+    getUserById,
+    getUserByUsername,
+    updateCurrentUser,
+    setAvatar,
+    clearAvatar,
+}

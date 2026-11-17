@@ -190,19 +190,40 @@ const saveAvatar = async (image: ValidatedImage, user: User) => {
 			throw new Error('CONCURRENCY')
 	} catch (error: any) {
 
-		deleteImage(path, directory)
+		try {
+			await deleteImage(path, directory)
+		} catch (error) {
+			console.log(error)	
+		}
 
 		throw error
 	}
 
-	if (oldImagePath)
-		deleteImage(oldImagePath, directory)
+	try {
+		if (oldImagePath)
+			await deleteImage(oldImagePath, directory)
+	} catch (error) {
+		console.log(error)	
+	}
+
+	return path
 
 }
 
-const clearAvatar = (user: User) => {
+const deleteAvatar = async (user: User) => {
 
-	
+	const oldAvatarUrl = user.avatarUrl!
+
+	const count = (await userRepository.updateUserAvatarUrl(user.id, oldAvatarUrl, null)).count
+
+	if (count === 0)
+		throw new Error('CONCURRENCY')
+
+	try {
+		await deleteImage(oldAvatarUrl, 'avatars')	
+	} catch (error) {
+		console.log(error)
+	}
 
 }
 
@@ -218,4 +239,5 @@ export {
 	updateUser,
     createGoogleUser,
     saveAvatar,
+	deleteAvatar,
 }
