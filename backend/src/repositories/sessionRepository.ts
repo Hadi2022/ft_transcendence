@@ -14,7 +14,7 @@ export const create = async (data: CreateSessionData) => {
 	return prisma.session.create({ data })
 }
 
-export const findByUserId = async (userId: string) => {
+export const findActiveByUserId = async (userId: string) => {
 	return prisma.session.findMany({
 		where: { 
 			userId,

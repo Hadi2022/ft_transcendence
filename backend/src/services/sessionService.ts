@@ -20,7 +20,7 @@ export const findActiveSessionByToken = async (token: string) => {
 }
 
 export const findUserSessions = async (userId: string) => {
-	return sessionRepository.findByUserId(userId)
+	return sessionRepository.findActiveByUserId(userId)
 }
 
 export const openSession = async (userId: string, meta?: CreateSessionMeta) => {
