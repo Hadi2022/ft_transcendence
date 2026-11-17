@@ -241,11 +241,12 @@ export async function createGoogleUser(
     );
 }
 
-export async function updateUserAvatarUrl(id: string, avatarUrl: string) {
+export async function updateUserAvatarUrl(id: string, oldAvatarUrl: string | null, avatarUrl: string) {
 
     return prisma.user.updateMany({
         where: {
             id,
+            avatarUrl: oldAvatarUrl,
         },
         data: {
             avatarUrl

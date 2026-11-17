@@ -176,13 +176,33 @@ async function createGoogleUser(profile: ProfileGoogle) {
 	}
 }
 
-const saveAvatar = async (image: ValidatedImage, userId: string) => {
+const saveAvatar = async (image: ValidatedImage, user: User) => {
 
-    const path = await saveImage(image, 'avatars')
+	const directory = 'avatars'
 
-    await userRepository.updateUserAvatarUrl(userId, path)
+	const path = await saveImage(image, directory)
 
-    // deleteImage(oldImagePath, 'avatars')
+	const oldImagePath = user.avatarUrl
+
+	try {
+		const count = (await userRepository.updateUserAvatarUrl(user.id, oldImagePath, path)).count
+		if (count === 0)
+			throw new Error('CONCURRENCY')
+	} catch (error: any) {
+
+		deleteImage(path, directory)
+
+		throw error
+	}
+
+	if (oldImagePath)
+		deleteImage(oldImagePath, directory)
+
+}
+
+const clearAvatar = (user: User) => {
+
+	
 
 }
 

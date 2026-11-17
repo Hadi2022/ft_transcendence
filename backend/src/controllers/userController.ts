@@ -174,7 +174,7 @@ const setAvatar = async (req: AuthenticatedRequest, res: Response) => {
     const image = await validateImage(req.file!.buffer, 'avatar')
     
     try {
-        saveAvatar(image, req.user.id)
+        saveAvatar(image, req.user)
     } catch (error: any) {
         throw error
     }
