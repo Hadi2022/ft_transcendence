@@ -14,8 +14,8 @@ export async function getUserByUsername(username: string) : Promise<UserProfile>
 }
 
 export type UpdateProfileData = {
-    name: string | null
-    biography: string | null
+    name?: string | null
+    biography?: string | null
 }
 
 export async function updateCurrentUser(data: UpdateProfileData): Promise<UserProfile> {
