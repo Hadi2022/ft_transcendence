@@ -249,8 +249,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
     get:
-      summary: Get user sessions
-      description: Returns all sessions of the logged in user
+      summary: Get active user sessions
+      description: Returns all non-expired sessions of the logged in user
       operationId: getSessions
       security:
         - sessionCookie: []

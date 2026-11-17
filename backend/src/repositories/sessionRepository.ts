@@ -16,7 +16,12 @@ export const create = async (data: CreateSessionData) => {
 
 export const findByUserId = async (userId: string) => {
 	return prisma.session.findMany({
-		where: { userId },
+		where: { 
+			userId,
+			expiresAt: {
+				gt: new Date(),
+			},
+		},
 		omit: { tokenHash: true },
 	})
 }
@@ -39,7 +44,7 @@ export const purgeExpired = async () => {
 			{
 				where: {
 					expiresAt: {
-						lt: new Date()
+						lte: new Date()
 					}
 				}
 			}

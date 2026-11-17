@@ -13,7 +13,7 @@ export const findActiveSessionByToken = async (token: string) => {
 
 	const session = await sessionRepository.findByTokenHash(hashToken(token))
 
-	if (!session || session.expiresAt < new Date())
+	if (!session || session.expiresAt <= new Date())
 		return null
 
 	return session
