@@ -62,11 +62,6 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
             return
         }
 
-        if (!(await canDecodeImage(file))) {
-            setError("settings.avatar.invalidImage")
-            return
-        }
-
         const controller = new AbortController()
         abortRef.current = controller
         
@@ -74,6 +69,14 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
         setStatus("uploading")
         onPendingChange(true)
         try {
+            const isValid = await canDecodeImage(file)
+
+            if (controller.signal.aborted) return
+            if (!isValid) {
+                setError("settings.avatar.invalidImage")
+                return
+            }
+
             const url = await uploadAvatar(file, controller.signal)
             onAvatarChange(url)
         } catch {
