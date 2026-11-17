@@ -6,6 +6,16 @@ const DEFAULT_AVATAR="/img/default-avatar.svg"
 const AVATAR_MAX_SIZE = 2 * 1024 * 1024
 const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"]
 
+async function canDecodeImage(file: File): Promise<boolean>{
+    try {
+        const bitmap = await createImageBitmap(file)
+        bitmap.close()
+        return (true)
+    } catch {
+        return (false)
+    }
+}
+
 type AvatarSectionProps = {
     avatarUrl: string | null
     onAvatarChange: (url: string | null) => void
@@ -44,6 +54,11 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
         }
         if (file.size > AVATAR_MAX_SIZE) {
             setError("settings.avatar.tooLarge")
+            return
+        }
+
+        if (!(await canDecodeImage(file))) {
+            setError("settings.avatar.invalidImage")
             return
         }
         
