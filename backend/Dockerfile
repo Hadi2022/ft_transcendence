@@ -23,4 +23,4 @@ COPY backend/ /app/backend/
 # Generate Prisma client
 RUN npx prisma generate
 
-CMD ["node", "./src/index.ts"]
+CMD ["sh", "-c", "npx prisma migrate deploy && exec node ./src/index.ts"]
