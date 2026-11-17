@@ -1255,6 +1255,70 @@ paths:
         '500':
           description: Internal server error (unexpected disk failure, file or database rollback).
           $ref: '#/components/responses/InternalServerError'
+ post:
+      summary: Create a new post with an image and caption optional
+      tags:
+        - Posts
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Image file (JPEG, PNG, WebP). Must match real file signature (magic bytes) and not exceed max size.
+                caption:
+                  type: string
+                  nullable: true
+                  description: Optional text caption for the post.
+            encoding:
+              image:
+                contentType: image/jpeg, image/png, image/webp
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '400':
+          description: Validation error (missing image, invalid file, malformed caption)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '413':
+          description: Image exceeds the maximum allowed size
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '415':
+          description: Unsupported image format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error (with automatic file rollback)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 
 components:
   securitySchemes:
