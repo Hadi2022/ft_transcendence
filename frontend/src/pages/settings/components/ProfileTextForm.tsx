@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next"
 import type { UserProfile } from "../../../services/auth"
 import { useId, useState, type SubmitEvent } from "react"
 import InputComponent from "../../../components/InputComponent"
-import { updateCurrentUser } from "../../../services/users"
+import { updateCurrentUser, type UpdateProfileData } from "../../../services/users"
 
 const NAME_MAX_LENGTH = 100
 const BIO_MAX_LENGTH = 1000
@@ -38,13 +38,23 @@ export default function ProfileTextForm({user, onSaved, disabled, onPendingChang
         e.preventDefault()
         if (!isDirty || isSaving || disabled) return
 
+        const trimmedName = name.trim()
+        const trimmedBio = biography.trim()
+
+        const changes: UpdateProfileData = {}
+        if (trimmedName !== savedName) changes.name = trimmedName || null
+        if (trimmedBio !== savedBio) changes.biography = trimmedBio || null
+
+        if (Object.keys(changes).length === 0) {
+            setName(savedName)
+            setBiography(savedBio)
+            return
+        }
+
         setSaveStatus("saving")
         onPendingChange(true)
         try {
-            const updated = await updateCurrentUser({
-                name: name.trim() || null,
-                biography: biography.trim() || null
-            })
+            const updated = await updateCurrentUser(changes)
 
             onSaved(updated)
             setName(updated.name ?? "")
