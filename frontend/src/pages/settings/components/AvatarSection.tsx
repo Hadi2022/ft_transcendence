@@ -33,6 +33,11 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
     const [error, setError] = useState<string | null>(null)
 
     const inputRef = useRef<HTMLInputElement>(null)
+    const abortRef = useRef<AbortController | null>(null)
+
+    useEffect(() => {
+        return () => abortRef.current?.abort()
+    }, [])
 
     const isBusy = status !== "idle" || disabled
 
@@ -61,33 +66,46 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
             setError("settings.avatar.invalidImage")
             return
         }
+
+        const controller = new AbortController()
+        abortRef.current = controller
         
         setError(null)
         setStatus("uploading")
         onPendingChange(true)
         try {
-            const url = await uploadAvatar(file)
+            const url = await uploadAvatar(file, controller.signal)
             onAvatarChange(url)
         } catch {
+            if (controller.signal.aborted) return
             setError("settings.avatar.uploadError")
         } finally {
-            setStatus("idle")
-            onPendingChange(false)
+            if (!controller.signal.aborted) {
+                setStatus("idle")
+                onPendingChange(false)
+            }
         }
     }
 
     async function handleRemove() {
+
+        const controller = new AbortController()
+        abortRef.current = controller
+
         setError(null)
         setStatus("removing")
         onPendingChange(true)
         try {
-            await removeAvatar()
+            await removeAvatar(controller.signal)
             onAvatarChange(null)
         } catch {
+            if (controller.signal.aborted) return
             setError("settings.avatar.removeError")
         } finally {
-            setStatus("idle")
-            onPendingChange(false)
+            if (!controller.signal.aborted) {
+                setStatus("idle")
+                onPendingChange(false)
+            }
         }
     }
 

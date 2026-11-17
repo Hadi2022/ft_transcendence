@@ -35,15 +35,22 @@ export async function updateCurrentUser(data: UpdateProfileData): Promise<UserPr
 
 // MOCK: no avatar endpoint yet
 // Replace these two functions with real requests when the backend is ready
-function wait(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms))
+function wait(ms: number, signal?: AbortSignal) {
+    signal?.throwIfAborted()
+    return new Promise<void>((resolve, reject) => {
+        const timer = setTimeout(resolve, ms)
+        signal?.addEventListener("abort", () => {
+            clearTimeout(timer)
+            reject(signal.reason)
+        }, { once: true })
+    })
 }
 
-export async function uploadAvatar(file: File): Promise<string> {
-    await wait(800)
+export async function uploadAvatar(file: File, signal?: AbortSignal): Promise<string> {
+    await wait(800, signal)
     return (URL.createObjectURL(file))
 }
 
-export async function removeAvatar(): Promise<void> {
-    await wait(500)
+export async function removeAvatar(signal?: AbortSignal): Promise<void> {
+    await wait(500, signal)
 }
