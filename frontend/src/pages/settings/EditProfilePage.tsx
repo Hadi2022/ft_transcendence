@@ -40,6 +40,14 @@ export default function EditProfilePage() {
         }
     }, [])
 
+    function updateUser(changes: Partial<UserProfile>) {
+        setState((prev) => 
+            prev.status === "ready"
+            ? { status: "ready", user: { ...prev.user, ...changes} }
+            : prev
+        )
+    }
+
     function handleRetry() {
         setState({ status: "loading" })
         loadUser()
@@ -69,7 +77,8 @@ export default function EditProfilePage() {
         <div className="flex flex-col gap-6">
             <h3 className="text-lg font-semibold">{ t("settings.profile.title") }</h3>
 
-            <AvatarSection user={state.user} />
+            <AvatarSection avatarUrl={state.user.avatarUrl}
+                            onAvatarChange={(avatarUrl) => updateUser({avatarUrl})} />
 
             <div className="flex flex-col gap-1">
                 <InputComponent label={ t("auth.username") }
@@ -79,7 +88,8 @@ export default function EditProfilePage() {
                 <p className="text-xs text-soft-text">{ t("settings.profile.usernameHint") }</p>
             </div>
 
-            <ProfileTextForm user={state.user} />
+            <ProfileTextForm user={state.user}
+                                onSaved={(updated) => updateUser(updated)} />
         </div>
     )
 }

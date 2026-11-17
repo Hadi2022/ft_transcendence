@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next"
-import type { UserProfile } from "../../../services/auth"
 import { useEffect, useRef, useState, type ChangeEvent } from "react"
 import { removeAvatar, uploadAvatar } from "../../../services/users"
 
@@ -8,16 +7,16 @@ const AVATAR_MAX_SIZE = 2 * 1024 * 1024
 const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"]
 
 type AvatarSectionProps = {
-    user: UserProfile
+    avatarUrl: string | null
+    onAvatarChange: (url: string | null) => void
 }
 
 type AvatarStatus = "idle" | "uploading" | "removing"
 
-export default function AvatarSection({ user } : AvatarSectionProps) {
+export default function AvatarSection({ avatarUrl, onAvatarChange } : AvatarSectionProps) {
 
     const { t } = useTranslation()
 
-    const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl)
     const [status, setStatus] = useState<AvatarStatus>("idle")
     const [error, setError] = useState<string | null>(null)
 
@@ -50,7 +49,7 @@ export default function AvatarSection({ user } : AvatarSectionProps) {
         setStatus("uploading")
         try {
             const url = await uploadAvatar(file)
-            setAvatarUrl(url)
+            onAvatarChange(url)
         } catch {
             setError("settings.avatar.uploadError")
         } finally {
@@ -63,7 +62,7 @@ export default function AvatarSection({ user } : AvatarSectionProps) {
         setStatus("removing")
         try {
             await removeAvatar()
-            setAvatarUrl(null)
+            onAvatarChange(null)
         } catch {
             setError("settings.avatar.removeError")
         } finally {

@@ -9,28 +9,27 @@ const BIO_MAX_LENGTH = 1000
 
 type ProfileTextFormProps = {
     user: UserProfile
+    onSaved: (user: UserProfile) => void
 }
 
 type SaveStatus = "idle" | "saving" | "saved" | "error"
 
-export default function ProfileTextForm({user}: ProfileTextFormProps) {
+export default function ProfileTextForm({user, onSaved}: ProfileTextFormProps) {
 
     const { t } = useTranslation()
 
     const [name, setName] = useState(user.name ?? "")
     const [biography, setBiography] = useState(user.biography ?? "")
 
-    const [saved, setSaved] = useState({
-        name: user.name ?? "",
-        biography: user.biography ?? ""
-    })
+    const savedName = user.name ?? ""
+    const savedBio = user.biography ?? ""
 
     const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle")
 
     const bioId = useId()
     const counterId = useId()
 
-    const isDirty = name !== saved.name || biography !== saved.biography
+    const isDirty = name !== savedName || biography !== savedBio
     const isSaving = saveStatus === "saving"
 
     async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
@@ -44,13 +43,9 @@ export default function ProfileTextForm({user}: ProfileTextFormProps) {
                 biography: biography.trim() || null
             })
 
-            const newSaved = {
-                name: updated.name ?? "",
-                biography: updated.biography ?? ""
-            }
-            setSaved(newSaved)
-            setName(newSaved.name)
-            setBiography(newSaved.biography)
+            onSaved(updated)
+            setName(updated.name ?? "")
+            setBiography(updated.biography ?? "")
             setSaveStatus("saved")
         } catch {
             setSaveStatus("error")
@@ -58,8 +53,8 @@ export default function ProfileTextForm({user}: ProfileTextFormProps) {
     }
 
     function handleCancel() {
-        setName(saved.name)
-        setBiography(saved.biography)
+        setName(savedName)
+        setBiography(savedBio)
         setSaveStatus("idle")
     }
 
