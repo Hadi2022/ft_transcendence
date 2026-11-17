@@ -54,7 +54,7 @@ paths:
         Sets a temporary HttpOnly cookie containing the OAuth state
         used to validate the callback. Does not require a local session.
         Requests the openid, email and profile scopes and always asks the
-        user to choose a Google account. If authorization cannot be 
+        user to choose a Google account. If authorization cannot be
         started, redirects the browser to /login?error=CODE.
       operationId: authorizeGoogle
       security: []
@@ -245,12 +245,14 @@ paths:
                   code: CONFLICT
                   message: You are already logged in
                   details: {}
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
     get:
-      summary: Get user sessions
-      description: Returns all sessions of the logged in user
+      summary: Get active user sessions
+      description: Returns all non-expired sessions of the logged in user
       operationId: getSessions
       security:
         - sessionCookie: []
@@ -491,11 +493,13 @@ paths:
                       message: User already exists
                       details:
                         username: USERNAME_IN_USE
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
     get:
-      summary: Retrieve a list of users 
+      summary: Retrieve a list of users
       description: >-
         Returns a list of users, by default sorted by creation time in
         descending order. Ties are broken by user ID. At most 100 users are
@@ -524,7 +528,7 @@ paths:
 
       responses:
         '200':
-          description: Sucessfully returned list of users 
+          description: Sucessfully returned list of users
           content:
             application/json:
               schema:
@@ -534,9 +538,9 @@ paths:
                 properties:
                   data:
                     type: object
-                    required: 
+                    required:
                       - users
-                    properties: 
+                    properties:
                       users:
                         type: array
                         items:
@@ -725,6 +729,8 @@ paths:
                   code: NOT_FOUND
                   message: User not found
                   details: {}
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -987,6 +993,8 @@ paths:
                       code: CONFLICT
                       message: Friend request already open
                       details: {}
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
         '500':
           $ref: '#/components/responses/InternalServerError'
     get:
@@ -1142,7 +1150,8 @@ paths:
                   code: NOT_FOUND
                   message: Pending friend request could not be found
                   details: {}
-
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
         '500':
           $ref: '#/components/responses/InternalServerError'
 
@@ -1203,6 +1212,58 @@ paths:
 
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /posts/{id}:
+    delete:
+      summary: Delete a post.
+      description: Safely delete a post and its associated image.
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Publication UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Post successfully deleted.
+        '400':
+          description: Invalid request (e.g., manipulated image path or invalid filename).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Post not found
+                  details: {}
+        '409':
+          description: Conflict. A deletion operation is already underway for this same post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 409
+                message: "A deletion for this post is already in progress."
+                errors: null
+        '500':
+          description: Internal server error (unexpected disk failure, file or database rollback).
+          $ref: '#/components/responses/InternalServerError'
 
 components:
   securitySchemes:
@@ -1222,6 +1283,29 @@ components:
             error:
               code: UNAUTHORIZED
               message: You are not authorized to access this resource
+              details: {}
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: FORBIDDEN
+              message: Only the author of the post can delete it
+              details: {}
+
+    PayloadTooLarge:
+      description: Request body exceeds the maximum allowed size
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: PAYLOAD_TOO_LARGE
+              message: JSON payload too large
               details: {}
 
     InternalServerError:
@@ -1357,7 +1441,21 @@ components:
         current:
           type: boolean
           description: Whether this is the current session
-
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        multimediaUrl:
+          type: string
+          nullable: false
+        caption:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
     ErrorResponse:
       type: object
       required:
@@ -1395,6 +1493,7 @@ components:
         - FORBIDDEN
         - NOT_FOUND
         - CONFLICT
+        - PAYLOAD_TOO_LARGE
         - BAD_GATEWAY
         - INTERNAL_SERVER_ERROR
         - INVALID_CREDENTIALS
@@ -1411,6 +1510,7 @@ components:
         FORBIDDEN: The user is not allowed to perform this action.
         NOT_FOUND: The referenced resource does not exist.
         CONFLICT: The request conflicts with current state (already logged in, user already exists, or a friend request is already open).
+        PAYLOAD_TOO_LARGE: The request body exceeds the maximum allowed size.
         BAD_GATEWAY: An external provider failed.
         INTERNAL_SERVER_ERROR: Unexpected server failure.
         INVALID_CREDENTIALS: Wrong email or password.

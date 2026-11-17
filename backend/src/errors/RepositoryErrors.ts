@@ -1,3 +1,4 @@
+import { ErrorCodes } from "@transcendence/shared/errors/error-codes";
 
 export class UniqueConstraintError extends Error {
 
@@ -13,8 +14,8 @@ export class UniqueConstraintError extends Error {
 }
 
 export class RecordNotFoundError extends Error {
-    constructor(message: string) {
-        super(message)
+    constructor(message = 'Record not found') {
+        super(message, )
         this.name = 'RecordNotFoundError'
     }
 }

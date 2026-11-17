@@ -7,35 +7,47 @@ import type { Friend, FriendRelation } from '../types/friend.ts'
 import { AlreadyFriendsError, FriendSelfError, FriendRequestExistsError } from '../errors/friendErrors.ts'
 import { UserNotFoundError } from '../errors/userErrors.ts'
 
-export const openOrAcceptFriendRequest = async (relation: FriendRelation): Promise<Friend> => {
+export const openOrAcceptFriendRequest = async (
+    relation: FriendRelation
+): Promise<Friend> => {
 
-	if (await userRepository.findById(relation.receiverId) == null)
-		throw new UserNotFoundError('User not found')
+    if (await userRepository.findById(relation.receiverId) == null)
+        throw new UserNotFoundError('User not found')
 
-	if (relation.receiverId == relation.senderId)
-		throw new FriendSelfError('Cannot friend yourself')
+    if (relation.receiverId == relation.senderId)
+        throw new FriendSelfError('Cannot friend yourself')
 
-	const existingRequest = await friendRepository.findBidirectional(relation)
+    const existingRequest = await friendRepository.findBidirectional(relation)
 
-	if (existingRequest?.status == 'accepted')
-		throw new AlreadyFriendsError('Already friends')
+    if (existingRequest)
+        return await resolveExistingRequest(existingRequest, relation)
 
-	if (existingRequest?.status == 'pending') {
-		if (existingRequest.senderId == relation.receiverId)
-			return await friendRepository.updateStatus(existingRequest.id, 'accepted')
-		throw new FriendRequestExistsError('Friend request already open')
-	}
+    try {
+        return await friendRepository.create(relation)
 
-	try {
-		return await friendRepository.create(relation)	
-	} catch (error) {
+    } catch (error) {
 
-		if (error instanceof UniqueConstraintError || error instanceof GenericConstraintError)
-			throw new FriendRequestExistsError('Friend request already open')
+        if (error instanceof UniqueConstraintError) {
 
-		throw error
-	}
-    
+            const concurrentRequest =
+                await friendRepository.findBidirectional(relation)
+
+            if (concurrentRequest)
+                return await resolveExistingRequest(
+                    concurrentRequest,
+                    relation
+                )
+
+            throw new FriendRequestExistsError(
+                'Friend request already open'
+            )
+        }
+
+        if (error instanceof GenericConstraintError)
+            throw new FriendRequestExistsError('Friend request already open')
+
+        throw error
+    }
 }
 
 export const declineFriendRequest = async (
@@ -65,4 +77,30 @@ export const acceptFriendRequest = async (
         requestId,
         receiverId
     )
+}
+
+const resolveExistingRequest = async (
+    existingRequest: Friend,
+    relation: FriendRelation
+): Promise<Friend> => {
+
+    if (existingRequest.status === 'accepted')
+        throw new AlreadyFriendsError('Already friends')
+
+    if (existingRequest.senderId === relation.receiverId) {
+
+        const accepted = await friendRepository.acceptPendingReceivedRequest(
+            existingRequest.id,
+            relation.senderId
+        )
+
+        if (accepted)
+            return accepted
+
+        throw new FriendRequestExistsError(
+            'Friend request is no longer pending'
+        )
+    }
+
+    throw new FriendRequestExistsError('Friend request already open')
 }
