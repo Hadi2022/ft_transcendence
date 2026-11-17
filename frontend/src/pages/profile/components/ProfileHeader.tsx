@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next"
 import type { UserProfile } from "../../../services/auth"
+import { Link } from "react-router"
 
 const DEFAULT_AVATAR = "/img/default-avatar.svg"
 
@@ -50,12 +51,12 @@ export default function ProfileHeader({profile, relation} : ProfileHeaderProps) 
                 
                 {
                     relation === "own" && (
-                        <button type="button"
+                        <Link to="/settings/profile"
                                 className="rounded-md bg-soft-text/20 px-4 py-2
                                             text-sm font-medium hover:bg-soft-text/30
                                             transition-colors">
                             { t("profile.editProfile") }
-                        </button>
+                        </Link>
                     )
                 }
 

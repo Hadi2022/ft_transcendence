@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router";
 import HomePage from "../pages/home/HomePage";
 import AuthLayout from "../layouts/AuthLayout";
 import LoginPage from "../pages/auth/LoginPage";
@@ -6,6 +6,9 @@ import RegisterPage from "../pages/auth/RegisterPage";
 import MainLayout from "../layouts/MainLayout";
 import GuestRoute from "../components/GuestRoute";
 import ProfilePage from "../pages/profile/ProfilePage";
+import ProtectedRoute from "../components/ProtectedRoute";
+import EditProfilePage from "../pages/settings/EditProfilePage";
+import SettingsLayout from "../layouts/SettingsLayout";
 
 export const router = createBrowserRouter([
     {
@@ -23,7 +26,18 @@ export const router = createBrowserRouter([
         element: <MainLayout />,
         children: [
             { index: true, element: <HomePage /> },
-            { path: "users/:username", element: <ProfilePage />}
+            { path: "users/:username", element: <ProfilePage />},
+            {
+                element: <ProtectedRoute />,
+                children: [
+                    { path: "settings", element: <SettingsLayout />,
+                        children: [
+                            { index: true, element: <Navigate replace to="profile" /> },
+                            {path: "profile", element: <EditProfilePage /> }
+                        ]
+                    }
+                ]
+            }
         ]
     }
 ])
