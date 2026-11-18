@@ -762,7 +762,11 @@ paths:
                 avatar:
                   type: string
                   format: binary
-                  description: Image file (JPEG, PNG or WebP). Subject to a maximum file size
+                  description: >-
+                    Image file (JPEG, PNG or WebP).
+                    Maximum file size: 2 MiB (2097152 bytes).
+                    Maximum pixel count: 25000000.
+                    Animated and multi-page images are not supported.
             encoding:
               avatar:
                 contentType: image/jpeg, image/png, image/webp
@@ -1389,11 +1393,17 @@ paths:
         '204':
           description: Post successfully deleted.
         '400':
-          description: Invalid request (e.g., manipulated image path or invalid filename).
+          description: Invalid post ID
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: Invalid post ID
+                  details:
+                    id: INVALID_UUID
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1445,11 +1455,16 @@ paths:
                 image:
                   type: string
                   contentMediaType: image/*
-                  description: Image file (JPEG, PNG, WebP). Validated by magic bytes and size limit.
+                  description: >-
+                    Image file (JPEG, PNG or WebP).
+                    Maximum file size: 6 MiB (6291456 bytes).
+                    Maximum pixel count: 25000000.
+                    Animated and multi-page images are not supported.
                 caption:
                   type:
                     - string
                     - 'null'
+                  maxLength: 400
                   description: Optional text caption for the post.
             encoding:
               image:
@@ -1483,7 +1498,9 @@ paths:
                     isVerified: true
                     createdAt: "2026-11-09T18:49:39.495Z"
         '400':
-          description: Bad Request - Missing image, invalid file content/format, or malformed caption
+          description: >-
+            The request is not valid multipart/form-data, the image file is
+            missing, the image content is invalid, or the caption fails validation.
           content:
             application/json:
               schema:
@@ -1493,9 +1510,10 @@ paths:
                   summary: Missing image file
                   value:
                     error:
-                      code: "BAD_REQUEST"
+                      code: "VALIDATION_ERROR"
                       message: "Image is required."
-                      details: {}
+                      details:
+                        image: IMAGE_REQUIRED
                 malformedCaption:
                   summary: Malformed or invalid caption
                   value:
@@ -1512,6 +1530,14 @@ paths:
                       message: "Invalid image content"
                       details:
                         image: "IMAGE_INVALID_CONTENT"
+                invalidMultipart:
+                  summary: Not multipart/form-data, or malformed multipart body
+                  value:
+                    error:
+                      code: BAD_REQUEST
+                      message: Invalid multipart request
+                      details:
+                        image: INVALID_MULTIPART
         '401':
           $ref: '#/components/responses/Unauthorized'
         '413':
@@ -1741,12 +1767,14 @@ components:
           format: uuid
         multimediaUrl:
           type: string
+          maxLength: 500
           examples:
             - "/uploads/posts/a3545fba-f703-4661-a765-3a626082bffa.jpg"
         caption:
           type:
             - string
             - 'null'
+          maxLength: 400
         createdAt:
           type: string
           format: date-time
@@ -1802,6 +1830,7 @@ components:
         - GOOGLE_AUTHORIZATION_DENIED
         - GOOGLE_AUTHENTICATION_FAILED
         - GOOGLE_PROVIDER_ERROR
+        - EMAIL_CONFLICT
         - ALREADY_FRIENDS
       x-enumDescriptions:
         VALIDATION_ERROR: Request body, query or route parameters failed validation. See details for the offending fields.
@@ -1820,6 +1849,7 @@ components:
         GOOGLE_AUTHORIZATION_DENIED: Google authorization was not completed.
         GOOGLE_AUTHENTICATION_FAILED: Google authentication or identity verification failed.
         GOOGLE_PROVIDER_ERROR: Google authentication provider failed.
+        EMAIL_CONFLICT: The email address conflicts with an existing account.
         ALREADY_FRIENDS: The two users are already friends.
 
     ErrorDetail:
