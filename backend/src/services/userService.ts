@@ -1,11 +1,13 @@
 import type { User, NewUserData, UpdateUserData, OwnProfile, UserProfile, UserOrderBy } from '../types/user.ts'
-import { UserNameConflictError, UserEmailConflictError, UserNotFoundError } from '../errors/userErrors.ts'
+import { UserNameConflictError, UserEmailConflictError, UserNotFoundError, UserConcurrencyError } from '../errors/userErrors.ts'
 import { hashPassword, verifyPassword } from './passwordService.ts'
 import * as userRepository from '../repositories/userRepository.ts'
 import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts'
 import type { Order } from '../types/query.ts'
 import { ConflictError, BadRequestError, UnauthorizedError } from '../errors/HttpErrors.ts'
 import { ErrorDetails } from '@transcendence/shared/errors/error-details'
+import type { ValidatedImage } from '../types/image.ts'
+import { deleteImage, saveImage } from '../utils/imageStorage.ts'
 
 type CreateUserInput = {
     username: string
@@ -174,6 +176,60 @@ async function createGoogleUser(profile: ProfileGoogle) {
 	}
 }
 
+const saveAvatar = async (image: ValidatedImage, user: User) => {
+
+	const directory = 'avatars'
+
+	const path = await saveImage(image, directory)
+
+	const oldImagePath = user.avatarUrl
+
+	try {
+		const count = (await userRepository.updateUserAvatarUrl(user.id, oldImagePath, path)).count
+		if (count === 0)
+			throw new UserConcurrencyError()
+	} catch (error: any) {
+
+		try {
+			await deleteImage(path, directory)
+		} catch (error) {
+			console.log(error)	
+		}
+
+		throw error
+	}
+
+	try {
+		if (oldImagePath)
+			await deleteImage(oldImagePath, directory)
+	} catch (error) {
+		console.log(error)	
+	}
+
+	return path
+
+}
+
+const deleteAvatar = async (user: User) => {
+
+	const oldAvatarUrl = user.avatarUrl
+
+	if (!oldAvatarUrl)
+		return
+
+	const count = (await userRepository.updateUserAvatarUrl(user.id, oldAvatarUrl, null)).count
+
+	if (count === 0)
+		throw new UserConcurrencyError()
+
+	try {
+		await deleteImage(oldAvatarUrl, 'avatars')	
+	} catch (error) {
+		console.log(error)
+	}
+
+}
+
 export {
     prepareUser,
     createUser,
@@ -185,4 +241,6 @@ export {
     findUserOwnProfileById,
 	updateUser,
     createGoogleUser,
+    saveAvatar,
+	deleteAvatar,
 }

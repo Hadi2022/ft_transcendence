@@ -734,6 +734,156 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
+  /users/me/avatar:
+    put:
+      summary: Set the current user's avatar
+      description: >-
+        Uploads a new avatar image for the logged in user as multipart/form-data
+        (single file in the avatar field). The image is fully decoded and
+        validated server side (JPEG, PNG or WebP; single frame; pixel count
+        limited) and stored under a server generated filename. The previous
+        avatar file, if it was a locally stored image, is deleted. Fails with
+        409 if the avatar was changed concurrently by another request.
+      operationId: setCurrentUserAvatar
+      security:
+        - sessionCookie: []
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - avatar
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+                  description: Image file (JPEG, PNG or WebP). Subject to a maximum file size
+            encoding:
+              avatar:
+                contentType: image/jpeg, image/png, image/webp
+
+      responses:
+        '200':
+          description: Avatar updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - avatarUrl
+                properties:
+                  avatarUrl:
+                    type: string
+                    maxLength: 500
+                    description: Public path of the newly stored avatar
+              example:
+                avatarUrl: /uploads/avatars/0b0f5a52-3c4d-4d1e-8f6a-1d2c9e3b5a47.webp
+        '400':
+          description: >-
+            The request is not valid multipart/form-data, the avatar file is
+            missing, or the file is corrupt, animated or otherwise not a
+            valid single image
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidMultipart:
+                  summary: Not multipart/form-data, or malformed multipart body
+                  value:
+                    error:
+                      code: BAD_REQUEST
+                      message: Invalid multipart request
+                      details:
+                        avatar: INVALID_MULTIPART
+                imageRequired:
+                  summary: No file in the avatar field
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Image is required
+                      details:
+                        avatar: IMAGE_REQUIRED
+                invalidContent:
+                  summary: File cannot be decoded as a single valid image
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid image content
+                      details:
+                        avatar: IMAGE_INVALID_CONTENT
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: The avatar was changed by a concurrent request. Retry the upload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: CONFLICT
+                  message: Conflict
+                  details: {}
+        '413':
+          description: Avatar file exceeds the maximum allowed size
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: PAYLOAD_TOO_LARGE
+                  message: Image is too large
+                  details:
+                    avatar: IMAGE_TOO_LARGE
+        '415':
+          description: The file is a valid image but not in an allowed format (JPEG, PNG or WebP)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: UNSUPPORTED_MEDIA_TYPE
+                  message: Unsupported image format
+                  details:
+                    avatar: IMAGE_INVALID_FORMAT
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Remove the current user's avatar
+      description: >-
+        Clears the avatar of the logged in user and deletes the stored image
+        file. Idempotent: succeeds even when no avatar is set. Fails with 409
+        if the avatar was changed concurrently by another request.
+      operationId: clearCurrentUserAvatar
+      security:
+        - sessionCookie: []
+
+      responses:
+        '204':
+          description: Avatar removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: The avatar was changed by a concurrent request. Retry the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: CONFLICT
+                  message: Conflict
+                  details: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /users/{id}:
     get:
       summary: Get a user by ID
@@ -1494,6 +1644,7 @@ components:
         - NOT_FOUND
         - CONFLICT
         - PAYLOAD_TOO_LARGE
+        - UNSUPPORTED_MEDIA_TYPE
         - BAD_GATEWAY
         - INTERNAL_SERVER_ERROR
         - INVALID_CREDENTIALS
@@ -1510,7 +1661,8 @@ components:
         FORBIDDEN: The user is not allowed to perform this action.
         NOT_FOUND: The referenced resource does not exist.
         CONFLICT: The request conflicts with current state (already logged in, user already exists, or a friend request is already open).
-        PAYLOAD_TOO_LARGE: The request body exceeds the maximum allowed size.
+        PAYLOAD_TOO_LARGE: The request body or uploaded file exceeds the maximum allowed size.
+        UNSUPPORTED_MEDIA_TYPE: The uploaded file is not in a supported format.
         BAD_GATEWAY: An external provider failed.
         INTERNAL_SERVER_ERROR: Unexpected server failure.
         INVALID_CREDENTIALS: Wrong email or password.
@@ -1548,4 +1700,9 @@ components:
         - INVALID_UUID
         - INVALID_ORDER
         - INVALID_ORDER_BY
+        - IMAGE_REQUIRED
+        - IMAGE_TOO_LARGE
+        - IMAGE_INVALID_FORMAT
+        - IMAGE_INVALID_CONTENT
+        - INVALID_MULTIPART
         - CANNOT_TARGET_SELF

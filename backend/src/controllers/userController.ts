@@ -2,13 +2,14 @@ import type { Request, Response } from 'express'
 
 import { registerUserSchema, updateUserSchema, usernameSchema } from '@transcendence/shared/schemas/user'
 import { listUsersQuerySchema } from '../schemas/user.ts'
-import { createUser, listUserProfiles, findUserOwnProfileById, updateUser, findUserProfileByUsername } from '../services/userService.ts'
+import { createUser, listUserProfiles, findUserOwnProfileById, updateUser, findUserProfileByUsername, saveAvatar, deleteAvatar } from '../services/userService.ts'
 import { BadRequestError, ConflictError, NotFoundError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'
-import { UserEmailConflictError, UserNameConflictError, UserNotFoundError } from '../errors/userErrors.ts'
+import { UserConcurrencyError, UserEmailConflictError, UserNameConflictError, UserNotFoundError } from '../errors/userErrors.ts'
 import type { AuthenticatedRequest } from '../types/express/Request.js'
 import { ErrorCodes } from '@transcendence/shared/errors/error-codes'
 import { ErrorDetails } from '@transcendence/shared/errors/error-details'
+import { validateImage } from '../utils/imageValidation.ts'
 
 async function registerUser(req: Request, res: Response): Promise<void> {
     const parsed = registerUserSchema.safeParse(req.body)
@@ -168,4 +169,51 @@ const updateCurrentUser = async (
     })
 }
 
-export { registerUser, getUsers, getCurrentUser, getUserById, getUserByUsername, updateCurrentUser }
+const setAvatar = async (req: AuthenticatedRequest, res: Response) => {
+
+    const   image = await validateImage(req.file!.buffer, 'avatar')
+    let     newAvatarUrl: string
+
+    try {
+        newAvatarUrl = await saveAvatar(image, req.user)
+    } catch (error: any) {
+
+        if (error instanceof UserConcurrencyError)
+            throw new ConflictError()
+
+        throw error
+    }
+    
+    res.status(200).json({
+        data: {
+            avatarUrl: newAvatarUrl
+        }
+    })
+}
+
+const clearAvatar = async (req: AuthenticatedRequest, res: Response) => {
+
+    try {
+        await deleteAvatar(req.user)
+    } catch (error: any) {
+
+        if (error instanceof UserConcurrencyError)
+            throw new ConflictError()
+
+        throw error
+    }
+
+    res.status(204).send()
+
+}
+
+export { 
+    registerUser,
+    getUsers,
+    getCurrentUser,
+    getUserById,
+    getUserByUsername,
+    updateCurrentUser,
+    setAvatar,
+    clearAvatar,
+}
