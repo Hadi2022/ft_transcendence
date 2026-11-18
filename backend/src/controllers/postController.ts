@@ -60,7 +60,9 @@ const uploadPost = async (req: AuthenticatedRequest, res: Response) => {
 	} catch (error) {
 		throw error;
 	}
-	return res.status(201).json(postCreated);
+	return res.status(201).json({
+		data:postCreated
+	});
 }
 
 export { deletePost, uploadPost }
