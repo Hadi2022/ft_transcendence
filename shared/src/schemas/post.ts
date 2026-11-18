@@ -10,6 +10,9 @@ export const multimediaUrlField = z.string({error:E.IMAGE_REQUIRED}).min(1,E.IMA
 
 export const captionField = z.string().max(400, E.INVALID_VALUE).optional().nullable()
 
+export const uploadPostSchema = z.object({
+	caption:captionField
+})
 
 export const createPostSchema = z.object({
 	userId: userIdField,
