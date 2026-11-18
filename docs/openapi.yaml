@@ -775,14 +775,20 @@ paths:
               schema:
                 type: object
                 required:
-                  - avatarUrl
+                  - data
                 properties:
-                  avatarUrl:
-                    type: string
-                    maxLength: 500
-                    description: Public path of the newly stored avatar
+                  data:
+                    type: object
+                    required:
+                      - avatarUrl
+                    properties:
+                      avatarUrl:
+                        type: string
+                        maxLength: 500
+                        description: Public path of the newly stored avatar
               example:
-                avatarUrl: /uploads/avatars/0b0f5a52-3c4d-4d1e-8f6a-1d2c9e3b5a47.webp
+                data:
+                  avatarUrl: /uploads/avatars/0b0f5a52-3c4d-4d1e-8f6a-1d2c9e3b5a47.webp
         '400':
           description: >-
             The request is not valid multipart/form-data, the avatar file is
@@ -1454,22 +1460,28 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PostResponse'
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PostResponse'
               example:
-                id: "0abd644b-1ade-419f-9f71-cf9a0d3e5bc9"
-                userId: "07420a48-cfa7-4fd5-b450-020e449f5485"
-                multimediaUrl: "/uploads/posts/a3545fba-f703-4661-a765-3a626082bffa.jpg"
-                caption: "Mi quinta prueba"
-                createdAt: "2026-11-17T22:15:29.742Z"
-                updatedAt: "2026-11-17T22:15:29.742Z"
-                user:
-                  id: "07420a48-cfa7-4fd5-b450-020e449f5485"
-                  username: "fernandezestebanmanuel9"
-                  name: "Manuel Fernández Esteban"
-                  biography: null
-                  avatarUrl: "https://lh3.googleusercontent.com/a/ACg8ocJGgWcDD_qTGAdhIw9Lgq1ofUn83gz2FdYTvudP_AHREP78dQ=s96-c"
-                  isVerified: true
-                  createdAt: "2026-11-09T18:49:39.495Z"
+                data:
+                  id: "0abd644b-1ade-419f-9f71-cf9a0d3e5bc9"
+                  userId: "07420a48-cfa7-4fd5-b450-020e449f5485"
+                  multimediaUrl: "/uploads/posts/a3545fba-f703-4661-a765-3a626082bffa.jpg"
+                  caption: "Mi quinta prueba"
+                  createdAt: "2026-11-17T22:15:29.742Z"
+                  updatedAt: "2026-11-17T22:15:29.742Z"
+                  user:
+                    id: "07420a48-cfa7-4fd5-b450-020e449f5485"
+                    username: "fernandezestebanmanuel9"
+                    name: "Manuel Fernández Esteban"
+                    biography: null
+                    avatarUrl: "https://lh3.googleusercontent.com/a/ACg8ocJGgWcDD_qTGAdhIw9Lgq1ofUn83gz2FdYTvudP_AHREP78dQ=s96-c"
+                    isVerified: true
+                    createdAt: "2026-11-09T18:49:39.495Z"
         '400':
           description: Bad Request - Missing image, invalid file content/format, or malformed caption
           content:
