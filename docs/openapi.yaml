@@ -9,6 +9,20 @@ servers:
   - url: /api
     description: API base path
 
+tags:
+  - name: System
+    description: API status and system information
+  - name: Authentication
+    description: External authentication providers
+  - name: Sessions
+    description: User session management
+  - name: Users
+    description: User registration and profile management
+  - name: Friends
+    description: Friend requests and relationships
+  - name: Posts
+    description: Post creation and management
+
 paths:
   /status:
     get:
@@ -168,6 +182,8 @@ paths:
 
   /sessions:
     post:
+      tags:
+        - Sessions
       summary: User login endpoint
       description: >-
         Creates a new session and sets an HttpOnly session cookie that
@@ -253,6 +269,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
     get:
+      tags:
+        - Sessions
       summary: Get active user sessions
       description: Returns all non-expired sessions of the logged in user
       operationId: getSessions
@@ -293,6 +311,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
     delete:
+      tags:
+        - Sessions
       summary: Close all user sessions
       description: Closes all sessions of the logged in user and clears the cookie
       operationId: closeAllUserSessions
@@ -315,6 +335,8 @@ paths:
 
   /sessions/current:
     delete:
+      tags:
+        - Sessions
       summary: Close the current session
       description: Closes the current session and clears the cookie
       operationId: closeCurrentSession
@@ -337,6 +359,8 @@ paths:
 
   /sessions/{id}:
     delete:
+      tags:
+        - Sessions
       summary: Close a session by ID
       description: >-
         Closes a session belonging to the logged in user. If the closed
@@ -395,6 +419,8 @@ paths:
 
   /users:
     post:
+      tags:
+        - Users
       summary: Register a new user
       description: Creates a new user account from a username, email and password
       operationId: registerUser
@@ -501,6 +527,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
     get:
+      tags:
+        - Users
       summary: Retrieve a list of users
       description: >-
         Returns a list of users, by default sorted by creation time in
@@ -573,9 +601,10 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-
   /users/me:
     get:
+      tags:
+        - Users
       summary: Get the current user
       description: Returns the profile of the user who owns the current session
       operationId: getCurrentUser
@@ -621,6 +650,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
     patch:
+      tags:
+        - Users
       summary: Update the current user profile
       description: >-
         Updates one or more editable profile fields (name, biography) of the
@@ -738,6 +769,8 @@ paths:
 
   /users/me/avatar:
     put:
+      tags:
+        - Users
       summary: Set the current user's avatar
       description: >-
         Uploads a new avatar image for the logged in user as multipart/form-data
@@ -868,6 +901,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
     delete:
+      tags:
+        - Users
       summary: Remove the current user's avatar
       description: >-
         Clears the avatar of the logged in user and deletes the stored image
@@ -898,6 +933,8 @@ paths:
 
   /users/{id}:
     get:
+      tags:
+        - Users
       summary: Get a user by ID
       description: Returns the public profile of a user by their UUID
       operationId: getUserById
@@ -964,6 +1001,8 @@ paths:
 
   /users/by-username/{username}:
     get:
+      tags:
+        - Users
       summary: Get a user by username
       description: Returns the public profile of a user by their unique username
       operationId: getUserByUsername
@@ -1032,6 +1071,8 @@ paths:
 
   /friend-requests:
     post:
+      tags:
+        - Friends
       summary: Send or accept a friend request
       description: >-
         Sends a friend request from the logged in user to the receiver. If the
@@ -1160,6 +1201,8 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     get:
+      tags:
+        - Friends
       summary: Get pending friend requests
       description: >-
         Returns all pending friend requests received by the logged in user.
@@ -1374,73 +1417,14 @@ paths:
 
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /posts/{id}:
-    delete:
-      operationId: deletePost
-      summary: Delete a post.
-      description: Safely delete a post and its associated image.
-      security:
-        - sessionCookie: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: Publication UUID
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '204':
-          description: Post successfully deleted.
-        '400':
-          description: Invalid post ID
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error:
-                  code: VALIDATION_ERROR
-                  message: Invalid post ID
-                  details:
-                    id: INVALID_UUID
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          description: Forbidden
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          description: Post not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error:
-                  code: NOT_FOUND
-                  message: Post not found
-                  details: {}
-        '409':
-          description: Conflict. A deletion operation is already underway for this same post.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error:
-                  code: CONFLICT
-                  message: "A deletion for this post is already in progress."
-                  details: {}
-        '500':
-          description: Internal server error (unexpected disk failure, file or database rollback).
-          $ref: '#/components/responses/InternalServerError'
+
   /posts:
     post:
+      tags:
+        - Posts
       operationId: createPost
       summary: Create a new post with an image and caption optional
       description: Uploads an image file and creates a new post associated with the authenticated user.
-      tags:
-        - Posts
       security:
         - sessionCookie: []
       requestBody:
@@ -1454,7 +1438,7 @@ paths:
               properties:
                 image:
                   type: string
-                  contentMediaType: image/*
+                  contentMediaType: binary
                   description: >-
                     Image file (JPEG, PNG or WebP).
                     Maximum file size: 6 MiB (6291456 bytes).
@@ -1480,7 +1464,7 @@ paths:
                   - data
                 properties:
                   data:
-                    $ref: '#/components/schemas/PostResponse'
+                    $ref: '#/components/schemas/Post'
               example:
                 data:
                   id: "0abd644b-1ade-419f-9f71-cf9a0d3e5bc9"
@@ -1565,11 +1549,68 @@ paths:
                   details:
                     image: "IMAGE_INVALID_FORMAT"
         '500':
-          description: Internal server error (with automatic file rollback)
+          $ref: '#/components/responses/InternalServerError'
+
+  /posts/{id}:
+    delete:
+      tags:
+        - Posts
+      operationId: deletePost
+      summary: Delete a post.
+      description: Safely delete a post and its associated image.
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Publication UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Post successfully deleted.
+        '400':
+          description: Invalid post ID
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: Invalid post ID
+                  details:
+                    id: INVALID_UUID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Post not found
+                  details: {}
+        '409':
+          description: Conflict. A deletion operation is already underway for this same post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: CONFLICT
+                  message: "A deletion for this post is already in progress."
+                  details: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
 components:
   securitySchemes:
@@ -1748,7 +1789,7 @@ components:
         current:
           type: boolean
           description: Whether this is the current session
-    PostResponse:
+    Post:
       type: object
       required:
         - id
