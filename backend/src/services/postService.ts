@@ -1,10 +1,14 @@
 import * as postRepository from '../repositories/postRepository.ts'
 import { PostNotFoundError, ForbiddenAccessPostError, InternalPostError, ConflictPostError, BadRequestPostsError } from '../errors/postErrors.ts';
-import { deleteImage, getStorageDirectory } from '../utils/imageStorage.ts';
+import { deleteImage, getStorageDirectory, saveImage } from '../utils/imageStorage.ts';
 import path from 'node:path';
 import { promises as fs } from 'fs';
 import { UPLOAD_PUBLIC_PATH } from '../constants/imageUpload.ts';
 import { RecordNotFoundError } from '../errors/RepositoryErrors.ts';
+import type { Post } from '../types/post.ts';
+import type { ValidatedImage } from '../types/image.ts';
+import { validateImage } from '../utils/imageValidation.ts';
+import { buffer } from 'node:stream/consumers';
 
 const IMAGE_FILENAME_PATTERN =
     /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png|webp)$/
@@ -15,6 +19,35 @@ const activeDeletions = new Set<string>();
 
 export const getPostById = async (postId: string) => {
 	return postRepository.getPostById(postId);
+}
+
+export const createPost = async (
+	userId: string,
+	imageBuffer: Buffer,
+	caption: string | null = null): Promise<Post> =>{
+
+	const validatedImage:ValidatedImage = await validateImage(imageBuffer, 'image');
+
+	const multimediaUrl = await saveImage(validatedImage, 'posts');
+
+	try {
+		return await postRepository.createPost({
+			userId,
+			multimediaUrl,
+			caption
+		})
+	} catch (error) {
+		try {
+			await deleteImage(multimediaUrl,'posts');
+		} catch (error) {
+			throw new InternalPostError({ message: 'Failed to roll back post image',
+					details: 'The image must be deleted manually.',
+					filePath:multimediaUrl});
+		}
+
+		throw error;
+	}
+
 }
 
 export const deletePost = async (postId: string, userId: string) => {

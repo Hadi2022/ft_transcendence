@@ -49,7 +49,7 @@ export async function deletePost(
 			}
 			})
 			return deletedPost;
-		} catch (error) {
+		} catch (error: unknown) {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				if (error.code === 'P2025'){
 					throw new RecordNotFoundError();
