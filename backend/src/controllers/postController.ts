@@ -6,7 +6,7 @@ import { ErrorCodes } from "@transcendence/shared/errors/error-codes";
 import { formatZodErrors } from "../utils/zod.ts";
 import * as postService from '../services/postService.ts'
 import { ConflictPostError, ForbiddenAccessPostError, InternalPostError, PostNotFoundError } from "../errors/postErrors.ts";
-import { captionField } from "@transcendence/shared/schemas/post";
+import { uploadPostSchema } from "@transcendence/shared/schemas/post";
 
 const deletePost = async (
 	req: AuthenticatedRequest,
@@ -47,7 +47,7 @@ const uploadPost = async (req: AuthenticatedRequest, res: Response) => {
 			message: 'Image is required.'
 	});
 
-	const captionParsed = captionField.safeParse(req.body?.caption)
+	const captionParsed = uploadPostSchema.safeParse(req.body)
 	if (!captionParsed.success)
 		throw new BadRequestError({
 			code: ErrorCodes.VALIDATION_ERROR,
@@ -56,7 +56,7 @@ const uploadPost = async (req: AuthenticatedRequest, res: Response) => {
 	})
 	let postCreated;
 	try {
-		postCreated = await postService.createPost(userId, req.file.buffer, captionParsed.data ?? null)
+		postCreated = await postService.createPost(userId, req.file.buffer, captionParsed.data.caption ?? null)
 	} catch (error) {
 		throw error;
 	}
