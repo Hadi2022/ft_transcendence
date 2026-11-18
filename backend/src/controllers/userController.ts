@@ -192,7 +192,7 @@ const setAvatar = async (req: AuthenticatedRequest, res: Response) => {
 const clearAvatar = async (req: AuthenticatedRequest, res: Response) => {
 
     try {
-        deleteAvatar(req.user)
+        await deleteAvatar(req.user)
     } catch (error: any) {
 
         if (error instanceof UserConcurrencyError)

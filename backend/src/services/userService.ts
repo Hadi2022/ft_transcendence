@@ -212,7 +212,10 @@ const saveAvatar = async (image: ValidatedImage, user: User) => {
 
 const deleteAvatar = async (user: User) => {
 
-	const oldAvatarUrl = user.avatarUrl!
+	const oldAvatarUrl = user.avatarUrl
+
+	if (!oldAvatarUrl)
+		return
 
 	const count = (await userRepository.updateUserAvatarUrl(user.id, oldAvatarUrl, null)).count
 

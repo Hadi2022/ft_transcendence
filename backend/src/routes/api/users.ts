@@ -13,7 +13,7 @@ router.get('/', getUsers)
 router.get('/me', requireAuth, authed(getCurrentUser))
 router.patch('/me', requireAuth, authed(updateCurrentUser))
 router.put('/me/avatar', requireAuth, imageUpload('avatar', AVATAR_MAX_SIZE), authed(setAvatar))
-router.delete('/me/avatar', requireAuth, imageUpload('avatar', AVATAR_MAX_SIZE), authed(clearAvatar))
+router.delete('/me/avatar', requireAuth, authed(clearAvatar))
 router.get('/by-username/:username', getUserByUsername)
 router.get('/:id', loadUser, getUserById)
 
