@@ -1414,7 +1414,8 @@ paths:
         '500':
           description: Internal server error (unexpected disk failure, file or database rollback).
           $ref: '#/components/responses/InternalServerError'
-  post:
+  /posts:
+    post:
       summary: Create a new post with an image and caption optional
       description: Uploads an image file and creates a new post associated with the authenticated user.
       tags:
@@ -1714,21 +1715,6 @@ components:
         current:
           type: boolean
           description: Whether this is the current session
-    Post:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        multimediaUrl:
-          type: string
-          nullable: false
-        caption:
-          type: string
-          nullable: true
-        createdAt:
-          type: string
-          format: date-time
     PostResponse:
       type: object
       required:
@@ -1761,40 +1747,7 @@ components:
           type: string
           format: date-time
         user:
-          $ref: '#/components/schemas/PublicUser'
-
-    PublicUser:
-      type: object
-      required:
-        - id
-        - username
-        - name
-        - biography
-        - avatarUrl
-        - isVerified
-        - createdAt
-      properties:
-        id:
-          type: string
-          format: uuid
-        username:
-          type: string
-        name:
-          type: string
-        biography:
-          type:
-            - string
-            - 'null'
-        avatarUrl:
-          type:
-            - string
-            - 'null'
-          format: uri
-        isVerified:
-          type: boolean
-        createdAt:
-          type: string
-          format: date-time
+          $ref: '#/components/schemas/UserProfile'
     ErrorResponse:
       type: object
       required:
