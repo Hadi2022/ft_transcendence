@@ -1366,6 +1366,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
   /posts/{id}:
     delete:
+      operationId: deletePost
       summary: Delete a post.
       description: Safely delete a post and its associated image.
       security:
@@ -1410,14 +1411,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                status: 409
-                message: "A deletion for this post is already in progress."
-                errors: null
+                error:
+                  code: CONFLICT
+                  message: "A deletion for this post is already in progress."
+                  details: {}
         '500':
           description: Internal server error (unexpected disk failure, file or database rollback).
           $ref: '#/components/responses/InternalServerError'
   /posts:
     post:
+      operationId: createPost
       summary: Create a new post with an image and caption optional
       description: Uploads an image file and creates a new post associated with the authenticated user.
       tags:
@@ -1496,18 +1499,9 @@ paths:
                       code: "VALIDATION_ERROR"
                       message: "Invalid image content"
                       details:
-                        image: "INVALID_CONTENT"
+                        image: "IMAGE_INVALID_CONTENT"
         '401':
-          description: Unauthorized - Authentication required
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                value:
-                  error:
-                    code: "UNAUTHORIZED"
-                    message: "You are not authorized to access this resource"
+          $ref: '#/components/responses/Unauthorized'
         '413':
           description: Image exceeds the maximum allowed size
           content:
@@ -1515,12 +1509,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                value:
-                  error:
-                    code: "PAYLOAD_TOO_LARGE"
-                    message: "Image exceeds the maximum allowed size"
-                    details:
-                      image: "IMAGE_TOO_LARGE"
+                error:
+                  code: "PAYLOAD_TOO_LARGE"
+                  message: "Image exceeds the maximum allowed size"
+                  details:
+                    image: "IMAGE_TOO_LARGE"
         '415':
           description: Unsupported image format
           content:
@@ -1528,12 +1521,11 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                value:
-                  error:
-                    code: UNSUPPORTED_MEDIA_TYPE
-                    message: "Unsupported image format"
-                    details:
-                      image: "IMAGE_INVALID_FORMAT"
+                error:
+                  code: UNSUPPORTED_MEDIA_TYPE
+                  message: "Unsupported image format"
+                  details:
+                    image: "IMAGE_INVALID_FORMAT"
         '500':
           description: Internal server error (with automatic file rollback)
           content:
