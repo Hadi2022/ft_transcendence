@@ -558,7 +558,7 @@ paths:
 
       responses:
         '200':
-          description: Sucessfully returned list of users
+          description: Successfully returned list of users
           content:
             application/json:
               schema:
@@ -1423,7 +1423,7 @@ paths:
       tags:
         - Posts
       operationId: createPost
-      summary: Create a new post with an image and caption optional
+      summary: Create a new post with an image and an optional caption
       description: Uploads an image file and creates a new post associated with the authenticated user.
       security:
         - sessionCookie: []
@@ -1438,7 +1438,7 @@ paths:
               properties:
                 image:
                   type: string
-                  contentMediaType: binary
+                  format: binary
                   description: >-
                     Image file (JPEG, PNG or WebP).
                     Maximum file size: 6 MiB (6291456 bytes).
@@ -1475,8 +1475,8 @@ paths:
                   updatedAt: "2026-11-17T22:15:29.742Z"
                   user:
                     id: "07420a48-cfa7-4fd5-b450-020e449f5485"
-                    username: "fernandezestebanmanuel9"
-                    name: "Manuel Fernández Esteban"
+                    username: "example_user"
+                    name: "Example User"
                     biography: null
                     avatarUrl: "https://lh3.googleusercontent.com/a/ACg8ocJGgWcDD_qTGAdhIw9Lgq1ofUn83gz2FdYTvudP_AHREP78dQ=s96-c"
                     isVerified: true
@@ -1495,7 +1495,7 @@ paths:
                   value:
                     error:
                       code: "VALIDATION_ERROR"
-                      message: "Image is required."
+                      message: "Image is required"
                       details:
                         image: IMAGE_REQUIRED
                 malformedCaption:
@@ -1533,7 +1533,7 @@ paths:
               example:
                 error:
                   code: "PAYLOAD_TOO_LARGE"
-                  message: "Image exceeds the maximum allowed size"
+                  message: "Image is too large"
                   details:
                     image: "IMAGE_TOO_LARGE"
         '415':
@@ -1791,6 +1791,7 @@ components:
           description: Whether this is the current session
     Post:
       type: object
+      description: A post created by a user
       required:
         - id
         - userId
