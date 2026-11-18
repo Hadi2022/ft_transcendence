@@ -205,7 +205,7 @@ export async function createGoogleUser(
                     googleId: _data.googleId,
                     isVerified: true,
                     name: _data.name,
-                    avatarUrl: _data.picture,
+                    avatarUrl: null,
                 },
                 omit: userProfileOmit
             });

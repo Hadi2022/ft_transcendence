@@ -100,6 +100,8 @@ paths:
         Retrieves or creates the local user, opens a session using
         the existing session service, sets the HttpOnly sessionID
         cookie and redirects the browser to the frontend.
+        Newly created users have a null avatarUrl. Google profile
+        pictures are ignored and existing avatars are preserved.
         If the request already has an active session, authentication
         is rejected. The temporary OAuth state cookie is cleared
         when the callback is processed.
@@ -599,7 +601,7 @@ paths:
                   email: hadi@selfhosted.selfhostingiscool
                   name: hadi
                   biography: I hate big tech
-                  avatarUrl: https://example.com/avatars/hadi.png
+                  avatarUrl: /uploads/avatars/0b0f5a52-3c4d-4d1e-8f6a-1d2c9e3b5a47.webp
                   isVerified: false
                   createdAt: '2026-10-31T12:00:00.000Z'
         '401':
@@ -1633,6 +1635,7 @@ components:
         avatarUrl:
           type: [string, 'null']
           maxLength: 500
+          description: Public path of an internally managed avatar, or null if no avatar is set.
         isVerified:
           type: boolean
         createdAt:

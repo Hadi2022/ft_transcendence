@@ -20,7 +20,6 @@ type ProfileGoogle = {
     email: string
     emailVerified: boolean
     passwordHash: null
-    picture:string|null
     name:string|null
 }
 
