@@ -26,9 +26,17 @@ class UserNotFoundError extends Error {
     }
 }
 
+class UserConcurrencyError extends Error {
+    constructor(message: string = 'Concurrent change') {
+        super(message)
+        this.name = 'UserConcurrencyError'
+    }
+}
+
 export {
     UserValidationError,
     UserNameConflictError,
     UserEmailConflictError,
-	UserNotFoundError
+	UserNotFoundError,
+    UserConcurrencyError,
 }

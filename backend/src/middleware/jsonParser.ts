@@ -1,6 +1,6 @@
 
 import type { NextFunction, Request, Response } from 'express'
-import { BadRequestError } from '../errors/HttpErrors.ts'
+import { BadRequestError, PayloadTooLargeError } from '../errors/HttpErrors.ts'
 
 export const syntaxErrorParser = (err: Error, req: Request, res: Response, next: NextFunction) => {
 
@@ -8,6 +8,11 @@ export const syntaxErrorParser = (err: Error, req: Request, res: Response, next:
 		throw new BadRequestError({
 			message: 'Error parsing JSON',
 		})
+
+    if ('type' in err && err.type == 'entity.too.large')
+        throw new PayloadTooLargeError({
+            message: 'JSON payload too large',
+        })
 
 	throw err
 }

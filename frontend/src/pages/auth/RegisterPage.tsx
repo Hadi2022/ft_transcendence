@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router";
 import ButtonComponent from "./components/ButtonComponent";
-import InputComponent from "./components/InputComponent";
+import InputComponent from "../../components/InputComponent";
 import { register } from "../../services/auth";
 import { useState, type SubmitEvent } from "react";
 import { useTranslation } from "react-i18next";
