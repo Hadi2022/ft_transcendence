@@ -1,5 +1,5 @@
 import type { User, NewUserData, UpdateUserData, OwnProfile, UserProfile, UserOrderBy } from '../types/user.ts'
-import { UserNameConflictError, UserEmailConflictError, UserNotFoundError } from '../errors/userErrors.ts'
+import { UserNameConflictError, UserEmailConflictError, UserNotFoundError, UserConcurrencyError } from '../errors/userErrors.ts'
 import { hashPassword, verifyPassword } from './passwordService.ts'
 import * as userRepository from '../repositories/userRepository.ts'
 import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts'
@@ -187,7 +187,7 @@ const saveAvatar = async (image: ValidatedImage, user: User) => {
 	try {
 		const count = (await userRepository.updateUserAvatarUrl(user.id, oldImagePath, path)).count
 		if (count === 0)
-			throw new Error('CONCURRENCY')
+			throw new UserConcurrencyError()
 	} catch (error: any) {
 
 		try {
@@ -217,7 +217,7 @@ const deleteAvatar = async (user: User) => {
 	const count = (await userRepository.updateUserAvatarUrl(user.id, oldAvatarUrl, null)).count
 
 	if (count === 0)
-		throw new Error('CONCURRENCY')
+		throw new UserConcurrencyError()
 
 	try {
 		await deleteImage(oldAvatarUrl, 'avatars')	
