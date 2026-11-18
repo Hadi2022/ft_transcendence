@@ -101,7 +101,6 @@ export async function verifyGoogleAuthorizationCode(code: string) {
 	return {
 		googleId: payload.sub,
 		email: payload.email,
-		name: payload.name ?? null,
-		picture: payload.picture ?? null,
+		name: payload.name ?? null
 	}
 }

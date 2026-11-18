@@ -112,7 +112,6 @@ export async function googleCallback(req: Request, res: Response) {
 			googleId: googleProfileResponse.googleId,
 			email: parsed.data.email,
 			name: googleProfileResponse.name,
-			picture: googleProfileResponse.picture,
 			passwordHash: null,
 			emailVerified: true,
 		}
