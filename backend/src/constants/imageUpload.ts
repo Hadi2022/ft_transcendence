@@ -35,4 +35,4 @@ export const UPLOAD_DIRECTORIES = {
 // Maximum number of pixels allowed during image decoding (25 megapixels)
 export const MAX_IMAGE_PIXELS = 25_000_000
 
-export const POST_MAX_SIZE = 5 * 1024 * 1024
+export const POST_MAX_SIZE = 6 * 1024 * 1024

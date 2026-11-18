@@ -1414,12 +1414,13 @@ paths:
         '500':
           description: Internal server error (unexpected disk failure, file or database rollback).
           $ref: '#/components/responses/InternalServerError'
- post:
+  post:
       summary: Create a new post with an image and caption optional
+      description: Uploads an image file and creates a new post associated with the authenticated user.
       tags:
         - Posts
       security:
-        - cookieAuth: []
+        - sessionCookie: []
       requestBody:
         required: true
         content:
@@ -1431,11 +1432,12 @@ paths:
               properties:
                 image:
                   type: string
-                  format: binary
-                  description: Image file (JPEG, PNG, WebP). Must match real file signature (magic bytes) and not exceed max size.
+                  contentMediaType: image/*
+                  description: Image file (JPEG, PNG, WebP). Validated by magic bytes and size limit.
                 caption:
-                  type: string
-                  nullable: true
+                  type:
+                    - string
+                    - 'null'
                   description: Optional text caption for the post.
             encoding:
               image:
@@ -1447,37 +1449,94 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PostResponse'
+              example:
+                id: "0abd644b-1ade-419f-9f71-cf9a0d3e5bc9"
+                userId: "07420a48-cfa7-4fd5-b450-020e449f5485"
+                multimediaUrl: "/uploads/posts/a3545fba-f703-4661-a765-3a626082bffa.jpg"
+                caption: "Mi quinta prueba"
+                createdAt: "2026-11-17T22:15:29.742Z"
+                updatedAt: "2026-11-17T22:15:29.742Z"
+                user:
+                  id: "07420a48-cfa7-4fd5-b450-020e449f5485"
+                  username: "fernandezestebanmanuel9"
+                  name: "Manuel Fernández Esteban"
+                  biography: null
+                  avatarUrl: "https://lh3.googleusercontent.com/a/ACg8ocJGgWcDD_qTGAdhIw9Lgq1ofUn83gz2FdYTvudP_AHREP78dQ=s96-c"
+                  isVerified: true
+                  createdAt: "2026-11-09T18:49:39.495Z"
         '400':
-          description: Validation error (missing image, invalid file, malformed caption)
+          description: Bad Request - Missing image, invalid file content/format, or malformed caption
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingImage:
+                  summary: Missing image file
+                  value:
+                    error:
+                      code: "BAD_REQUEST"
+                      message: "Image is required."
+                      details: {}
+                malformedCaption:
+                  summary: Malformed or invalid caption
+                  value:
+                    error:
+                      code: "VALIDATION_ERROR"
+                      message: "Caption malformed"
+                      details:
+                        _root: "INVALID_VALUE"
+                invalidImageContent:
+                  summary: Corrupted file or invalid magic bytes
+                  value:
+                    error:
+                      code: "VALIDATION_ERROR"
+                      message: "Invalid image content"
+                      details:
+                        image: "INVALID_CONTENT"
         '401':
           description: Unauthorized - Authentication required
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                value:
+                  error:
+                    code: "UNAUTHORIZED"
+                    message: "You are not authorized to access this resource"
         '413':
           description: Image exceeds the maximum allowed size
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                value:
+                  error:
+                    code: "PAYLOAD_TOO_LARGE"
+                    message: "Image exceeds the maximum allowed size"
+                    details:
+                      image: "IMAGE_TOO_LARGE"
         '415':
           description: Unsupported image format
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                value:
+                  error:
+                    code: UNSUPPORTED_MEDIA_TYPE
+                    message: "Unsupported image format"
+                    details:
+                      image: "IMAGE_INVALID_FORMAT"
         '500':
           description: Internal server error (with automatic file rollback)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-
 
 components:
   securitySchemes:
@@ -1667,6 +1726,72 @@ components:
         caption:
           type: string
           nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    PostResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - multimediaUrl
+        - caption
+        - createdAt
+        - updatedAt
+        - user
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        multimediaUrl:
+          type: string
+          examples:
+            - "/uploads/posts/a3545fba-f703-4661-a765-3a626082bffa.jpg"
+        caption:
+          type:
+            - string
+            - 'null'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/PublicUser'
+
+    PublicUser:
+      type: object
+      required:
+        - id
+        - username
+        - name
+        - biography
+        - avatarUrl
+        - isVerified
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        name:
+          type: string
+        biography:
+          type:
+            - string
+            - 'null'
+        avatarUrl:
+          type:
+            - string
+            - 'null'
+          format: uri
+        isVerified:
+          type: boolean
         createdAt:
           type: string
           format: date-time
