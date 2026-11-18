@@ -185,7 +185,9 @@ const setAvatar = async (req: AuthenticatedRequest, res: Response) => {
     }
     
     res.status(200).json({
-        avatarUrl: newAvatarUrl
+        data: {
+            avatarUrl: newAvatarUrl
+        }
     })
 }
 
