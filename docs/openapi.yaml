@@ -795,7 +795,7 @@ paths:
                   summary: Not multipart/form-data, or malformed multipart body
                   value:
                     error:
-                      code: VALIDATION_ERROR
+                      code: BAD_REQUEST
                       message: Invalid multipart request
                       details:
                         avatar: INVALID_MULTIPART
