@@ -37,7 +37,14 @@ export const createPost = async (
 			caption
 		})
 	} catch (error) {
-		await deleteImage(multimediaUrl,'posts');
+		try {
+			await deleteImage(multimediaUrl,'posts');
+		} catch (error) {
+			throw new InternalPostError({ message: 'Failed to roll back post image',
+					details: 'The image must be deleted manually.',
+					filePath:multimediaUrl});
+		}
+
 		throw error;
 	}
 
