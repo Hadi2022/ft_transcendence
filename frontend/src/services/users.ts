@@ -33,24 +33,30 @@ export async function updateCurrentUser(data: UpdateProfileData): Promise<UserPr
     return (body.data)
 }
 
-// MOCK: no avatar endpoint yet
-// Replace these two functions with real requests when the backend is ready
-function wait(ms: number, signal?: AbortSignal) {
-    signal?.throwIfAborted()
-    return new Promise<void>((resolve, reject) => {
-        const timer = setTimeout(resolve, ms)
-        signal?.addEventListener("abort", () => {
-            clearTimeout(timer)
-            reject(signal.reason)
-        }, { once: true })
-    })
-}
-
 export async function uploadAvatar(file: File, signal?: AbortSignal): Promise<string> {
-    await wait(800, signal)
-    return (URL.createObjectURL(file))
+    const formData = new FormData()
+    formData.append("avatar", file)
+
+    const res = await fetch("/api/users/me/avatar", {
+        method: "PUT",
+        credentials: "include",
+        body: formData,
+        signal
+    })
+
+    if (!res.ok) await throwApiError(res)
+
+    const body = await res.json()
+
+    return (body.data.avatarUrl)
 }
 
 export async function removeAvatar(signal?: AbortSignal): Promise<void> {
-    await wait(500, signal)
+    const res = await fetch("/api/users/me/avatar", {
+        method: "DELETE",
+        credentials: "include",
+        signal
+    })
+
+    if (!res.ok) await throwApiError(res)
 }
