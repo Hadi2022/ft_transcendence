@@ -74,3 +74,23 @@ export async function getPostById(
 			}
 		})
 }
+
+export async function updatePost(
+	_idPost:string, _caption:string|null):Promise<Post> {
+
+		try {
+			return await prisma.post.update({
+				where: {id:_idPost},
+				data:{
+					caption : _caption
+				},
+				include:{
+					user:{omit:userProfileOmit}
+				}
+			})
+		} catch (error:unknown) {
+			if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025')
+				throw new RecordNotFoundError('Post not found')
+			throw error;
+		}
+}
