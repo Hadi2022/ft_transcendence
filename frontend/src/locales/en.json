@@ -99,7 +99,7 @@
             "removeError": "Couldn't remove the image",
             "uploaded": "Photo updated",
             "removed": "Photo removed",
-            "conflict": "Your photo changed while uploading. Please try again.",
+            "conflict": "Your photo was changed from another tab or device at the same time. Please try again.",
             "network": "Couldn't connect to the server"
         }
     },

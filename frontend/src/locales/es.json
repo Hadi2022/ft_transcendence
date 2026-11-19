@@ -99,7 +99,7 @@
             "removeError": "No se ha podido quitar la imagen",
             "uploaded": "Foto actualizada",
             "removed": "Foto eliminada",
-            "conflict": "Tu foto ha cambiado mientras se subía. Inténtalo de nuevo.",
+            "conflict": "Tu foto ha cambiado desde otra pestaña o dispositivo a la vez. Vuelve a intentarlo.",
             "network": "No se ha podido conectar con el servidor"
         }
     },
