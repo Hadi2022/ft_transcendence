@@ -31,6 +31,7 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
 
     const [status, setStatus] = useState<AvatarStatus>("idle")
     const [error, setError] = useState<string | null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string|null>(null)
 
     const inputRef = useRef<HTMLInputElement>(null)
     const abortRef = useRef<AbortController | null>(null)
@@ -42,11 +43,9 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
     const isBusy = status !== "idle" || disabled
 
     useEffect(() => {
-        return () => {
-            if (avatarUrl?.startsWith("blob:"))
-                URL.revokeObjectURL(avatarUrl)
-        }
-    }, [avatarUrl])
+        if (!previewUrl) return
+        return () => URL.revokeObjectURL(previewUrl)
+    }, [previewUrl])
 
     async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0]
@@ -77,6 +76,8 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
                 return
             }
 
+            setPreviewUrl(URL.createObjectURL(file))
+
             const url = await uploadAvatar(file, controller.signal)
             onAvatarChange(url)
         } catch {
@@ -84,6 +85,7 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
             setError("settings.avatar.uploadError")
         } finally {
             if (!controller.signal.aborted) {
+                setPreviewUrl(null)
                 setStatus("idle")
                 onPendingChange(false)
             }
@@ -114,7 +116,7 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
 
     return (
         <section className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-              <img src={avatarUrl ?? DEFAULT_AVATAR}
+              <img src={previewUrl ?? avatarUrl ?? DEFAULT_AVATAR}
                    alt={ t("settings.avatar.alt") }
                    onError={(e) => {
                        if (!e.currentTarget.src.endsWith(DEFAULT_AVATAR))
