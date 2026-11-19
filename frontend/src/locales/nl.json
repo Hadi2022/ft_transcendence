@@ -96,7 +96,11 @@
             "tooLarge": "The image is larger than 2 MB",
             "invalidImage": "The file is not a valid image",
             "uploadError": "Couldn't upload the image",
-            "removeError": "Couldn't remove the image"
+            "removeError": "Couldn't remove the image",
+            "uploaded": "Photo updated",
+            "removed": "Photo removed",
+            "conflict": "Your photo changed while uploading. Please try again.",
+            "network": "Couldn't connect to the server"
         }
     },
     "retry": "Retry"
