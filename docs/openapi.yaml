@@ -882,7 +882,7 @@ paths:
               example:
                 error:
                   code: PAYLOAD_TOO_LARGE
-                  message: Image is too large
+                  message: Image exceeds the maximum allowed size
                   details:
                     avatar: IMAGE_TOO_LARGE
         '415':
@@ -1445,11 +1445,11 @@ paths:
                     Maximum pixel count: 25000000.
                     Animated and multi-page images are not supported.
                 caption:
-                  type:
-                    - string
-                    - 'null'
+                  type: string
                   maxLength: 400
-                  description: Optional text caption for the post.
+                  description: >-
+                    Optional text caption for the post.
+                    Omit this field if no caption is provided.
             encoding:
               image:
                 contentType: image/jpeg, image/png, image/webp
@@ -1467,20 +1467,20 @@ paths:
                     $ref: '#/components/schemas/Post'
               example:
                 data:
-                  id: "0abd644b-1ade-419f-9f71-cf9a0d3e5bc9"
-                  userId: "07420a48-cfa7-4fd5-b450-020e449f5485"
-                  multimediaUrl: "/uploads/posts/a3545fba-f703-4661-a765-3a626082bffa.jpg"
-                  caption: "Mi quinta prueba"
-                  createdAt: "2026-11-17T22:15:29.742Z"
-                  updatedAt: "2026-11-17T22:15:29.742Z"
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  userId: "550e8400-e29b-41d4-a716-446655440001"
+                  multimediaUrl: "/uploads/posts/550e8400-e29b-41d4-a716-446655440002.jpg"
+                  caption: "My firs post"
+                  createdAt: "2026-11-17T22:00:00.000Z"
+                  updatedAt: "2026-11-17T22:00:00.000Z"
                   user:
-                    id: "07420a48-cfa7-4fd5-b450-020e449f5485"
+                    id: "550e8400-e29b-41d4-a716-446655440001"
                     username: "example_user"
                     name: "Example User"
                     biography: null
-                    avatarUrl: "https://lh3.googleusercontent.com/a/ACg8ocJGgWcDD_qTGAdhIw9Lgq1ofUn83gz2FdYTvudP_AHREP78dQ=s96-c"
+                    avatarUrl: null
                     isVerified: true
-                    createdAt: "2026-11-09T18:49:39.495Z"
+                    createdAt: "2026-11-09T18:00:00.000Z"
         '400':
           description: >-
             The request is not valid multipart/form-data, the image file is
@@ -1533,7 +1533,7 @@ paths:
               example:
                 error:
                   code: "PAYLOAD_TOO_LARGE"
-                  message: "Image is too large"
+                  message: Image exceeds the maximum allowed size
                   details:
                     image: "IMAGE_TOO_LARGE"
         '415':
