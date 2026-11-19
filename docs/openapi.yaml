@@ -1498,14 +1498,14 @@ paths:
                       message: "Image is required"
                       details:
                         image: IMAGE_REQUIRED
-                malformedCaption:
-                  summary: Malformed or invalid caption
+                captionTooLong:
+                  summary: Caption exceeds 400 characters
                   value:
                     error:
-                      code: "VALIDATION_ERROR"
-                      message: "Caption malformed"
+                      code: VALIDATION_ERROR
+                      message: Caption malformed
                       details:
-                        _root: "INVALID_VALUE"
+                        caption: INVALID_VALUE
                 invalidImageContent:
                   summary: Corrupted file or invalid magic bytes
                   value:
@@ -1580,7 +1580,7 @@ paths:
               example:
                 error:
                   code: VALIDATION_ERROR
-                  message: Invalid post ID
+                  message: Invalid UUID in route parameter
                   details:
                     id: INVALID_UUID
         '401':
