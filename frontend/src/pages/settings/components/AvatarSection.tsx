@@ -1,6 +1,9 @@
 import { useTranslation } from "react-i18next"
 import { useEffect, useRef, useState, type ChangeEvent } from "react"
 import { removeAvatar, uploadAvatar } from "../../../services/users"
+import { ApiError } from "../../../services/api"
+import { ErrorDetails } from "@transcendence/shared/errors/error-details"
+import { getCurrentUser } from "../../../services/auth"
 
 const DEFAULT_AVATAR="/img/default-avatar.svg"
 const AVATAR_MAX_SIZE = 2 * 1024 * 1024
@@ -14,6 +17,22 @@ async function canDecodeImage(file: File): Promise<boolean>{
     } catch {
         return (false)
     }
+}
+
+function getAvatarErrorKey(err: unknown, fallback: string): string {
+    if (err instanceof TypeError)
+        return "settings.avatar.network"
+    if (!(err instanceof ApiError))
+        return fallback
+    if (err.status === 409)
+        return "settings.avatar.conflict"
+    if (err.details.avatar === ErrorDetails.IMAGE_TOO_LARGE)
+        return "settings.avatar.tooLarge"
+    if (err.details.avatar === ErrorDetails.IMAGE_INVALID_FORMAT)
+        return "settings.avatar.invalidType"
+    if (err.details.avatar === ErrorDetails.IMAGE_INVALID_CONTENT)
+        return "settings.avatar.invalidImage"
+    return (fallback)
 }
 
 type AvatarSectionProps = {
@@ -31,6 +50,8 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
 
     const [status, setStatus] = useState<AvatarStatus>("idle")
     const [error, setError] = useState<string | null>(null)
+    const [success, setSuccess] = useState<string|null>(null)
+    const [previewUrl, setPreviewUrl] = useState<string|null>(null)
 
     const inputRef = useRef<HTMLInputElement>(null)
     const abortRef = useRef<AbortController | null>(null)
@@ -42,16 +63,26 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
     const isBusy = status !== "idle" || disabled
 
     useEffect(() => {
-        return () => {
-            if (avatarUrl?.startsWith("blob:"))
-                URL.revokeObjectURL(avatarUrl)
+        if (!previewUrl) return
+        return () => URL.revokeObjectURL(previewUrl)
+    }, [previewUrl])
+
+    async function syncAvatarAfterConflict(signal: AbortSignal) {
+        try {
+            const user = await getCurrentUser(signal)
+            if (!signal.aborted)
+                onAvatarChange(user.avatarUrl)
+        } catch {
+            // If it fails, nothing to do, conflict message remains
         }
-    }, [avatarUrl])
+    }
 
     async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0]
         e.target.value = ""
         if (!file) return
+
+        setSuccess(null)
 
         if (!AVATAR_TYPES.includes(file.type)) {
             setError("settings.avatar.invalidType")
@@ -77,13 +108,19 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
                 return
             }
 
+            setPreviewUrl(URL.createObjectURL(file))
+
             const url = await uploadAvatar(file, controller.signal)
             onAvatarChange(url)
-        } catch {
+            setSuccess("settings.avatar.uploaded")
+        } catch (err) {
             if (controller.signal.aborted) return
-            setError("settings.avatar.uploadError")
+            setError(getAvatarErrorKey(err, "settings.avatar.uploadError"))
+            if (err instanceof ApiError && err.status === 409)
+                await syncAvatarAfterConflict(controller.signal)
         } finally {
             if (!controller.signal.aborted) {
+                setPreviewUrl(null)
                 setStatus("idle")
                 onPendingChange(false)
             }
@@ -96,14 +133,18 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
         abortRef.current = controller
 
         setError(null)
+        setSuccess(null)
         setStatus("removing")
         onPendingChange(true)
         try {
             await removeAvatar(controller.signal)
             onAvatarChange(null)
-        } catch {
+            setSuccess("settings.avatar.removed")
+        } catch (err) {
             if (controller.signal.aborted) return
-            setError("settings.avatar.removeError")
+            setError(getAvatarErrorKey(err, "settings.avatar.removeError"))
+            if (err instanceof ApiError && err.status === 409)
+                await syncAvatarAfterConflict(controller.signal)
         } finally {
             if (!controller.signal.aborted) {
                 setStatus("idle")
@@ -114,7 +155,7 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
 
     return (
         <section className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
-              <img src={avatarUrl ?? DEFAULT_AVATAR}
+              <img src={previewUrl ?? avatarUrl ?? DEFAULT_AVATAR}
                    alt={ t("settings.avatar.alt") }
                    onError={(e) => {
                        if (!e.currentTarget.src.endsWith(DEFAULT_AVATAR))
@@ -150,6 +191,9 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
                       )}
                   </div>
                   <p className="text-xs text-soft-text">{ t("settings.avatar.hint") }</p>
+                  { success && (
+                    <p role="status" className="text-sm text-success">{ t(success) }</p>
+                  )}
 
                   { error && (
                       <p role="alert" className="text-sm text-danger">{ t(error) }</p>

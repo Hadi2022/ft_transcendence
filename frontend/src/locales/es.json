@@ -96,7 +96,11 @@
             "tooLarge": "La imagen pesa más de 2 MB",
             "invalidImage": "El archivo no es una imagen válida",
             "uploadError": "No se ha podido subir la imagen",
-            "removeError": "No se ha podido quitar la imagen"
+            "removeError": "No se ha podido quitar la imagen",
+            "uploaded": "Foto actualizada",
+            "removed": "Foto eliminada",
+            "conflict": "Tu foto ha cambiado desde otra pestaña o dispositivo a la vez. Vuelve a intentarlo.",
+            "network": "No se ha podido conectar con el servidor"
         }
     },
     "retry": "Reintentar"

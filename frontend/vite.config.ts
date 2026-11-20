@@ -11,6 +11,11 @@ export default defineConfig({
         target: 'https://localhost:443',
         changeOrigin: true,
 		secure: false
+      },
+      '/uploads': {
+        target: 'https://localhost:443',
+        changeOrigin: true,
+        secure: false
       }
     }
   }
