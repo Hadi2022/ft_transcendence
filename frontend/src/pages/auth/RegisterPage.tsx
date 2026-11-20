@@ -7,8 +7,39 @@ import { useTranslation } from "react-i18next";
 import { ApiError } from "../../services/api";
 import { registerUserSchema } from "@transcendence/shared/schemas/user";
 import GoogleButtonComponent from "./components/GoogleButtonComponent";
+import { ErrorDetails } from "@transcendence/shared/errors/error-details";
 
-const SPECIAL_CHAR_REGEX = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/
+const REGISTER_FIELDS = ["username", "email", "password"]
+
+const FIELD_ERROR_CODES: string[] = [
+    ErrorDetails.USERNAME_REQUIRED,
+    ErrorDetails.USERNAME_TOO_SHORT,
+    ErrorDetails.USERNAME_TOO_LONG,
+    ErrorDetails.USERNAME_INVALID_CHARS,
+    ErrorDetails.EMAIL_REQUIRED,
+    ErrorDetails.EMAIL_TOO_LONG,
+    ErrorDetails.EMAIL_INVALID_FORMAT,
+    ErrorDetails.PASSWORD_REQUIRED,
+    ErrorDetails.PASSWORD_TOO_SHORT,
+    ErrorDetails.PASSWORD_TOO_LONG,
+    ErrorDetails.PASSWORD_NO_SPECIAL_CHAR,
+]
+
+type ValidationIssue = { path: PropertyKey[], message: string}
+
+function getFieldErrors(issues: ValidationIssue[]): Record<string, string> {
+    const errors: Record<string, string> = { }
+
+    for (const issue of issues) {
+        const field = issue.path[0]
+        if (typeof field !== "string" || !REGISTER_FIELDS.includes(field) || errors[field])
+            continue
+        errors[field] = FIELD_ERROR_CODES.includes(issue.message)
+            ? `auth.fieldErrors.${issue.message}`
+            : "auth.errors.invalidFields"
+    }
+    return (errors)
+}
 
 function getRegisterErrorKey(err: unknown): string {
     if (err instanceof TypeError)
@@ -52,18 +83,18 @@ export default function RegisterPage() {
         setFieldErrors({})
       
         const result = registerUserSchema.safeParse({ username, email, password })
-        if (!result.success) {
-          setError("auth.errors.invalidFields")
-          return
-        }
-        
-        if (password !== confirmPassword) {
-            setFieldErrors({ confirmPassword: "auth.errors.passwordMismatch" })
-            return 
+        const errors = result.success ? {} : getFieldErrors(result.error.issues)
+
+        if (password !== confirmPassword)
+                errors.confirmPassword = "auth.errors.passwordMismatch"
+
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(errors)
+            return
         }
 
-        if (!SPECIAL_CHAR_REGEX.test(password)) {
-            setFieldErrors({ password: "auth.errors.passwordSpecialChar" })
+        if (!result.success) {
+            setError("auth.errors.invalidFields")
             return
         }
 
@@ -97,7 +128,7 @@ export default function RegisterPage() {
                 <p className="text-sm text-zinc-500">{ t("auth.registerSubtitle") }</p>
             </div>
 
-            <form onSubmit={handleSubmit}
+            <form onSubmit={handleSubmit} noValidate
                 className="flex flex-col gap-5">
                 
                 { /* Username input*/ }
