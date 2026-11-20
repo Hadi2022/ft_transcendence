@@ -1,0 +1,20 @@
+import express from 'express'
+import healthRoutes from './api/health.ts'
+import statusRoutes from './api/status.ts'
+import userRoutes from './api/users.ts'
+import sessionRoutes from './api/sessions.ts'
+import googleAuthRoutes from './api/googleAuth.ts'
+import friendRequestRoutes from './api/friendRequests.ts'
+import postRoutes from './api/post.ts'
+
+const router = express.Router()
+
+router.use('/health', healthRoutes)
+router.use('/status', statusRoutes)
+router.use('/users', userRoutes)
+router.use('/sessions', sessionRoutes)
+router.use('/auth/google', googleAuthRoutes)
+router.use('/friend-requests', friendRequestRoutes)
+router.use('/posts', postRoutes)
+
+export default router

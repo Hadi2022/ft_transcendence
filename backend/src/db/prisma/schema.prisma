@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ----------------------------------------------------
+// ENUMS
+// ----------------------------------------------------
+
+enum FriendStatus {
+  pending
+  accepted
+
+  @@map("friend_status")
+}
+
+// ----------------------------------------------------
+// MODELOS PRINCIPALES
+// ----------------------------------------------------
+
+model User {
+  id             String    @id @default(uuid()) @db.Uuid
+  username       String    @unique @db.VarChar(30)
+  email          String    @unique @db.VarChar(255)
+  passwordHash   String?   @map("password_hash") @db.VarChar(255)
+  googleId       String?   @unique @map("google_id") @db.VarChar(255)
+
+  name           String?   @map("name") @db.VarChar(100)
+  biography      String?   @db.Text
+  avatarUrl      String?   @map("avatar_url") @db.VarChar(500)
+  isVerified     Boolean   @default(false) @map("is_verified")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relaciones
+  session        Session[]
+  posts          Post[]
+  comments       Comment[]
+  likes          PostLike[]
+
+  // Relaciones auto-referenciales para seguidores / seguidos
+  followers      Follow_up[] @relation("Followers")
+  following      Follow_up[] @relation("Continued")
+
+  friendRequestsSent     Friend[] @relation("FriendSender")
+  friendRequestsReceived Friend[] @relation("FriendReceiver")
+
+  @@map("users")
+}
+
+model Friend {
+  id         String       @id @default(uuid()) @db.Uuid
+  senderId   String       @map("sender_id") @db.Uuid
+  receiverId String       @map("receiver_id") @db.Uuid
+  status     FriendStatus @default(pending)
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz
+
+  sender     User @relation("FriendSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver   User @relation("FriendReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@map("friends")
+}
+
+model Session {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  tokenHash    String    @unique @map("token_hash") @db.VarChar(255)
+  ipOrigin     String?   @map("ip_origin") @db.VarChar(45)
+  userAgent    String?   @map("user_agent") @db.Text
+  expiresAt    DateTime  @map("expires_at") @db.Timestamptz
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  lastAccess   DateTime  @default(now()) @updatedAt @map("last_access") @db.Timestamptz
+
+  // Relaciones
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model Follow_up {
+  followerId   String   @map("follower_id") @db.Uuid
+  continuedId  String   @map("continued_id") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relaciones
+  follower   User  @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
+  continued  User  @relation("Continued", fields: [continuedId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, continuedId])
+  @@index([continuedId])
+  @@map("follow-ups")
+}
+/*
+model Category {
+  id          Int             @id @default(autoincrement())
+  name        String          @unique @db.VarChar(50)
+  slug        String          @unique @db.VarChar(60)
+  description String?         @db.VarChar(255)
+  iconUrl     String?         @map("icon_url") @db.VarChar(500)
+
+  // Relaciones
+  posts       PostCategory[]
+
+  @@map("categories")
+}
+*/
+model Post {
+  id             String          @id @default(uuid()) @db.Uuid
+  userId         String          @map("user_id") @db.Uuid
+  multimediaUrl  String          @map("multimedia_url") @db.VarChar(500)
+  caption        String?          @db.VarChar(400)
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relaciones
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments       Comment[]
+  likes          PostLike[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("posts")
+}
+/*
+model PostCategory {
+  postId      String    @map("post_id") @db.Uuid
+  categoryId  Int       @map("category_id")
+
+  // Relaciones
+  post        Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([postId, categoryId])
+  @@index([categoryId])
+  @@map("post_categories")
+}
+*/
+model Comment {
+  id                 String       @id @default(uuid()) @db.Uuid
+  postId             String       @map("post_id") @db.Uuid
+  userId             String       @map("user_id") @db.Uuid
+  parentCommentId    String?      @map("parent_comment_id") @db.Uuid
+  content            String       @db.Text
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relaciones
+  post               Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Auto-relación para respuestas jerárquicas
+  parentComment      Comment?  @relation("Thread", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  reply              Comment[] @relation("Thread")
+
+  @@index([postId, createdAt(sort: Asc)])
+  @@map("comments")
+}
+
+model PostLike {
+  postId    String   @map("post_id") @db.Uuid
+  userId String   @map("user_id") @db.Uuid
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relaciones
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user   User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+  @@map("post_likes")
+}

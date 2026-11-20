@@ -1,0 +1,245 @@
+import type { User, NewUserData, UpdateUserData, OwnProfile, UserProfile, UserOrderBy } from '../types/user.ts'
+import { UserNameConflictError, UserEmailConflictError, UserNotFoundError, UserConcurrencyError } from '../errors/userErrors.ts'
+import { hashPassword, verifyPassword } from './passwordService.ts'
+import * as userRepository from '../repositories/userRepository.ts'
+import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts'
+import type { Order } from '../types/query.ts'
+import { ConflictError, BadRequestError, UnauthorizedError } from '../errors/HttpErrors.ts'
+import { ErrorDetails } from '@transcendence/shared/errors/error-details'
+import type { ValidatedImage } from '../types/image.ts'
+import { deleteImage, saveImage } from '../utils/imageStorage.ts'
+
+type CreateUserInput = {
+    username: string
+    email: string
+    password: string
+}
+
+type ProfileGoogle = {
+    googleId: string
+    email: string
+    emailVerified: boolean
+    passwordHash: null
+    name:string|null
+}
+
+interface ListUserProfilesInput {
+    order?: Order | undefined,
+    orderBy?: UserOrderBy | undefined,
+}
+
+async function prepareUser(input: CreateUserInput): Promise<NewUserData> {
+    const passwordHash = await hashPassword(input.password)
+
+
+    return {
+        username: input.username,
+        email: input.email,
+        passwordHash
+    }
+}
+
+async function createUser(input: CreateUserInput): Promise<UserProfile> {
+
+    const userData = await prepareUser(input)
+    try {
+        return await userRepository.createUser(userData);
+    }
+    catch (error) {
+        if (error instanceof UniqueConstraintError) {
+            if (error?.field === 'email')
+                throw new UserEmailConflictError('The email address is already registered');
+            else if (error?.field === 'username')
+                throw new UserNameConflictError('The username is already in use');
+        }
+        throw error;
+    }
+
+}
+
+async function isValidCredentials(
+    email: string,
+    password: string
+): Promise<User | null> {
+
+    const user = await userRepository.findByEmail(email)
+
+    if (!user || !user.passwordHash) {
+        return null
+    }
+
+    const isValid = await verifyPassword(user.passwordHash, password)
+
+    if (!isValid) {
+        return null
+    }
+
+    return user
+}
+
+async function listUserProfiles(params: ListUserProfilesInput): Promise<UserProfile[]> {
+
+    return userRepository.findMany({
+        order: params.order,
+        orderBy: params.orderBy,
+    })
+
+}
+
+// Returns full user object
+async function findUserById(id: string): Promise<User | null> {
+    return userRepository.findById(id)
+}
+
+// Returns only public user fields
+async function findUserProfileById(id: string): Promise<UserProfile | null> {
+    return userRepository.findProfileById(id)
+}
+
+// Returns only public user fields by username
+async function findUserProfileByUsername(username: string): Promise<UserProfile | null> {
+    return userRepository.findProfileByUsername(username)
+}
+
+// Public profile + email
+async function findUserOwnProfileById(id: string): Promise<OwnProfile | null> {
+    return userRepository.findOwnProfileById(id)
+}
+
+async function updateUser(
+    id: string,
+    data: UpdateUserData
+): Promise<OwnProfile> {
+
+    try {
+        if (data.biography?.trim() === "")
+            data.biography = null
+        if (data.name?.trim() === "")
+            data.name = null
+        return await userRepository.updateUser(id, data)
+    }
+    catch (error) {
+        if (error instanceof RecordNotFoundError) {
+            throw new UserNotFoundError('User not found')
+        }
+
+        throw error
+    }
+}
+
+async function createGoogleUser(profile: ProfileGoogle) {
+
+    if (!profile.email)
+        throw new BadRequestError({
+            message: 'An email address could not be obtained from the Google provider.'
+        });
+
+    if (!profile.emailVerified)
+        throw new UnauthorizedError({
+            message: 'The Google email address is not verified. The account cannot be provisioned.'
+        });
+
+    const checkGoogleId = await userRepository.findUserByGoogleId(profile.googleId);
+    if (checkGoogleId)
+        return checkGoogleId;
+    const checkEmail = await userRepository.findByEmail(profile.email);
+    if (checkEmail)
+        throw new ConflictError({
+            message: 'The email address is already registered.',
+            details: { email: ErrorDetails.EMAIL_IN_USE }
+        });
+    try {
+        return await userRepository.createGoogleUser(profile);
+	} catch (error) {
+		if (error instanceof UniqueConstraintError) {
+			if (error.field === 'email')
+				throw new ConflictError({
+					message: 'The email address is already registered.',
+					details: { email: ErrorDetails.EMAIL_IN_USE }
+				});
+
+			if (error.field === 'username')
+				throw new ConflictError({
+					message: 'The username is already in use.',
+					details: { username: ErrorDetails.USERNAME_IN_USE }
+				});
+		}
+
+		if (error instanceof UserNameConflictError)
+			throw new ConflictError({
+				message: 'A unique username could not be generated after several attempts.',
+				details: { username: ErrorDetails.USERNAME_IN_USE }
+			});
+
+		throw error;
+	}
+}
+
+const saveAvatar = async (image: ValidatedImage, user: User) => {
+
+	const directory = 'avatars'
+
+	const path = await saveImage(image, directory)
+
+	const oldImagePath = user.avatarUrl
+
+	try {
+		const count = (await userRepository.updateUserAvatarUrl(user.id, oldImagePath, path)).count
+		if (count === 0)
+			throw new UserConcurrencyError()
+	} catch (error: any) {
+
+		try {
+			await deleteImage(path, directory)
+		} catch (error) {
+			console.log(error)	
+		}
+
+		throw error
+	}
+
+	try {
+		if (oldImagePath)
+			await deleteImage(oldImagePath, directory)
+	} catch (error) {
+		console.log(error)	
+	}
+
+	return path
+
+}
+
+const deleteAvatar = async (user: User) => {
+
+	const oldAvatarUrl = user.avatarUrl
+
+	if (!oldAvatarUrl)
+		return
+
+	const count = (await userRepository.updateUserAvatarUrl(user.id, oldAvatarUrl, null)).count
+
+	if (count === 0)
+		throw new UserConcurrencyError()
+
+	try {
+		await deleteImage(oldAvatarUrl, 'avatars')	
+	} catch (error) {
+		console.log(error)
+	}
+
+}
+
+export {
+    prepareUser,
+    createUser,
+    isValidCredentials,
+    listUserProfiles,
+    findUserById,
+    findUserProfileById,
+	findUserProfileByUsername,
+    findUserOwnProfileById,
+	updateUser,
+    createGoogleUser,
+    saveAvatar,
+	deleteAvatar,
+}

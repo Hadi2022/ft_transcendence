@@ -1,0 +1,1929 @@
+openapi: 3.1.2
+
+info:
+  title: Transcendence API
+  version: 0.1.0
+  description: REST API for the ft_transcendence project
+
+servers:
+  - url: /api
+    description: API base path
+
+tags:
+  - name: System
+    description: API status and system information
+  - name: Authentication
+    description: External authentication providers
+  - name: Sessions
+    description: User session management
+  - name: Users
+    description: User registration and profile management
+  - name: Friends
+    description: Friend requests and relationships
+  - name: Posts
+    description: Post creation and management
+
+paths:
+  /status:
+    get:
+      tags:
+        - System
+      summary: Get API status
+      description: Returns the current availability status of the API
+      operationId: getApiStatus
+      security: []
+
+      responses:
+        '200':
+          description: API is operational
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: object
+                    required:
+                      - status
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - ok
+              example:
+                data:
+                  status: ok
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/google:
+    get:
+      tags:
+        - Authentication
+      summary: Start Google OAuth authorization
+      description: >-
+        Redirects the browser to Google for authentication.
+        Sets a temporary HttpOnly cookie containing the OAuth state
+        used to validate the callback. Does not require a local session.
+        Requests the openid, email and profile scopes and always asks the
+        user to choose a Google account. If authorization cannot be
+        started, redirects the browser to /login?error=CODE.
+      operationId: authorizeGoogle
+      security: []
+
+      responses:
+        '302':
+          description: Redirect to Google's authorization endpoint
+          headers:
+            Location:
+              description: Google authorization URL
+              required: true
+              schema:
+                type: string
+                format: uri
+            Set-Cookie:
+              description: >-
+                Temporary OAuth state cookie (google_oauth_state). HttpOnly,
+                Secure, SameSite=Lax, scoped to /api/auth/google and valid
+                for 10 minutes
+              required: true
+              schema:
+                type: string
+        '303':
+          description: >-
+            Redirects to /login?error=CODE when Google OAuth
+            authorization cannot be started.
+          headers:
+            Location:
+              description: Frontend login URL containing an error code
+              required: true
+              schema:
+                type: string
+              example: /login?error=INTERNAL_SERVER_ERROR
+
+  /auth/google/callback:
+    get:
+      tags:
+        - Authentication
+      summary: Handle Google OAuth callback
+      description: >-
+        Validates the OAuth state, exchanges the authorization code
+        for Google tokens and verifies the Google ID token.
+        Retrieves or creates the local user, opens a session using
+        the existing session service, sets the HttpOnly sessionID
+        cookie and redirects the browser to the frontend.
+        Newly created users have a null avatarUrl. Google profile
+        pictures are ignored and existing avatars are preserved.
+        If the request already has an active session, authentication
+        is rejected. The temporary OAuth state cookie is cleared
+        when the callback is processed.
+        On failure, the browser is redirected to the login page
+        with an error code.
+
+      operationId: googleCallback
+      security: []
+
+      parameters:
+        - name: state
+          in: query
+          required: false
+          description: State value returned by Google
+          schema:
+            type: string
+
+        - name: code
+          in: query
+          required: false
+          description: Authorization code returned by Google on success
+          schema:
+            type: string
+
+        - name: error
+          in: query
+          required: false
+          description: Error returned by Google when authorization fails
+          schema:
+            type: string
+
+      responses:
+        '303':
+          description: >-
+            Redirects to / after successful authentication,
+            or to /login?error=CODE when authentication fails.
+          headers:
+            Location:
+              description: Frontend destination URL
+              required: true
+              schema:
+                type: string
+              examples:
+                success:
+                  value: /
+                invalidState:
+                  value: /login?error=INVALID_OAUTH_STATE
+                denied:
+                  value: /login?error=GOOGLE_AUTHORIZATION_DENIED
+                conflict:
+                  value: /login?error=CONFLICT
+                emailConflict:
+                  value: /login?error=EMAIL_CONFLICT
+
+            Set-Cookie:
+              description: >-
+                The callback clears the temporary google_oauth_state
+                cookie. On successful authentication, it also sets
+                the HttpOnly sessionID cookie with the existing
+                session expiration and path /.
+                Multiple Set-Cookie headers may be returned.
+              schema:
+                type: string
+
+  /sessions:
+    post:
+      tags:
+        - Sessions
+      summary: User login endpoint
+      description: >-
+        Creates a new session and sets an HttpOnly session cookie that
+        expires together with the session. Fails with 409 if the request
+        already carries a valid session.
+      operationId: openSession
+      security: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  description: Email address. Trimmed and lowercased by the server
+                  type: string
+                  format: email
+                  maxLength: 254
+                password:
+                  type: string
+                  format: password
+                  minLength: 1
+            example:
+              email: john.doe@selfhosted.es
+              password: s3cret-passw0rd
+
+      responses:
+        '201':
+          description: Session created
+          headers:
+            Set-Cookie:
+              description: Session cookie
+              required: true
+              schema:
+                type: string
+        '400':
+          description: Request contains invalid fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                validation:
+                  summary: Invalid or missing fields
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Input contains invalid fields
+                      details:
+                        password: PASSWORD_REQUIRED
+                invalidJson:
+                  $ref: '#/components/examples/InvalidJson'
+        '401':
+          description: Unknown email, wrong password, or an account with no password set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: INVALID_CREDENTIALS
+                  message: Invalid credentials
+                  details: {}
+        '409':
+          description: Session already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: CONFLICT
+                  message: You are already logged in
+                  details: {}
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - Sessions
+      summary: Get active user sessions
+      description: Returns all non-expired sessions of the logged in user
+      operationId: getSessions
+      security:
+        - sessionCookie: []
+
+      responses:
+        '200':
+          description: Sessions returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Session'
+              example:
+                data:
+                  - id: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
+                    userId: c86c401f-7405-456f-ab6f-0ad2ffa2f462
+                    expiresAt: '2026-11-13T12:00:00.000Z'
+                    ipOrigin: 203.0.113.7
+                    userAgent: Mozilla/5.0 (X11; Linux x86_64) Firefox/131.0
+                    current: true
+                  - id: a41d80c5-92b7-4f3e-8a15-c0d9e6b72f14
+                    userId: c86c401f-7405-456f-ab6f-0ad2ffa2f462
+                    expiresAt: '2026-11-12T09:30:00.000Z'
+                    ipOrigin: null
+                    userAgent: null
+                    current: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Sessions
+      summary: Close all user sessions
+      description: Closes all sessions of the logged in user and clears the cookie
+      operationId: closeAllUserSessions
+      security:
+        - sessionCookie: []
+
+      responses:
+        '204':
+          description: All sessions closed
+          headers:
+            Set-Cookie:
+              description: Clears the session cookie
+              required: true
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /sessions/current:
+    delete:
+      tags:
+        - Sessions
+      summary: Close the current session
+      description: Closes the current session and clears the cookie
+      operationId: closeCurrentSession
+      security:
+        - sessionCookie: []
+
+      responses:
+        '204':
+          description: Session closed
+          headers:
+            Set-Cookie:
+              description: Clears the session cookie
+              required: true
+              schema:
+                type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /sessions/{id}:
+    delete:
+      tags:
+        - Sessions
+      summary: Close a session by ID
+      description: >-
+        Closes a session belonging to the logged in user. If the closed
+        session is the current one, the cookie is cleared as well.
+      operationId: closeSession
+      security:
+        - sessionCookie: []
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the session to close
+          schema:
+            type: string
+            format: uuid
+
+      responses:
+        '204':
+          description: Session closed
+          headers:
+            Set-Cookie:
+              description: >-
+                Clears the session cookie. Only present when the closed
+                session was the current one.
+              required: false
+              schema:
+                type: string
+        '400':
+          description: Invalid session ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: Invalid UUID in route parameter
+                  details:
+                    id: INVALID_UUID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Session could not be found
+                  details: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users:
+    post:
+      tags:
+        - Users
+      summary: Register a new user
+      description: Creates a new user account from a username, email and password
+      operationId: registerUser
+      security: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  pattern: '^[a-zA-Z0-9_]+$'
+                  description: Unique username. Letters, digits and underscores only
+                email:
+                  type: string
+                  format: email
+                  maxLength: 254
+                  description: Unique email address. Trimmed and lowercased by the server
+                password:
+                  type: string
+                  format: password
+                  minLength: 6
+                  maxLength: 128
+                  description: Must contain at least one special character
+            example:
+              username: jdoe
+              email: jdoe@example.com
+              password: s3cret-passw0rd
+
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+              example:
+                data:
+                  id: f659603a-e5dc-45be-bf70-21390457357e
+                  username: jdoe
+                  name: null
+                  biography: null
+                  avatarUrl: null
+                  isVerified: false
+                  createdAt: '2026-10-31T12:00:00.000Z'
+        '400':
+          description: Request contains invalid fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                validation:
+                  summary: Invalid or missing fields
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Input contains invalid fields
+                      details:
+                        email: EMAIL_INVALID_FORMAT
+                        password: PASSWORD_NO_SPECIAL_CHAR
+                invalidJson:
+                  $ref: '#/components/examples/InvalidJson'
+        '409':
+          description: Username or email is already in use
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                emailConflict:
+                  summary: Email already registered
+                  value:
+                    error:
+                      code: CONFLICT
+                      message: User already exists
+                      details:
+                        email: EMAIL_IN_USE
+                usernameConflict:
+                  summary: Username already taken
+                  value:
+                    error:
+                      code: CONFLICT
+                      message: User already exists
+                      details:
+                        username: USERNAME_IN_USE
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - Users
+      summary: Retrieve a list of users
+      description: >-
+        Returns a list of users, by default sorted by creation time in
+        descending order. Ties are broken by user ID. At most 100 users are
+        returned (temporary cap until pagination is implemented).
+      operationId: getUserList
+      security: []
+
+      parameters:
+        - name: order
+          in: query
+          required: false
+          description: Sort direction
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+
+        - name: order_by
+          in: query
+          required: false
+          description: Field used to sort users
+          schema:
+            type: string
+            enum: [created_at, username]
+            default: created_at
+
+      responses:
+        '200':
+          description: Successfully returned list of users
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: object
+                    required:
+                      - users
+                    properties:
+                      users:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserProfile'
+        '400':
+          description: Invalid ordering query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidOrder:
+                  summary: Invalid sort direction
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid query parameters
+                      details:
+                        order: INVALID_ORDER
+                invalidOrderBy:
+                  summary: Invalid sort field
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid query parameters
+                      details:
+                        order_by: INVALID_ORDER_BY
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Get the current user
+      description: Returns the profile of the user who owns the current session
+      operationId: getCurrentUser
+      security:
+        - sessionCookie: []
+
+      responses:
+        '200':
+          description: Current user returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/OwnProfile'
+              example:
+                data:
+                  id: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
+                  username: hadi
+                  email: hadi@selfhosted.selfhostingiscool
+                  name: hadi
+                  biography: I hate big tech
+                  avatarUrl: /uploads/avatars/0b0f5a52-3c4d-4d1e-8f6a-1d2c9e3b5a47.webp
+                  isVerified: false
+                  createdAt: '2026-10-31T12:00:00.000Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: You do not exist! (wow!)
+                  details: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      tags:
+        - Users
+      summary: Update the current user profile
+      description: >-
+        Updates one or more editable profile fields (name, biography) of the
+        logged in user. At least one field is required and unknown fields are
+        rejected. A biography that is empty or only whitespace is stored as null.
+      operationId: updateCurrentUser
+      security:
+        - sessionCookie: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              minProperties: 1
+              additionalProperties: false
+              properties:
+                name:
+                  type: [string, 'null']
+                  maxLength: 100
+                  description: Display name
+                biography:
+                  type: [string, 'null']
+                  maxLength: 1000
+                  description: >-
+                    Profile biography. An empty or whitespace-only string is
+                    stored as null
+            example:
+              name: CrazyIgor
+              biography: Updated profile biography
+
+      responses:
+        '200':
+          description: User profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/OwnProfile'
+              example:
+                data:
+                  id: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
+                  username: hadi
+                  email: hadi@selfhosted.selfhostingiscool
+                  name: CrazyIgor
+                  biography: Updated profile biography
+                  avatarUrl: null
+                  isVerified: false
+                  createdAt: '2026-10-31T12:00:00.000Z'
+
+        '400':
+          description: Invalid profile fields, unknown fields or empty request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                noFields:
+                  summary: Empty request body
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Input contains invalid fields
+                      details:
+                        _root: NO_FIELDS_PROVIDED
+                nameTooLong:
+                  summary: Name longer than 100 characters
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Input contains invalid fields
+                      details:
+                        name: NAME_TOO_LONG
+                biographyTooLong:
+                  summary: Biography longer than 1000 characters
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Input contains invalid fields
+                      details:
+                        biography: BIOGRAPHY_TOO_LONG
+                invalidType:
+                  summary: Field is not a string or null
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Input contains invalid fields
+                      details:
+                        name: INVALID_VALUE
+                invalidJson:
+                  $ref: '#/components/examples/InvalidJson'
+
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: User not found
+                  details: {}
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/me/avatar:
+    put:
+      tags:
+        - Users
+      summary: Set the current user's avatar
+      description: >-
+        Uploads a new avatar image for the logged in user as multipart/form-data
+        (single file in the avatar field). The image is fully decoded and
+        validated server side (JPEG, PNG or WebP; single frame; pixel count
+        limited) and stored under a server generated filename. The previous
+        avatar file, if it was a locally stored image, is deleted. Fails with
+        409 if the avatar was changed concurrently by another request.
+      operationId: setCurrentUserAvatar
+      security:
+        - sessionCookie: []
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - avatar
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+                  description: >-
+                    Image file (JPEG, PNG or WebP).
+                    Maximum file size: 2 MiB (2097152 bytes).
+                    Maximum pixel count: 25000000.
+                    Animated and multi-page images are not supported.
+            encoding:
+              avatar:
+                contentType: image/jpeg, image/png, image/webp
+
+      responses:
+        '200':
+          description: Avatar updated
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: object
+                    required:
+                      - avatarUrl
+                    properties:
+                      avatarUrl:
+                        type: string
+                        maxLength: 500
+                        description: Public path of the newly stored avatar
+              example:
+                data:
+                  avatarUrl: /uploads/avatars/0b0f5a52-3c4d-4d1e-8f6a-1d2c9e3b5a47.webp
+        '400':
+          description: >-
+            The request is not valid multipart/form-data, the avatar file is
+            missing, or the file is corrupt, animated or otherwise not a
+            valid single image
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidMultipart:
+                  summary: Not multipart/form-data, or malformed multipart body
+                  value:
+                    error:
+                      code: BAD_REQUEST
+                      message: Invalid multipart request
+                      details:
+                        avatar: INVALID_MULTIPART
+                imageRequired:
+                  summary: No file in the avatar field
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Image is required
+                      details:
+                        avatar: IMAGE_REQUIRED
+                invalidContent:
+                  summary: File cannot be decoded as a single valid image
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid image content
+                      details:
+                        avatar: IMAGE_INVALID_CONTENT
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: The avatar was changed by a concurrent request. Retry the upload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: CONFLICT
+                  message: Conflict
+                  details: {}
+        '413':
+          description: Avatar file exceeds the maximum allowed size
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: PAYLOAD_TOO_LARGE
+                  message: Image exceeds the maximum allowed size
+                  details:
+                    avatar: IMAGE_TOO_LARGE
+        '415':
+          description: The file is a valid image but not in an allowed format (JPEG, PNG or WebP)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: UNSUPPORTED_MEDIA_TYPE
+                  message: Unsupported image format
+                  details:
+                    avatar: IMAGE_INVALID_FORMAT
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Users
+      summary: Remove the current user's avatar
+      description: >-
+        Clears the avatar of the logged in user and deletes the stored image
+        file. Idempotent: succeeds even when no avatar is set. Fails with 409
+        if the avatar was changed concurrently by another request.
+      operationId: clearCurrentUserAvatar
+      security:
+        - sessionCookie: []
+
+      responses:
+        '204':
+          description: Avatar removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: The avatar was changed by a concurrent request. Retry the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: CONFLICT
+                  message: Conflict
+                  details: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get a user by ID
+      description: Returns the public profile of a user by their UUID
+      operationId: getUserById
+      security: []
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the user to retrieve
+          schema:
+            type: string
+            format: uuid
+
+      responses:
+        '200':
+          description: User profile returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+              example:
+                data:
+                  id: 2c5e3619-cbed-4a02-a1e3-9807f0b2989c
+                  username: alejandro_test
+                  name: null
+                  biography: null
+                  avatarUrl: null
+                  isVerified: false
+                  createdAt: '2026-10-31T17:10:37.131Z'
+
+        '400':
+          description: Invalid user ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: Invalid user ID
+                  details:
+                    id: INVALID_UUID
+
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: User not found
+                  details: {}
+
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/by-username/{username}:
+    get:
+      tags:
+        - Users
+      summary: Get a user by username
+      description: Returns the public profile of a user by their unique username
+      operationId: getUserByUsername
+      security: []
+
+      parameters:
+        - name: username
+          in: path
+          required: true
+          description: Username of the user to retrieve
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 30
+            pattern: '^[a-zA-Z0-9_]+$'
+
+      responses:
+        '200':
+          description: User profile returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+              example:
+                data:
+                  id: 2c5e3619-cbed-4a02-a1e3-9807f0b2989c
+                  username: testuser1
+                  name: null
+                  biography: null
+                  avatarUrl: null
+                  isVerified: false
+                  createdAt: '2026-11-12T10:00:00.000Z'
+
+        '400':
+          description: Invalid username
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: Invalid username
+                  details:
+                    username: USERNAME_INVALID_CHARS
+
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: User not found
+                  details: {}
+
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /friend-requests:
+    post:
+      tags:
+        - Friends
+      summary: Send or accept a friend request
+      description: >-
+        Sends a friend request from the logged in user to the receiver. If the
+        receiver has already sent a pending request to the logged in user, that
+        request is accepted instead and the two users become friends.
+      operationId: openFriendRequest
+      security:
+        - sessionCookie: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - receiverId
+              properties:
+                receiverId:
+                  type: string
+                  format: uuid
+                  description: ID of the user to send the friend request to
+            example:
+              receiverId: 2c5e3619-cbed-4a02-a1e3-9807f0b2989c
+
+      responses:
+        '200':
+          description: >-
+            The receiver had already sent a pending request, which is now
+            accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/FriendRequest'
+              example:
+                data:
+                  id: 7b0e5a52-3c4d-4d1e-8f6a-1d2c9e3b5a47
+                  senderId: 2c5e3619-cbed-4a02-a1e3-9807f0b2989c
+                  receiverId: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
+                  status: accepted
+                  createdAt: '2026-11-03T12:00:00.000Z'
+        '201':
+          description: Friend request created and pending
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/FriendRequest'
+              example:
+                data:
+                  id: 7b0e5a52-3c4d-4d1e-8f6a-1d2c9e3b5a47
+                  senderId: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
+                  receiverId: 2c5e3619-cbed-4a02-a1e3-9807f0b2989c
+                  status: pending
+                  createdAt: '2026-11-03T12:00:00.000Z'
+        '400':
+          description: Request contains invalid fields or targets the sender themselves
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                validation:
+                  summary: Invalid receiver ID
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Input contains invalid fields
+                      details:
+                        receiverId: INVALID_UUID
+                selfTarget:
+                  summary: Sender and receiver are the same user
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Cannot friend yourself
+                      details:
+                        receiverId: CANNOT_TARGET_SELF
+                invalidJson:
+                  $ref: '#/components/examples/InvalidJson'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Receiver does not exist
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Resource not found
+                  details: {}
+        '409':
+          description: Users are already friends or a request from the sender is already open
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                alreadyFriends:
+                  summary: Users are already friends
+                  value:
+                    error:
+                      code: ALREADY_FRIENDS
+                      message: Already friends
+                      details: {}
+                requestExists:
+                  summary: A request from the sender is already open
+                  value:
+                    error:
+                      code: CONFLICT
+                      message: Friend request already open
+                      details: {}
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      tags:
+        - Friends
+      summary: Get pending friend requests
+      description: >-
+        Returns all pending friend requests received by the logged in user.
+        The authenticated user is matched against the receiverId field.
+      operationId: getFriendRequests
+      security:
+        - sessionCookie: []
+
+      responses:
+        '200':
+          description: Pending friend requests returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/FriendRequest'
+                        - type: object
+                          required:
+                            - sender
+                          properties:
+                            sender:
+                              $ref: '#/components/schemas/UserProfile'
+              example:
+                data:
+                  - id: 62f19da2-4142-4a61-9f6b-a353dc9e9337
+                    senderId: 32a92853-3745-42c2-a08b-998d4187aae6
+                    receiverId: c86c401f-7405-456f-ab6f-0ad2ffa2f462
+                    status: pending
+                    createdAt: '2026-11-04T13:28:22.339Z'
+                    sender:
+                      id: 32a92853-3745-42c2-a08b-998d4187aae6
+                      username: friend1
+                      name: null
+                      biography: null
+                      avatarUrl: null
+                      isVerified: false
+                      createdAt: '2026-11-03T14:05:57.879Z'
+
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /friend-requests/{id}:
+    patch:
+      tags:
+        - Friends
+      summary: Accept a pending friend request
+      description: >-
+        Allows the authenticated receiver to accept a pending
+        friend request. Only the receiver can accept it.
+        Changes the status from pending to accepted.
+        Does not create a new friendship record.
+      operationId: patchFriendRequest
+      security:
+        - sessionCookie: []
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the friend request to accept
+          schema:
+            type: string
+            format: uuid
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              additionalProperties: false
+              properties:
+                status:
+                  type: string
+                  const: accepted
+            example:
+              status: accepted
+
+      responses:
+        '200':
+          description: Friend request successfully accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/FriendRequest'
+              example:
+                data:
+                  id: 5d6f7cbc-6f44-4da9-9ea3-38627ba59b47
+                  senderId: 8d665cf3-2375-48bd-8095-b1205265db4b
+                  receiverId: 93083e19-a059-48c6-a566-b6c161895562
+                  status: accepted
+                  createdAt: '2026-11-06T12:00:00.000Z'
+
+        '400':
+          description: Invalid friend request ID or request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidId:
+                  summary: Invalid friend request ID
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid UUID in route parameter
+                      details:
+                        id: INVALID_UUID
+                invalidStatus:
+                  summary: Invalid status in request body
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid friend request status
+                      details:
+                        status: INVALID_VALUE
+                invalidJson:
+                  $ref: '#/components/examples/InvalidJson'
+
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+        '404':
+          description: >-
+            Friend request not found, not pending,
+            or not addressed to the authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Pending friend request could not be found
+                  details: {}
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - Friends
+      summary: Decline a pending friend request
+      description: >-
+        Allows the authenticated receiver to decline a pending
+        friend request. Deletes the corresponding Friend record.
+        Does not remove accepted friendships.
+      operationId: deleteFriendRequest
+      security:
+        - sessionCookie: []
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the friend request to decline
+          schema:
+            type: string
+            format: uuid
+
+      responses:
+        '204':
+          description: Friend request successfully declined
+
+        '400':
+          description: Invalid friend request ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: Invalid UUID in route parameter
+                  details:
+                    id: INVALID_UUID
+
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+        '404':
+          description: >-
+            Friend request not found, not pending,
+            or not addressed to the authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Friend request could not be found
+                  details: {}
+
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /posts:
+    post:
+      tags:
+        - Posts
+      operationId: createPost
+      summary: Create a new post with an image and an optional caption
+      description: Uploads an image file and creates a new post associated with the authenticated user.
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: >-
+                    Image file (JPEG, PNG or WebP).
+                    Maximum file size: 6 MiB (6291456 bytes).
+                    Maximum pixel count: 25000000.
+                    Animated and multi-page images are not supported.
+                caption:
+                  type: string
+                  maxLength: 400
+                  description: >-
+                    Optional text caption for the post.
+                    Omit this field if no caption is provided.
+            encoding:
+              image:
+                contentType: image/jpeg, image/png, image/webp
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Post'
+              example:
+                data:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  userId: "550e8400-e29b-41d4-a716-446655440001"
+                  multimediaUrl: "/uploads/posts/550e8400-e29b-41d4-a716-446655440002.jpg"
+                  caption: "My first post"
+                  createdAt: "2026-11-17T22:00:00.000Z"
+                  updatedAt: "2026-11-17T22:00:00.000Z"
+                  user:
+                    id: "550e8400-e29b-41d4-a716-446655440001"
+                    username: "example_user"
+                    name: "Example User"
+                    biography: null
+                    avatarUrl: null
+                    isVerified: true
+                    createdAt: "2026-11-09T18:00:00.000Z"
+        '400':
+          description: >-
+            The request is not valid multipart/form-data, the image file is
+            missing, the image content is invalid, or the caption fails validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingImage:
+                  summary: Missing image file
+                  value:
+                    error:
+                      code: "VALIDATION_ERROR"
+                      message: "Image is required"
+                      details:
+                        image: IMAGE_REQUIRED
+                captionTooLong:
+                  summary: Caption exceeds 400 characters
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Caption malformed
+                      details:
+                        caption: INVALID_VALUE
+                invalidImageContent:
+                  summary: Corrupted file or invalid magic bytes
+                  value:
+                    error:
+                      code: "VALIDATION_ERROR"
+                      message: "Invalid image content"
+                      details:
+                        image: "IMAGE_INVALID_CONTENT"
+                invalidMultipart:
+                  summary: Not multipart/form-data, or malformed multipart body
+                  value:
+                    error:
+                      code: BAD_REQUEST
+                      message: Invalid multipart request
+                      details:
+                        image: INVALID_MULTIPART
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '413':
+          description: Image exceeds the maximum allowed size
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: "PAYLOAD_TOO_LARGE"
+                  message: Image exceeds the maximum allowed size
+                  details:
+                    image: IMAGE_TOO_LARGE
+        '415':
+          description: Unsupported image format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: UNSUPPORTED_MEDIA_TYPE
+                  message: "Unsupported image format"
+                  details:
+                    image: IMAGE_INVALID_FORMAT
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /posts/{id}:
+    delete:
+      tags:
+        - Posts
+      operationId: deletePost
+      summary: Delete a post.
+      description: Safely delete a post and its associated image.
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Publication UUID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Post successfully deleted.
+        '400':
+          description: Invalid post ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: Invalid UUID in route parameter
+                  details:
+                    id: INVALID_UUID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Post not found
+                  details: {}
+        '409':
+          description: Conflict. A deletion operation is already underway for this same post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: CONFLICT
+                  message: "A deletion for this post is already in progress."
+                  details: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: sessionID
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: UNAUTHORIZED
+              message: You are not authorized to access this resource
+              details: {}
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: FORBIDDEN
+              message: Only the author of the post can delete it
+              details: {}
+
+    PayloadTooLarge:
+      description: Request body exceeds the maximum allowed size
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: PAYLOAD_TOO_LARGE
+              message: JSON payload too large
+              details: {}
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: INTERNAL_SERVER_ERROR
+              message: Internal server error
+              details: {}
+
+  examples:
+    InvalidJson:
+      summary: Malformed JSON body
+      value:
+        error:
+          code: BAD_REQUEST
+          message: Error parsing JSON
+          details: {}
+
+  schemas:
+    UserProfile:
+      type: object
+      description: Public profile of a user. Does not include the email address.
+      required:
+        - id
+        - username
+        - name
+        - biography
+        - avatarUrl
+        - isVerified
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: User ID represented as UUID
+        username:
+          type: string
+          maxLength: 30
+        name:
+          type: [string, 'null']
+          maxLength: 100
+          description: Display name
+        biography:
+          type: [string, 'null']
+          maxLength: 1000
+        avatarUrl:
+          type: [string, 'null']
+          maxLength: 500
+          description: Public path of an internally managed avatar, or null if no avatar is set.
+        isVerified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    OwnProfile:
+      description: Profile of the logged in user. Public profile plus the email address.
+      allOf:
+        - $ref: '#/components/schemas/UserProfile'
+        - type: object
+          required:
+            - email
+          properties:
+            email:
+              type: string
+              format: email
+
+    FriendRequest:
+      type: object
+      description: A friend request between two users, pending or accepted
+      required:
+        - id
+        - senderId
+        - receiverId
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Friend request ID
+        senderId:
+          type: string
+          format: uuid
+          description: ID of the user who sent the request
+        receiverId:
+          type: string
+          format: uuid
+          description: ID of the user who received the request
+        status:
+          type: string
+          enum:
+            - pending
+            - accepted
+        createdAt:
+          type: string
+          format: date-time
+
+    Session:
+      type: object
+      description: A login session of the user. The session token is never returned.
+      required:
+        - id
+        - userId
+        - expiresAt
+        - ipOrigin
+        - userAgent
+        - current
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Session ID
+        userId:
+          type: string
+          format: uuid
+          description: ID of the user who owns the session
+        expiresAt:
+          type: string
+          format: date-time
+          description: When the session expires
+        ipOrigin:
+          type: [string, 'null']
+          description: IP address the session was opened from, if known
+        userAgent:
+          type: [string, 'null']
+          maxLength: 255
+          description: User agent the session was opened with, if known. Truncated to 255 characters
+        current:
+          type: boolean
+          description: Whether this is the current session
+    Post:
+      type: object
+      description: A post created by a user
+      required:
+        - id
+        - userId
+        - multimediaUrl
+        - caption
+        - createdAt
+        - updatedAt
+        - user
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        multimediaUrl:
+          type: string
+          maxLength: 500
+          examples:
+            - "/uploads/posts/a3545fba-f703-4661-a765-3a626082bffa.jpg"
+        caption:
+          type:
+            - string
+            - 'null'
+          maxLength: 400
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        user:
+          $ref: '#/components/schemas/UserProfile'
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+            - details
+          properties:
+            code:
+              $ref: '#/components/schemas/ErrorCode'
+            message:
+              type: string
+              description: Human-readable error message
+            details:
+              type: object
+              description: >-
+                Per-field error codes, keyed by field name. Empty when the
+                error is not tied to specific fields
+              additionalProperties:
+                $ref: '#/components/schemas/ErrorDetail'
+
+    ErrorCode:
+      type: string
+      description: >-
+        Machine-readable error code. Clients must tolerate unknown
+        values and fall back to the HTTP status and message.
+      enum:
+        - VALIDATION_ERROR
+        - BAD_REQUEST
+        - UNAUTHORIZED
+        - FORBIDDEN
+        - NOT_FOUND
+        - CONFLICT
+        - PAYLOAD_TOO_LARGE
+        - UNSUPPORTED_MEDIA_TYPE
+        - BAD_GATEWAY
+        - INTERNAL_SERVER_ERROR
+        - INVALID_CREDENTIALS
+        - INVALID_OAUTH_STATE
+        - MISSING_AUTHORIZATION_CODE
+        - GOOGLE_AUTHORIZATION_DENIED
+        - GOOGLE_AUTHENTICATION_FAILED
+        - GOOGLE_PROVIDER_ERROR
+        - EMAIL_CONFLICT
+        - ALREADY_FRIENDS
+      x-enumDescriptions:
+        VALIDATION_ERROR: Request body, query or route parameters failed validation. See details for the offending fields.
+        BAD_REQUEST: The request could not be processed (for example, malformed JSON).
+        UNAUTHORIZED: Missing or invalid session.
+        FORBIDDEN: The user is not allowed to perform this action.
+        NOT_FOUND: The referenced resource does not exist.
+        CONFLICT: The request conflicts with current state (already logged in, user already exists, or a friend request is already open).
+        PAYLOAD_TOO_LARGE: The request body or uploaded file exceeds the maximum allowed size.
+        UNSUPPORTED_MEDIA_TYPE: The uploaded file is not in a supported format.
+        BAD_GATEWAY: An external provider failed.
+        INTERNAL_SERVER_ERROR: Unexpected server failure.
+        INVALID_CREDENTIALS: Wrong email or password.
+        INVALID_OAUTH_STATE: Missing or invalid OAuth state.
+        MISSING_AUTHORIZATION_CODE: Google callback has no authorization code.
+        GOOGLE_AUTHORIZATION_DENIED: Google authorization was not completed.
+        GOOGLE_AUTHENTICATION_FAILED: Google authentication or identity verification failed.
+        GOOGLE_PROVIDER_ERROR: Google authentication provider failed.
+        EMAIL_CONFLICT: The email address conflicts with an existing account.
+        ALREADY_FRIENDS: The two users are already friends.
+
+    ErrorDetail:
+      type: string
+      description: >-
+        Machine-readable reason a single field was rejected. Clients must
+        tolerate unknown values.
+      enum:
+        - INVALID
+        - INVALID_VALUE
+        - USERNAME_IN_USE
+        - USERNAME_REQUIRED
+        - USERNAME_TOO_SHORT
+        - USERNAME_TOO_LONG
+        - USERNAME_INVALID_CHARS
+        - EMAIL_IN_USE
+        - EMAIL_REQUIRED
+        - EMAIL_TOO_LONG
+        - EMAIL_INVALID_FORMAT
+        - PASSWORD_REQUIRED
+        - PASSWORD_TOO_SHORT
+        - PASSWORD_TOO_LONG
+        - PASSWORD_NO_SPECIAL_CHAR
+        - NAME_TOO_LONG
+        - BIOGRAPHY_TOO_LONG
+        - NO_FIELDS_PROVIDED
+        - INVALID_UUID
+        - INVALID_ORDER
+        - INVALID_ORDER_BY
+        - IMAGE_REQUIRED
+        - IMAGE_TOO_LARGE
+        - IMAGE_INVALID_FORMAT
+        - IMAGE_INVALID_CONTENT
+        - INVALID_MULTIPART
+        - CANNOT_TARGET_SELF

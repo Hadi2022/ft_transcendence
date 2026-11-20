@@ -1,0 +1,22 @@
+{
+	"name": "@transcendence/shared",
+	"version": "1.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+	"./schemas/user": "./src/schemas/user.ts",
+	"./schemas/common": "./src/schemas/common.ts",
+	"./schemas/friend": "./src/schemas/friend.ts",
+  	"./schemas/session": "./src/schemas/session.ts",
+	"./schemas/post": "./src/schemas/post.ts",
+	"./errors/error-details": "./src/error-codes/ErrorDetails.ts",
+	"./errors/error-codes": "./src/error-codes/ErrorCodes.ts"
+
+	},
+	"peerDependencies": {
+		"zod": "^4.6.7"
+	},
+	"devDependencies": {
+		"zod": "^4.6.7"
+	}
+}

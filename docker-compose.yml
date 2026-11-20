@@ -1,0 +1,86 @@
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+
+    restart: unless-stopped
+
+
+    environment:
+      INTERNAL_PORT: ${INTERNAL_PORT}
+
+    ports:
+      - 443:443
+
+    networks:
+      - external
+
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./uploads/posts:/usr/share/nginx/html/uploads/posts:ro
+      - ./uploads/avatars:/usr/share/nginx/html/uploads/avatars:ro
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+
+    restart: unless-stopped
+
+    environment:
+      PORT: ${INTERNAL_PORT}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}
+
+    networks:
+      - internal
+      - external
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${INTERNAL_PORT}/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads
+
+  database:
+    image: postgres:17-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    networks:
+      - internal
+    volumes:
+      - db:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+networks:
+  external:
+    driver: bridge
+  internal:
+    driver: bridge
+
+volumes:
+  db:
+

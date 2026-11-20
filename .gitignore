@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+secrets
+
+# Build output
+dist/
+build/
+coverage/
+uploads/
+
+# Logs
+*.log
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+
+#test
+/backend/test

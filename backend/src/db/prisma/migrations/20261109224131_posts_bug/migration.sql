@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "posts" ALTER COLUMN "caption" DROP NOT NULL,
+ALTER COLUMN "caption" SET DATA TYPE VARCHAR(400);
