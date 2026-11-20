@@ -1470,7 +1470,7 @@ paths:
                   id: "550e8400-e29b-41d4-a716-446655440000"
                   userId: "550e8400-e29b-41d4-a716-446655440001"
                   multimediaUrl: "/uploads/posts/550e8400-e29b-41d4-a716-446655440002.jpg"
-                  caption: "My firs post"
+                  caption: "My first post"
                   createdAt: "2026-11-17T22:00:00.000Z"
                   updatedAt: "2026-11-17T22:00:00.000Z"
                   user:
@@ -1535,7 +1535,7 @@ paths:
                   code: "PAYLOAD_TOO_LARGE"
                   message: Image exceeds the maximum allowed size
                   details:
-                    image: "IMAGE_TOO_LARGE"
+                    image: IMAGE_TOO_LARGE
         '415':
           description: Unsupported image format
           content:
@@ -1547,7 +1547,7 @@ paths:
                   code: UNSUPPORTED_MEDIA_TYPE
                   message: "Unsupported image format"
                   details:
-                    image: "IMAGE_INVALID_FORMAT"
+                    image: IMAGE_INVALID_FORMAT
         '500':
           $ref: '#/components/responses/InternalServerError'
 
