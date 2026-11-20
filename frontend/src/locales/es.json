@@ -25,7 +25,6 @@
             "email": "Email inválido",
             "password": "Contraseña inválida",
             "passwordMismatch": "Las contraseñas no coinciden",
-            "passwordSpecialChar": "La contraseña requiere al menos un carácter especial",
             "network": "No se ha podido conectar con el servidor",
             "emailInUse": "Este correo ya está registrado",
             "usernameInUse": "Este nombre de usuario ya existe",
@@ -34,6 +33,19 @@
             "invalidCredentials": "Credenciales inválidos",
             "unexpected": "Error inesperado, inténtalo más tarde",
             "sessionCheck": "No se ha podido verificar tu sesión"
+        },
+        "fieldErrors": {
+            "USERNAME_REQUIRED": "El nombre de usuario es obligatorio",
+            "USERNAME_TOO_SHORT": "El nombre de usuario debe tener al menos 3 caracteres",
+            "USERNAME_TOO_LONG": "El nombre de usuario no puede tener más de 30 caracteres",
+            "USERNAME_INVALID_CHARS": "Solo se permiten letras, números y guion bajo (_)",
+            "EMAIL_REQUIRED": "El correo es obligatorio",
+            "EMAIL_TOO_LONG": "El correo no puede tener más de 254 caracteres",
+            "EMAIL_INVALID_FORMAT": "Introduce un correo válido",
+            "PASSWORD_REQUIRED": "La contraseña es obligatoria",
+            "PASSWORD_TOO_SHORT": "La contraseña debe tener al menos 6 caracteres",
+            "PASSWORD_TOO_LONG": "La contraseña no puede tener más de 128 caracteres",
+            "PASSWORD_NO_SPECIAL_CHAR": "La contraseña debe tener al menos un carácter especial"
         },
         "googleButton": "Continuar con Google",
         "googleErrors": {

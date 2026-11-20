@@ -25,7 +25,6 @@
             "email": "Invalid email",
             "password": "Invalid password",
             "passwordMismatch": "Passwords don't match",
-            "passwordSpecialChar": "The password requires one special character at least",
             "network": "It was not possible to connect the server",
             "emailInUse": "This email is already registered",
             "usernameInUse": "This username is taken",
@@ -34,6 +33,19 @@
             "invalidCredentials": "Invalid credentials",
             "unexpected": "Unexpected error, try again later",
             "sessionCheck": "We couldn't verify your session"
+        },
+        "fieldErrors": {
+            "USERNAME_REQUIRED": "Username is required",
+            "USERNAME_TOO_SHORT": "Username must be at least 3 characters",
+            "USERNAME_TOO_LONG": "Username can't be longer than 30 characters",
+            "USERNAME_INVALID_CHARS": "Only letters, numbers and underscore (_) are allowed",
+            "EMAIL_REQUIRED": "Email is required",
+            "EMAIL_TOO_LONG": "Email can't be longer than 254 characters",
+            "EMAIL_INVALID_FORMAT": "Enter a valid email address",
+            "PASSWORD_REQUIRED": "Password is required",
+            "PASSWORD_TOO_SHORT": "Password must be at least 6 characters",
+            "PASSWORD_TOO_LONG": "Password can't be longer than 128 characters",
+            "PASSWORD_NO_SPECIAL_CHAR": "Password must contain at least one special character"
         },
         "googleButton": "Continue with Google",
         "googleErrors": {
