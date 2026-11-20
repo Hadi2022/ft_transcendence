@@ -1,5 +1,5 @@
 import { prisma } from "../db/prisma/prisma.ts";
-import type { NewPostData, Post, PostDelete } from "../types/post.ts";
+import type { NewPostData, Post, PostDelete, ListPostsParams, ListPostsResult } from "../types/post.ts";
 import { Prisma } from '@prisma/client';
 import { userProfileOmit } from "./userRepository.ts";
 import { UserNotFoundError } from "../errors/userErrors.ts";
@@ -93,4 +93,36 @@ export async function updatePost(
 				throw new RecordNotFoundError('Post not found')
 			throw error;
 		}
+}
+
+export async function listPosts(
+    { limit, offset, userId }: ListPostsParams
+): Promise<ListPostsResult> {
+
+    const where: Prisma.PostWhereInput = {};
+
+    if (userId !== undefined)
+        where.userId = userId;
+
+    const [posts, total] = await Promise.all([
+        prisma.post.findMany({
+            where,
+            orderBy: [
+                { createdAt: 'desc' },
+                { id: 'desc' }
+            ],
+            take: limit,
+            skip: offset,
+            include: {
+                user: {
+                    omit: userProfileOmit
+                }
+            }
+        }),
+        prisma.post.count({
+            where
+        })
+    ]);
+
+    return { posts, total };
 }
