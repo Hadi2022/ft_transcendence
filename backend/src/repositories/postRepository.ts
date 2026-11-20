@@ -75,6 +75,20 @@ export async function getPostById(
 		})
 }
 
+export async function getPublicPostById(
+    id: string
+): Promise<Post | null> {
+
+    return await prisma.post.findUnique({
+        where: { id },
+        include: {
+            user: {
+                omit: userProfileOmit
+            }
+        }
+    });
+}
+
 export async function updatePost(
 	_idPost:string, _caption:string|null):Promise<Post> {
 
