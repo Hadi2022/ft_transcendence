@@ -36,7 +36,7 @@ function getFieldErrors(issues: ValidationIssue[]): Record<string, string> {
             continue
         errors[field] = FIELD_ERROR_CODES.includes(issue.message)
             ? `auth.fieldErrors.${issue.message}`
-            : `auth.errors.${field}`
+            : "auth.errors.invalidFields"
     }
     return (errors)
 }
