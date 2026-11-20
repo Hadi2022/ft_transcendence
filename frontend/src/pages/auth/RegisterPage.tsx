@@ -128,7 +128,7 @@ export default function RegisterPage() {
                 <p className="text-sm text-zinc-500">{ t("auth.registerSubtitle") }</p>
             </div>
 
-            <form onSubmit={handleSubmit}
+            <form onSubmit={handleSubmit} noValidate
                 className="flex flex-col gap-5">
                 
                 { /* Username input*/ }
