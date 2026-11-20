@@ -115,5 +115,17 @@
             "network": "Couldn't connect to the server"
         }
     },
+    "posts": {
+        "title": "Bericht maken",
+        "image": "Afbeelding",
+        "imageHint": "Selecteer één afbeelding.",
+        "preview": "Voorbeeld van het bericht",
+        "caption": "Bijschrift (optioneel)",
+        "publish": "Publiceren",
+        "errors": {
+            "imageRequired": "Selecteer een afbeelding om te publiceren",
+            "invalidImage": "Het bestand is geen geldige afbeelding"
+        }
+    },
     "retry": "Retry"
 }

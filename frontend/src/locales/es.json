@@ -115,5 +115,17 @@
             "network": "No se ha podido conectar con el servidor"
         }
     },
+    "posts": {
+        "title": "Crear publicación",
+        "image": "Imagen",
+        "imageHint": "Selecciona una imagen.",
+        "preview": "Vista previa de la publicación",
+        "caption": "Texto (opcional)",
+        "publish": "Publicar",
+        "errors": {
+            "imageRequired": "Selecciona una imagen para publicar",
+            "invalidImage": "El archivo no es una imagen válida"
+        }
+    },
     "retry": "Reintentar"
 }

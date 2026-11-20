@@ -115,5 +115,17 @@
             "network": "Couldn't connect to the server"
         }
     },
+    "posts": {
+        "title": "Create post",
+        "image": "Image",
+        "imageHint": "Select one image.",
+        "preview": "Post preview",
+        "caption": "Caption (optional)",
+        "publish": "Publish",
+        "errors": {
+            "imageRequired": "Select an image to publish",
+            "invalidImage": "The file is not a valid image"
+        }
+    },
     "retry": "Retry"
 }
