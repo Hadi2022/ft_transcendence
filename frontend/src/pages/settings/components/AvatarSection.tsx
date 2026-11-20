@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type ChangeEvent } from "react"
 import { removeAvatar, uploadAvatar } from "../../../services/users"
 import { ApiError } from "../../../services/api"
 import { ErrorDetails } from "@transcendence/shared/errors/error-details"
+import { getCurrentUser } from "../../../services/auth"
 
 const DEFAULT_AVATAR="/img/default-avatar.svg"
 const AVATAR_MAX_SIZE = 2 * 1024 * 1024
@@ -66,6 +67,16 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
         return () => URL.revokeObjectURL(previewUrl)
     }, [previewUrl])
 
+    async function syncAvatarAfterConflict(signal: AbortSignal) {
+        try {
+            const user = await getCurrentUser(signal)
+            if (!signal.aborted)
+                onAvatarChange(user.avatarUrl)
+        } catch {
+            // If it fails, nothing to do, conflict message remains
+        }
+    }
+
     async function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0]
         e.target.value = ""
@@ -105,6 +116,8 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
         } catch (err) {
             if (controller.signal.aborted) return
             setError(getAvatarErrorKey(err, "settings.avatar.uploadError"))
+            if (err instanceof ApiError && err.status === 409)
+                await syncAvatarAfterConflict(controller.signal)
         } finally {
             if (!controller.signal.aborted) {
                 setPreviewUrl(null)
@@ -130,6 +143,8 @@ export default function AvatarSection({ avatarUrl, onAvatarChange, disabled, onP
         } catch (err) {
             if (controller.signal.aborted) return
             setError(getAvatarErrorKey(err, "settings.avatar.removeError"))
+            if (err instanceof ApiError && err.status === 409)
+                await syncAvatarAfterConflict(controller.signal)
         } finally {
             if (!controller.signal.aborted) {
                 setStatus("idle")

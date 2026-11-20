@@ -56,9 +56,10 @@ export async function logout(): Promise<void> {
     if (!res.ok) await throwApiError(res)
 }
 
-export async function getCurrentUser(): Promise<UserProfile>{
+export async function getCurrentUser(signal?: AbortSignal): Promise<UserProfile>{
     const res = await fetch("/api/users/me", {
-        credentials: "include"
+        credentials: "include",
+        signal
     })
 
     if (!res.ok) await throwApiError(res)
