@@ -9,6 +9,20 @@ servers:
   - url: /api
     description: API base path
 
+tags:
+  - name: System
+    description: API status and system information
+  - name: Authentication
+    description: External authentication providers
+  - name: Sessions
+    description: User session management
+  - name: Users
+    description: User registration and profile management
+  - name: Friends
+    description: Friend requests and relationships
+  - name: Posts
+    description: Post creation and management
+
 paths:
   /status:
     get:
@@ -168,6 +182,8 @@ paths:
 
   /sessions:
     post:
+      tags:
+        - Sessions
       summary: User login endpoint
       description: >-
         Creates a new session and sets an HttpOnly session cookie that
@@ -253,6 +269,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
     get:
+      tags:
+        - Sessions
       summary: Get active user sessions
       description: Returns all non-expired sessions of the logged in user
       operationId: getSessions
@@ -293,6 +311,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
     delete:
+      tags:
+        - Sessions
       summary: Close all user sessions
       description: Closes all sessions of the logged in user and clears the cookie
       operationId: closeAllUserSessions
@@ -315,6 +335,8 @@ paths:
 
   /sessions/current:
     delete:
+      tags:
+        - Sessions
       summary: Close the current session
       description: Closes the current session and clears the cookie
       operationId: closeCurrentSession
@@ -337,6 +359,8 @@ paths:
 
   /sessions/{id}:
     delete:
+      tags:
+        - Sessions
       summary: Close a session by ID
       description: >-
         Closes a session belonging to the logged in user. If the closed
@@ -395,6 +419,8 @@ paths:
 
   /users:
     post:
+      tags:
+        - Users
       summary: Register a new user
       description: Creates a new user account from a username, email and password
       operationId: registerUser
@@ -501,6 +527,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
     get:
+      tags:
+        - Users
       summary: Retrieve a list of users
       description: >-
         Returns a list of users, by default sorted by creation time in
@@ -530,7 +558,7 @@ paths:
 
       responses:
         '200':
-          description: Sucessfully returned list of users
+          description: Successfully returned list of users
           content:
             application/json:
               schema:
@@ -573,9 +601,10 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
 
-
   /users/me:
     get:
+      tags:
+        - Users
       summary: Get the current user
       description: Returns the profile of the user who owns the current session
       operationId: getCurrentUser
@@ -621,6 +650,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
     patch:
+      tags:
+        - Users
       summary: Update the current user profile
       description: >-
         Updates one or more editable profile fields (name, biography) of the
@@ -738,6 +769,8 @@ paths:
 
   /users/me/avatar:
     put:
+      tags:
+        - Users
       summary: Set the current user's avatar
       description: >-
         Uploads a new avatar image for the logged in user as multipart/form-data
@@ -762,7 +795,11 @@ paths:
                 avatar:
                   type: string
                   format: binary
-                  description: Image file (JPEG, PNG or WebP). Subject to a maximum file size
+                  description: >-
+                    Image file (JPEG, PNG or WebP).
+                    Maximum file size: 2 MiB (2097152 bytes).
+                    Maximum pixel count: 25000000.
+                    Animated and multi-page images are not supported.
             encoding:
               avatar:
                 contentType: image/jpeg, image/png, image/webp
@@ -775,14 +812,20 @@ paths:
               schema:
                 type: object
                 required:
-                  - avatarUrl
+                  - data
                 properties:
-                  avatarUrl:
-                    type: string
-                    maxLength: 500
-                    description: Public path of the newly stored avatar
+                  data:
+                    type: object
+                    required:
+                      - avatarUrl
+                    properties:
+                      avatarUrl:
+                        type: string
+                        maxLength: 500
+                        description: Public path of the newly stored avatar
               example:
-                avatarUrl: /uploads/avatars/0b0f5a52-3c4d-4d1e-8f6a-1d2c9e3b5a47.webp
+                data:
+                  avatarUrl: /uploads/avatars/0b0f5a52-3c4d-4d1e-8f6a-1d2c9e3b5a47.webp
         '400':
           description: >-
             The request is not valid multipart/form-data, the avatar file is
@@ -839,7 +882,7 @@ paths:
               example:
                 error:
                   code: PAYLOAD_TOO_LARGE
-                  message: Image is too large
+                  message: Image exceeds the maximum allowed size
                   details:
                     avatar: IMAGE_TOO_LARGE
         '415':
@@ -858,6 +901,8 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
     delete:
+      tags:
+        - Users
       summary: Remove the current user's avatar
       description: >-
         Clears the avatar of the logged in user and deletes the stored image
@@ -888,6 +933,8 @@ paths:
 
   /users/{id}:
     get:
+      tags:
+        - Users
       summary: Get a user by ID
       description: Returns the public profile of a user by their UUID
       operationId: getUserById
@@ -954,6 +1001,8 @@ paths:
 
   /users/by-username/{username}:
     get:
+      tags:
+        - Users
       summary: Get a user by username
       description: Returns the public profile of a user by their unique username
       operationId: getUserByUsername
@@ -1022,6 +1071,8 @@ paths:
 
   /friend-requests:
     post:
+      tags:
+        - Friends
       summary: Send or accept a friend request
       description: >-
         Sends a friend request from the logged in user to the receiver. If the
@@ -1150,6 +1201,8 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
     get:
+      tags:
+        - Friends
       summary: Get pending friend requests
       description: >-
         Returns all pending friend requests received by the logged in user.
@@ -1364,8 +1417,145 @@ paths:
 
         '500':
           $ref: '#/components/responses/InternalServerError'
+
+  /posts:
+    post:
+      tags:
+        - Posts
+      operationId: createPost
+      summary: Create a new post with an image and an optional caption
+      description: Uploads an image file and creates a new post associated with the authenticated user.
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: >-
+                    Image file (JPEG, PNG or WebP).
+                    Maximum file size: 6 MiB (6291456 bytes).
+                    Maximum pixel count: 25000000.
+                    Animated and multi-page images are not supported.
+                caption:
+                  type: string
+                  maxLength: 400
+                  description: >-
+                    Optional text caption for the post.
+                    Omit this field if no caption is provided.
+            encoding:
+              image:
+                contentType: image/jpeg, image/png, image/webp
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Post'
+              example:
+                data:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  userId: "550e8400-e29b-41d4-a716-446655440001"
+                  multimediaUrl: "/uploads/posts/550e8400-e29b-41d4-a716-446655440002.jpg"
+                  caption: "My first post"
+                  createdAt: "2026-11-17T22:00:00.000Z"
+                  updatedAt: "2026-11-17T22:00:00.000Z"
+                  user:
+                    id: "550e8400-e29b-41d4-a716-446655440001"
+                    username: "example_user"
+                    name: "Example User"
+                    biography: null
+                    avatarUrl: null
+                    isVerified: true
+                    createdAt: "2026-11-09T18:00:00.000Z"
+        '400':
+          description: >-
+            The request is not valid multipart/form-data, the image file is
+            missing, the image content is invalid, or the caption fails validation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingImage:
+                  summary: Missing image file
+                  value:
+                    error:
+                      code: "VALIDATION_ERROR"
+                      message: "Image is required"
+                      details:
+                        image: IMAGE_REQUIRED
+                captionTooLong:
+                  summary: Caption exceeds 400 characters
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Caption malformed
+                      details:
+                        caption: INVALID_VALUE
+                invalidImageContent:
+                  summary: Corrupted file or invalid magic bytes
+                  value:
+                    error:
+                      code: "VALIDATION_ERROR"
+                      message: "Invalid image content"
+                      details:
+                        image: "IMAGE_INVALID_CONTENT"
+                invalidMultipart:
+                  summary: Not multipart/form-data, or malformed multipart body
+                  value:
+                    error:
+                      code: BAD_REQUEST
+                      message: Invalid multipart request
+                      details:
+                        image: INVALID_MULTIPART
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '413':
+          description: Image exceeds the maximum allowed size
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: "PAYLOAD_TOO_LARGE"
+                  message: Image exceeds the maximum allowed size
+                  details:
+                    image: IMAGE_TOO_LARGE
+        '415':
+          description: Unsupported image format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: UNSUPPORTED_MEDIA_TYPE
+                  message: "Unsupported image format"
+                  details:
+                    image: IMAGE_INVALID_FORMAT
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /posts/{id}:
     delete:
+      tags:
+        - Posts
+      operationId: deletePost
       summary: Delete a post.
       description: Safely delete a post and its associated image.
       security:
@@ -1382,15 +1572,20 @@ paths:
         '204':
           description: Post successfully deleted.
         '400':
-          description: Invalid request (e.g., manipulated image path or invalid filename).
+          description: Invalid post ID
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: Invalid UUID in route parameter
+                  details:
+                    id: INVALID_UUID
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
-          description: Forbidden
           $ref: '#/components/responses/Forbidden'
         '404':
           description: Post not found
@@ -1410,136 +1605,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                status: 409
-                message: "A deletion for this post is already in progress."
-                errors: null
+                error:
+                  code: CONFLICT
+                  message: "A deletion for this post is already in progress."
+                  details: {}
         '500':
-          description: Internal server error (unexpected disk failure, file or database rollback).
           $ref: '#/components/responses/InternalServerError'
-  /posts:
-    post:
-      summary: Create a new post with an image and caption optional
-      description: Uploads an image file and creates a new post associated with the authenticated user.
-      tags:
-        - Posts
-      security:
-        - sessionCookie: []
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              required:
-                - image
-              properties:
-                image:
-                  type: string
-                  contentMediaType: image/*
-                  description: Image file (JPEG, PNG, WebP). Validated by magic bytes and size limit.
-                caption:
-                  type:
-                    - string
-                    - 'null'
-                  description: Optional text caption for the post.
-            encoding:
-              image:
-                contentType: image/jpeg, image/png, image/webp
-      responses:
-        '201':
-          description: Post created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PostResponse'
-              example:
-                id: "0abd644b-1ade-419f-9f71-cf9a0d3e5bc9"
-                userId: "07420a48-cfa7-4fd5-b450-020e449f5485"
-                multimediaUrl: "/uploads/posts/a3545fba-f703-4661-a765-3a626082bffa.jpg"
-                caption: "Mi quinta prueba"
-                createdAt: "2026-11-17T22:15:29.742Z"
-                updatedAt: "2026-11-17T22:15:29.742Z"
-                user:
-                  id: "07420a48-cfa7-4fd5-b450-020e449f5485"
-                  username: "fernandezestebanmanuel9"
-                  name: "Manuel Fernández Esteban"
-                  biography: null
-                  avatarUrl: "https://lh3.googleusercontent.com/a/ACg8ocJGgWcDD_qTGAdhIw9Lgq1ofUn83gz2FdYTvudP_AHREP78dQ=s96-c"
-                  isVerified: true
-                  createdAt: "2026-11-09T18:49:39.495Z"
-        '400':
-          description: Bad Request - Missing image, invalid file content/format, or malformed caption
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                missingImage:
-                  summary: Missing image file
-                  value:
-                    error:
-                      code: "BAD_REQUEST"
-                      message: "Image is required."
-                      details: {}
-                malformedCaption:
-                  summary: Malformed or invalid caption
-                  value:
-                    error:
-                      code: "VALIDATION_ERROR"
-                      message: "Caption malformed"
-                      details:
-                        _root: "INVALID_VALUE"
-                invalidImageContent:
-                  summary: Corrupted file or invalid magic bytes
-                  value:
-                    error:
-                      code: "VALIDATION_ERROR"
-                      message: "Invalid image content"
-                      details:
-                        image: "INVALID_CONTENT"
-        '401':
-          description: Unauthorized - Authentication required
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                value:
-                  error:
-                    code: "UNAUTHORIZED"
-                    message: "You are not authorized to access this resource"
-        '413':
-          description: Image exceeds the maximum allowed size
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                value:
-                  error:
-                    code: "PAYLOAD_TOO_LARGE"
-                    message: "Image exceeds the maximum allowed size"
-                    details:
-                      image: "IMAGE_TOO_LARGE"
-        '415':
-          description: Unsupported image format
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                value:
-                  error:
-                    code: UNSUPPORTED_MEDIA_TYPE
-                    message: "Unsupported image format"
-                    details:
-                      image: "IMAGE_INVALID_FORMAT"
-        '500':
-          description: Internal server error (with automatic file rollback)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   securitySchemes:
@@ -1718,8 +1789,9 @@ components:
         current:
           type: boolean
           description: Whether this is the current session
-    PostResponse:
+    Post:
       type: object
+      description: A post created by a user
       required:
         - id
         - userId
@@ -1737,12 +1809,14 @@ components:
           format: uuid
         multimediaUrl:
           type: string
+          maxLength: 500
           examples:
             - "/uploads/posts/a3545fba-f703-4661-a765-3a626082bffa.jpg"
         caption:
           type:
             - string
             - 'null'
+          maxLength: 400
         createdAt:
           type: string
           format: date-time
@@ -1798,6 +1872,7 @@ components:
         - GOOGLE_AUTHORIZATION_DENIED
         - GOOGLE_AUTHENTICATION_FAILED
         - GOOGLE_PROVIDER_ERROR
+        - EMAIL_CONFLICT
         - ALREADY_FRIENDS
       x-enumDescriptions:
         VALIDATION_ERROR: Request body, query or route parameters failed validation. See details for the offending fields.
@@ -1816,6 +1891,7 @@ components:
         GOOGLE_AUTHORIZATION_DENIED: Google authorization was not completed.
         GOOGLE_AUTHENTICATION_FAILED: Google authentication or identity verification failed.
         GOOGLE_PROVIDER_ERROR: Google authentication provider failed.
+        EMAIL_CONFLICT: The email address conflicts with an existing account.
         ALREADY_FRIENDS: The two users are already friends.
 
     ErrorDetail:
