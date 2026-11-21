@@ -23,6 +23,10 @@ export type PostDelete = Omit<Post,
     'user'
 >
 
+export type UpdatePostData = {
+    caption: string | null
+}
+
 export type ListPostsParams = {
     limit: number;
     offset: number;
