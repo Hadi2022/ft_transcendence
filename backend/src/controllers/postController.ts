@@ -38,6 +38,22 @@ const deletePost = async (
 
 }
 
+const updatePost = async (
+	req: AuthenticatedRequest,
+	res: Response) => {
+
+	const parsedIdPost = idParamSchema.safeParse(req.params)
+	if (!parsedIdPost.success)
+		throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			message: 'Invalid UUID in route parameter',
+			details: formatZodErrors(parsedIdPost.error),
+	})
+	return res.status(200).json({
+		data:{}
+	});
+}
+
 const uploadPost = async (req: AuthenticatedRequest, res: Response) => {
 
 	const userId = req.user.id;
@@ -65,4 +81,6 @@ const uploadPost = async (req: AuthenticatedRequest, res: Response) => {
 	});
 }
 
-export { deletePost, uploadPost }
+
+
+export { deletePost, uploadPost, updatePost }
