@@ -5,8 +5,8 @@ import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from ".
 import { ErrorCodes } from "@transcendence/shared/errors/error-codes";
 import { formatZodErrors } from "../utils/zod.ts";
 import * as postService from '../services/postService.ts'
-import { ConflictPostError, ForbiddenAccessPostError, InternalPostError, PostNotFoundError } from "../errors/postErrors.ts";
-import { uploadPostSchema } from "@transcendence/shared/schemas/post";
+import { ConflictPostError, ForbiddenAccessPostError, PostNotFoundError } from "../errors/postErrors.ts";
+import { updatePostSchema, uploadPostSchema } from "@transcendence/shared/schemas/post";
 
 const deletePost = async (
 	req: AuthenticatedRequest,
@@ -50,16 +50,7 @@ const updatePost = async (
 			details: formatZodErrors(parsedIdPost.error),
 	})
 
-	if (!req.body.caption)
-		throw new BadRequestError({
-			code: ErrorCodes.VALIDATION_ERROR,
-			message: 'Input contains invalid fields',
-			details: {
-				caption:"INVALID_VALUE"
-			}
-	})
-
-	const captionParse = uploadPostSchema.safeParse(req.body);
+	const captionParse = updatePostSchema.safeParse(req.body);
 	if (!captionParse.success)
 				throw new BadRequestError({
 			code: ErrorCodes.VALIDATION_ERROR,
@@ -78,11 +69,7 @@ const updatePost = async (
 			throw new ForbiddenError({ message: error.message })
 		else if (error instanceof PostNotFoundError)
 			throw new NotFoundError({ message: error.message })
-		else if (error instanceof ConflictPostError)
-			throw new ConflictError({
-				message: error.message,
-				code: ErrorCodes.CONFLICT
-			})
+
 		throw error;
 	}
 }
