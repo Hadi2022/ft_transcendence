@@ -118,7 +118,7 @@ const getPostById = async (req: AuthenticatedRequest, res: Response) => {
 					message:'Post not found',
 					code:ErrorCodes.NOT_FOUND,
 				})
-		return res.status(201).json({
+		return res.status(200).json({
 			data:post
 		})
 	} catch(error){
