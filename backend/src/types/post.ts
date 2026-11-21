@@ -22,3 +22,7 @@ export type PostDelete = Omit<Post,
     'updatedAt' |
     'user'
 >
+
+export type UpdatePostData = {
+    caption: string | null
+}

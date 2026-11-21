@@ -5,13 +5,13 @@ import path from 'node:path';
 import { promises as fs } from 'fs';
 import { UPLOAD_PUBLIC_PATH } from '../constants/imageUpload.ts';
 import { RecordNotFoundError } from '../errors/RepositoryErrors.ts';
-import type { Post } from '../types/post.ts';
+import type { Post, UpdatePostData } from '../types/post.ts';
 import type { ValidatedImage } from '../types/image.ts';
 import { validateImage } from '../utils/imageValidation.ts';
-import { buffer } from 'node:stream/consumers';
+
 
 const IMAGE_FILENAME_PATTERN =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png|webp)$/
+	/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png|webp)$/
 
 
 
@@ -24,9 +24,9 @@ export const getPostById = async (postId: string) => {
 export const createPost = async (
 	userId: string,
 	imageBuffer: Buffer,
-	caption: string | null = null): Promise<Post> =>{
+	caption: string | null = null): Promise<Post> => {
 
-	const validatedImage:ValidatedImage = await validateImage(imageBuffer, 'image');
+	const validatedImage: ValidatedImage = await validateImage(imageBuffer, 'image');
 
 	const multimediaUrl = await saveImage(validatedImage, 'posts');
 
@@ -38,11 +38,13 @@ export const createPost = async (
 		})
 	} catch (error) {
 		try {
-			await deleteImage(multimediaUrl,'posts');
+			await deleteImage(multimediaUrl, 'posts');
 		} catch (error) {
-			throw new InternalPostError({ message: 'Failed to roll back post image',
-					details: 'The image must be deleted manually.',
-					filePath:multimediaUrl});
+			throw new InternalPostError({
+				message: 'Failed to roll back post image',
+				details: 'The image must be deleted manually.',
+				filePath: multimediaUrl
+			});
 		}
 
 		throw error;
@@ -78,9 +80,9 @@ export const deletePost = async (postId: string, userId: string) => {
 
 			const filename = post.multimediaUrl.slice(expectedPrefix.length);
 
-            if (!IMAGE_FILENAME_PATTERN.test(filename)) {
-                throw new BadRequestPostsError('Invalid image filename');
-            }
+			if (!IMAGE_FILENAME_PATTERN.test(filename)) {
+				throw new BadRequestPostsError('Invalid image filename');
+			}
 
 			originalFilePath = path.join(storageDirectory, filename);
 			const stagingDirectory = path.join(storageDirectory, '..', 'staging');
@@ -108,7 +110,7 @@ export const deletePost = async (postId: string, userId: string) => {
 					throw new InternalPostError({ message: 'Failed to restore media file for rollback' })
 				}
 			}
-			if ((error instanceof RecordNotFoundError) || (error && typeof error === 'object' && 'code' in error && error.code === 'P2025')){
+			if ((error instanceof RecordNotFoundError) || (error && typeof error === 'object' && 'code' in error && error.code === 'P2025')) {
 				throw new PostNotFoundError('Post not found');
 			}
 			throw error;
@@ -127,9 +129,11 @@ export const deletePost = async (postId: string, userId: string) => {
 					return;
 				}
 
-				throw new InternalPostError({ message: 'Failed to delete image',
+				throw new InternalPostError({
+					message: 'Failed to delete image',
 					details: 'The image must be deleted manually.',
-					filePath:stagedFilePath});
+					filePath: stagedFilePath
+				});
 			}
 
 			return deletedPost
@@ -139,3 +143,26 @@ export const deletePost = async (postId: string, userId: string) => {
 	}
 
 }
+
+export const updatePost = async (postId: string, userId: string, data: UpdatePostData) => {
+
+	const post = await getPostById(postId)
+	if (!post) {
+		throw new PostNotFoundError("Post not found.");
+	}
+	if (userId != post.userId) {
+		throw new ForbiddenAccessPostError('Only the author of the post can edit it.')
+	}
+
+	try {
+		return await postRepository.updatePost(postId, data.caption);
+	} catch (error) {
+		if ((error instanceof RecordNotFoundError) || (error && typeof error === 'object' && 'code' in error && error.code === 'P2025')) {
+			throw new PostNotFoundError('Post not found');
+		}
+		throw error;
+
+	}
+
+}
+

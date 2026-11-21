@@ -41,18 +41,38 @@ const deletePost = async (
 const updatePost = async (
 	req: AuthenticatedRequest,
 	res: Response) => {
-/*
+
 	const parsedIdPost = idParamSchema.safeParse(req.params)
 	if (!parsedIdPost.success)
 		throw new BadRequestError({
 			code: ErrorCodes.VALIDATION_ERROR,
 			message: 'Invalid UUID in route parameter',
 			details: formatZodErrors(parsedIdPost.error),
-		})
+	})
+
+	if (!req.body.caption)
+		throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			message: 'Input contains invalid fields',
+			details: {
+				caption:"INVALID_VALUE"
+			}
+	})
+
+	const captionParse = uploadPostSchema.safeParse(req.body);
+	if (!captionParse.success)
+				throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			message: 'Input contains invalid fields',
+			details: formatZodErrors(captionParse.error),
+	})
 
 	try {
-		await postService.deletePost(parsedIdPost.data.id, req.user.id);
-		return res.status(204).send();
+		await postService.updatePost(parsedIdPost.data.id, req.user.id, req.body);
+		return res.status(200).json({
+			data:{}
+		});
+
 	} catch (error) {
 		if (error instanceof ForbiddenAccessPostError)
 			throw new ForbiddenError({ message: error.message })
@@ -65,11 +85,6 @@ const updatePost = async (
 			})
 		throw error;
 	}
-*/
-	return res.status(200).json({
-		data:{}
-	});
-
 }
 
 const uploadPost = async (req: AuthenticatedRequest, res: Response) => {
