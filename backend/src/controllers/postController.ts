@@ -101,4 +101,11 @@ const uploadPost = async (req: AuthenticatedRequest, res: Response) => {
 	});
 }
 
-export { deletePost, uploadPost, updatePost }
+const getPostById = async (req: AuthenticatedRequest, res: Response) => {
+return res.status(201).json({
+		data:{}
+	});
+}
+
+
+export { deletePost, uploadPost, updatePost, getPostById }
