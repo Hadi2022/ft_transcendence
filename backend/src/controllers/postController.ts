@@ -7,6 +7,7 @@ import { formatZodErrors } from "../utils/zod.ts";
 import * as postService from '../services/postService.ts'
 import { ConflictPostError, ForbiddenAccessPostError, PostNotFoundError } from "../errors/postErrors.ts";
 import { updatePostSchema, uploadPostSchema } from "@transcendence/shared/schemas/post";
+import { ne } from "zod/locales";
 
 const deletePost = async (
 	req: AuthenticatedRequest,
@@ -102,9 +103,28 @@ const uploadPost = async (req: AuthenticatedRequest, res: Response) => {
 }
 
 const getPostById = async (req: AuthenticatedRequest, res: Response) => {
-return res.status(201).json({
-		data:{}
-	});
+
+	const parsedIdPost = idParamSchema.safeParse(req.params)
+	if (!parsedIdPost.success)
+		throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			message: 'Invalid UUID in route parameter',
+			details: formatZodErrors(parsedIdPost.error),
+	})
+	try{
+		const post = await postService.getPublicPostById(parsedIdPost.data.id)
+		if (!post)
+			throw new NotFoundError({
+					message:'Post not found',
+					code:ErrorCodes.NOT_FOUND,
+				})
+		return res.status(201).json({
+			data:post
+		})
+	} catch(error){
+		throw error;
+	}
+
 }
 
 

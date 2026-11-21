@@ -7,11 +7,23 @@ import { POST_MAX_SIZE } from '../../constants/imageUpload.ts'
 
 const router = express.Router()
 
-router.delete('/:id',requireAuth, authed(deletePost))
+router.delete(
+	'/:id',
+	requireAuth,
+	authed(deletePost)
+)
 
-router.patch('/:id',requireAuth, authed(updatePost))
+router.patch(
+	'/:id',
+	requireAuth,
+	authed(updatePost)
+)
 
-router.get('/:id',requireAuth, authed(getPostById))
+router.get(
+	'/:id',
+	requireAuth,
+	authed(getPostById)
+)
 
 router.post(
 	'/',
