@@ -68,9 +68,9 @@ const updatePost = async (
 	})
 
 	try {
-		await postService.updatePost(parsedIdPost.data.id, req.user.id, req.body);
+		const updatedPost = await postService.updatePost(parsedIdPost.data.id, req.user.id, req.body);
 		return res.status(200).json({
-			data:{}
+			data:updatedPost
 		});
 
 	} catch (error) {
