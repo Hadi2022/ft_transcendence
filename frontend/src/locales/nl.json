@@ -66,6 +66,7 @@
         "search": "Zoeken",
         "messages": "Berichten",
         "profile": "Profiel",
+        "newPost": "+ Post",
         "loggingOut": "Loggin out...",
         "logout": "Logout",
         "logoutError": "It was not possible to logout. Try again."
@@ -79,6 +80,25 @@
         "joined": "Joined {{date}}",
         "editProfile": "Edit profile",
         "follow": "Follow"
+    },
+    "posts": {
+        "create": {
+            "title": "Create post",
+            "subtitle": "Share an image with the community",
+            "selectImage": "Select image",
+            "changeImage" : "Change image",
+            "imageLabel": "Image",
+            "removeImage": "Remove",
+            "imageHint": "JPG, PNG or WEBP · max. 6 MB",
+            "caption": "Caption",
+            "captionPlaceholder": "Write something about your image (optional)",
+            "cancel": "Cancel",
+            "publish": "Publish",
+            "previewAlt": "Image preview",
+            "invalidType": "Invalid format. Use JPG, PNG or WEBP",
+            "tooLarge": "The image is larger than 6 MB",
+            "invalidImage":"The file is not a valid image"
+        }
     },
     "settings": {
         "title": "Settings",
