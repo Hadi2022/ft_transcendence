@@ -97,6 +97,7 @@
             "previewAlt": "Image preview",
             "invalidType": "Invalid format. Use JPG, PNG or WEBP",
             "tooLarge": "The image is larger than 6 MB",
+            "tooManyPixels": "The image resolution is too high (max. 25 megapixels)",
             "invalidImage":"The file is not a valid image"
         }
     },

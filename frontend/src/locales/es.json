@@ -97,6 +97,7 @@
             "previewAlt": "Vista previa de la imagen",
             "invalidType": "Formato no válido. Usa JPG, PNG o WEBP",
             "tooLarge": "La imagen pesa más de 6 MB",
+            "tooManyPixels": "La imagen tiene demasiada resolución (máx. 25 megapíxeles)",
             "invalidImage":"El archivo no es una imagen válida"
         }
     },

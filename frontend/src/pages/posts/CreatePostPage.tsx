@@ -1,11 +1,12 @@
 import { useEffect, useId, useRef, useState, type ChangeEvent, type SubmitEvent } from "react"
 import { useTranslation } from "react-i18next"
-import canDecodeImage from "../../utils/image"
+import { getImageSize } from "../../utils/image"
 import { useLocation, useNavigate } from "react-router"
 
 const POST_IMAGE_MAX_SIZE = 6 * 1024 * 1024
 const POST_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"]
 const CAPTION_MAX_LENGTH = 400
+const POST_IMAGE_MAX_PIXELS = 25_000_000 // same as backend MAX_IMAGE_PIXELS
 
 export default function CreatePostPage() {
 
@@ -50,11 +51,16 @@ export default function CreatePostPage() {
             return
         }
 
-        const isValid = await canDecodeImage(file)
+        const size = await getImageSize(file)
         if (validationId !== validationIdRef.current) return
 
-        if (!isValid) {
+        if (!size) {
             setImageError("posts.create.invalidImage")
+            return
+        }
+
+        if (size.width * size.height > POST_IMAGE_MAX_PIXELS) {
+            setImageError("posts.create.tooManyPixels")
             return
         }
 
