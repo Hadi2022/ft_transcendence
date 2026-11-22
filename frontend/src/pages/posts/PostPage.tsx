@@ -62,13 +62,16 @@ export default function PostPage() {
 
     if (!result || result.id !== id)
         return (
-            <div className="mx-auto flex w-full max-w-lg animate-pulse flex-col gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="size-10 rounded-full bg-soft-text/20"></div>
-                    <div className="h-4 w-32 rounded bg-soft-text/20"></div>
+            <div className="mx-auto grid w-full max-w-4xl animate-pulse gap-6
+                            md:grid-cols-[minmax(0,1fr)_20rem]">
+                <div className="aspect-square w-full rounded-lg bg-soft-text/20" />
+                <div className="flex flex-col gap-4 rounded-xl bg-surface p-4">
+                    <div className="flex items-center gap-3">
+                        <div className="size-10 rounded-full bg-soft-text/20" />
+                        <div className="h-4 w-32 rounded bg-soft-text/20" />
+                    </div>
+                    <div className="h-4 w-2/3 rounded bg-soft-text/20" />
                 </div>
-                <div className="aspect-square w-full rounded-lg bg-soft-text/20"></div>
-                <div className="h-4 w-2/3 rounded bg-soft-text/20"></div>
             </div>
         )
 
@@ -101,7 +104,7 @@ export default function PostPage() {
     })
 
     return (
-        <article className="mx-auto flex w-full max-w-lg flex-col gap-4">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
             { justCreated && (
                 <p role="status" className="rounded-md bg-success/10 px-4
                                             py-2 text-sm text-success">
@@ -109,34 +112,47 @@ export default function PostPage() {
                 </p>
             )}
 
-            <header className="flex items-center gap-3">
-                <img src={post.user.avatarUrl ?? DEFAULT_AVATAR} alt=""
-                        onError={(e) => {
-                            if(!e.currentTarget.src.endsWith(DEFAULT_AVATAR))
-                                e.currentTarget.src = DEFAULT_AVATAR
-                        }}
-                        className="size-10 shrink-0 rounded-full object-cover bg-surface"
-                />
-                <div className="min-w-0">
-                        <Link to={`/users/${post.user.username}`}
-                                className="block truncate font-semibold hover:underline">
-                            { post.user.username }
-                        </Link>
-                        <time dateTime={post.createdAt} className="text-xs text-soft-text">
-                            {createdDate}
-                        </time>
-                </div>
-            </header>
-
-            <div className="aspect-square w-full overflow-hidden rounded-lg bg-surface">
-                <img src={post.multimediaUrl}
+            <article className="grid gap-6 md:grid-cols-[minmax(0,1fr)_20rem]">
+                { /* Image */ }
+                <div className="flex items-center justify-center">
+                    <img src={post.multimediaUrl}
                         alt={ t("posts.view.imageAlt", { username: post.user.username }) }
-                        className="size-full object-contain" />
-            </div>
+                        className="block max-h-[80vh] w-auto max-w-full rounded-lg" />
+                </div>
 
-            { post.caption && (
-                <p className="whitespace-pre-line break-words">{post.caption}</p>
-            )}
-        </article>
+                { /* Side panel */ }
+                <aside className="flex min-w-0 flex-col gap-4 rounded-xl bg-surface p-4">
+                    <header className="flex items-center gap-3">
+                        <img src={post.user.avatarUrl ?? DEFAULT_AVATAR} alt=""
+                            onError={(e) => {
+                                if (!e.currentTarget.src.endsWith(DEFAULT_AVATAR))
+                                    e.currentTarget.src = DEFAULT_AVATAR
+                            }}
+                            className="size-10 shrink-0 rounded-full object-cover bg-transcendence" />
+                        <div className="min-w-0">
+                            <Link to={`/users/${post.user.username}`}
+                                className="block truncate font-semibold hover:underline">
+                                { post.user.username }
+                            </Link>
+                            <time dateTime={post.createdAt} className="text-xs text-soft-text">
+                                { createdDate }
+                            </time>
+                        </div>
+                    </header>
+
+                    { post.caption && (
+                        <p className="whitespace-pre-line break-words">{ post.caption }</p>
+                    )}
+
+                    { /* TODO: comments (future task) */ }
+                    <div aria-hidden="true"
+                        className="min-h-40 flex-1 rounded-lg bg-soft-text/10" />
+
+                    { /* TODO: likes (future task) */ }
+                    <div aria-hidden="true"
+                        className="h-10 rounded-lg bg-soft-text/10" />
+                </aside>
+            </article>
+        </div>
     )
 }
