@@ -9,6 +9,7 @@ import ProfilePage from "../pages/profile/ProfilePage";
 import ProtectedRoute from "../components/ProtectedRoute";
 import EditProfilePage from "../pages/settings/EditProfilePage";
 import SettingsLayout from "../layouts/SettingsLayout";
+import CreatePostPage from "../pages/posts/CreatePostPage";
 
 export const router = createBrowserRouter([
     {
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
             {
                 element: <ProtectedRoute />,
                 children: [
+                    { path: "posts/new", element: <CreatePostPage /> },
                     { path: "settings", element: <SettingsLayout />,
                         children: [
                             { index: true, element: <Navigate replace to="profile" /> },
