@@ -124,8 +124,8 @@ export default function CreatePostPage() {
         abortRef.current = controller
 
         try {
-            await createPost(image, caption, controller.signal)
-            // TODO: navigate to /posts/:id
+            const post = await createPost(image, caption, controller.signal)
+            navigate(`/posts/${post.id}`, { replace: true, state: { created: true } })
         } catch (err) {
             if (controller.signal.aborted) return
             const key = getCreatePostErrorKey(err)
