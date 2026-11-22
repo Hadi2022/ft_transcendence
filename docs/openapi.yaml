@@ -1483,14 +1483,12 @@ paths:
                           avatarUrl: null
                           isVerified: true
                           createdAt: '2026-11-09T10:00:00.000Z'
-                    pagination:
-                      total: 42
+                    total: 42
                 emptyList:
                   summary: No matching posts
                   value:
                     data: []
-                    pagination:
-                      total: 0
+                    total: 0
         '400':
           description: Invalid or disallowed query parameters.
           content:
@@ -2098,29 +2096,21 @@ components:
         current:
           type: boolean
           description: Whether this is the current session
-    PaginationMeta:
-      type: object
-      additionalProperties: false
-      required:
-        - total
-      properties:
-        total:
-          type: integer
-          minimum: 0
-          description: Total number of posts that meet the filter criteria.
     PostListResponse:
       type: object
       additionalProperties: false
       required:
         - data
-        - pagination
+        - total
       properties:
         data:
           type: array
           items:
             $ref: '#/components/schemas/Post'
-        pagination:
-          $ref: '#/components/schemas/PaginationMeta'
+        total:
+          type: integer
+          minimum: 0
+          description: Total number of posts that meet the filter criteria.
     PostResponse:
       type: object
       required:

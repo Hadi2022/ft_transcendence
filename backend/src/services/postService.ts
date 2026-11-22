@@ -16,7 +16,7 @@ const IMAGE_FILENAME_PATTERN =
 interface queryParamsPosts {
 	limit: number ,
 	offset: number,
-	userId?: string
+	userId?: string | undefined
 }
 
 const activeDeletions = new Set<string>();

@@ -30,7 +30,7 @@ export type UpdatePostData = {
 export type ListPostsParams = {
     limit: number;
     offset: number;
-    userId?: string;
+    userId?: string | undefined;
 }
 
 export type ListPostsResult = {
