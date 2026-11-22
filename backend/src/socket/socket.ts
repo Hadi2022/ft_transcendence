@@ -14,7 +14,10 @@ export const initSocket = (server: http.Server) => {
 	io.use(requireAuth)
 
 	io.on('connection', async (socket: Socket) => {
-		await connectionHandler(io, socket)
+		connectionHandler(io, socket).catch((err) => {
+			console.error('connectionHandler failed:', err)
+			socket.disconnect(true)
+		})
 	})
 
 }

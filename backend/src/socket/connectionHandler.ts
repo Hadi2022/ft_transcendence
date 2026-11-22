@@ -90,12 +90,14 @@ export const connectionHandler = async (io: Server, socket: Socket) => {
 		clearTimeout(expiryTimer)
 		const connectionAmount = removeUserConnection(user, socket)
 		if (connectionAmount < 1) {
-			const friendRooms = await getFriendRooms(user.id)
+			try {
+				const friendRooms = await getFriendRooms(user.id)
 
-			if (friendRooms.length > 0)
-				io.to(friendRooms).emit('user:offline', {
-					userId: user.id,
-				})
+				if (friendRooms.length > 0)
+					io.to(friendRooms).emit('user:offline', { userId: user.id })
+			} catch (err) {
+				console.error('Failed to emit user:offline', err)
+			}
 		}
 	})
 
