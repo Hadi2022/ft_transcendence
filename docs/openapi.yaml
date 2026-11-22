@@ -1611,7 +1611,199 @@ paths:
                   details: {}
         '500':
           $ref: '#/components/responses/InternalServerError'
-
+    get:
+      summary: Retrieve a post by ID
+      description: Returns the representation of an individual post along with the public data of its author.
+      operationId: getPostById
+      tags:
+        - Posts
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Post UUID.
+          schema:
+            type: string
+            format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+      responses:
+        '200':
+          description: Post found and successfully returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+              example:
+                data:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  userId: "550e8400-e29b-41d4-a716-446655440001"
+                  multimediaUrl: "/uploads/posts/550e8400-e29b-41d4-a716-446655440002.jpg"
+                  caption: "My first post"
+                  createdAt: "2026-11-17T22:00:00.000Z"
+                  updatedAt: "2026-11-17T22:00:00.000Z"
+                  user:
+                    id: "550e8400-e29b-41d4-a716-446655440001"
+                    username: "example_user"
+                    name: "Example User"
+                    biography: null
+                    avatarUrl: null
+                    isVerified: true
+                    createdAt: "2026-11-09T18:00:00.000Z"
+        '400':
+          description: The route parameter `id` is not a valid UUID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: Invalid UUID in route parameter
+                  details:
+                    id: INVALID_UUID
+        '401':
+          description: Unauthenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: UNAUTHORIZED
+                  message: You are not authorized to access this resource
+                  details: {}
+        '404':
+          description: There is no post with the provided ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Post not found
+                  details: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    patch:
+      summary: Update the caption of a post
+      description: >-
+        Allows an authenticated author to update or delete
+        (by setting it to `null`) the `caption` field of an existing post. All other fields are immutable.
+      operationId: updatePost
+      tags:
+        - Posts
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Post UUID.
+          schema:
+            type: string
+            format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostRequest'
+            examples:
+              updateCaption:
+                summary: Update caption with valid text
+                value:
+                  caption: New post description
+              clearCaption:
+                summary: Delete caption sending null
+                value:
+                  caption: null
+      responses:
+        '200':
+          description: Post updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+              example:
+                data:
+                  id: 550e8400-e29b-41d4-a716-446655440000
+                  userId: 550e8400-e29b-41d4-a716-446655440001
+                  multimediaUrl: /uploads/posts/550e8400-e29b-41d4-a716-446655440002.jpg
+                  caption: Nueva descripción de la publicación
+                  createdAt: '2026-11-17T10:00:00.000Z'
+                  updatedAt: '2026-11-22T11:45:00.000Z'
+                  user:
+                    id: 550e8400-e29b-41d4-a716-446655440001
+                    username: random_user
+                    name: Random User
+                    biography: null
+                    avatarUrl: null
+                    isVerified: true
+                    createdAt: '2026-11-09T10:00:00.000Z'
+        '400':
+          description: Invalid route parameter or request body validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidUuid:
+                  summary: Invalid UUID in route parameter
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid UUID in route parameter
+                      details:
+                        id: INVALID_UUID
+                captionTooLong:
+                  summary: Caption exceeds 400 characters
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Caption malformed
+                      details:
+                        caption: INVALID_VALUE
+        '401':
+          description: Unauthenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: UNAUTHORIZED
+                  message: You are not authorized to access this resource
+                  details: {}
+        '403':
+          description: The authenticated user is not the author of the post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: FORBIDDEN
+                  message: You are not allowed to edit this post
+                  details: {}
+        '404':
+          description: There is no publication with the specified ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: Post not found
+                  details: {}
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   securitySchemes:
     sessionCookie:
@@ -1789,6 +1981,13 @@ components:
         current:
           type: boolean
           description: Whether this is the current session
+    PostResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/Post'
     Post:
       type: object
       description: A post created by a user
@@ -1825,6 +2024,24 @@ components:
           format: date-time
         user:
           $ref: '#/components/schemas/UserProfile'
+    UpdatePostRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - caption
+      properties:
+        caption:
+          oneOf:
+            - type: string
+              minLength: 1
+              maxLength: 400
+              pattern: '.*\S.*'
+            - type: 'null'
+          description: >-
+            Caption text or null to remove it.
+            The backend trims leading and trailing whitespace before validation.
+            Empty or whitespace-only captions are rejected.
+            The maximum length is 400 characters after trimming.
     ErrorResponse:
       type: object
       required:

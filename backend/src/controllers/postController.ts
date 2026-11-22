@@ -8,6 +8,7 @@ import * as postService from '../services/postService.ts'
 import { ConflictPostError, ForbiddenAccessPostError, PostNotFoundError } from "../errors/postErrors.ts";
 import { updatePostSchema, uploadPostSchema } from "@transcendence/shared/schemas/post";
 
+
 const deletePost = async (
 	req: AuthenticatedRequest,
 	res: Response) => {
@@ -101,4 +102,30 @@ const uploadPost = async (req: AuthenticatedRequest, res: Response) => {
 	});
 }
 
-export { deletePost, uploadPost, updatePost }
+const getPostById = async (req: AuthenticatedRequest, res: Response) => {
+
+	const parsedIdPost = idParamSchema.safeParse(req.params)
+	if (!parsedIdPost.success)
+		throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			message: 'Invalid UUID in route parameter',
+			details: formatZodErrors(parsedIdPost.error),
+	})
+	try{
+		const post = await postService.getPublicPostById(parsedIdPost.data.id)
+		if (!post)
+			throw new NotFoundError({
+					message:'Post not found',
+					code:ErrorCodes.NOT_FOUND,
+				})
+		return res.status(200).json({
+			data:post
+		})
+	} catch(error){
+		throw error;
+	}
+
+}
+
+
+export { deletePost, uploadPost, updatePost, getPostById }

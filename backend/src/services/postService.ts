@@ -21,6 +21,10 @@ export const getPostById = async (postId: string) => {
 	return postRepository.getPostById(postId);
 }
 
+export const getPublicPostById = async (postId: string) => {
+	return postRepository.getPublicPostById(postId);
+}
+
 export const createPost = async (
 	userId: string,
 	imageBuffer: Buffer,
