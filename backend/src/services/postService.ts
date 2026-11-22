@@ -13,7 +13,11 @@ import { validateImage } from '../utils/imageValidation.ts';
 const IMAGE_FILENAME_PATTERN =
 	/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png|webp)$/
 
-
+interface queryParamsPosts {
+	limit: number ,
+	offset: number,
+	userId?: string | undefined
+}
 
 const activeDeletions = new Set<string>();
 
@@ -23,6 +27,13 @@ export const getPostById = async (postId: string) => {
 
 export const getPublicPostById = async (postId: string) => {
 	return postRepository.getPublicPostById(postId);
+}
+
+export const getPosts = async (
+	params: queryParamsPosts) : Promise<Post[]> =>{
+
+
+	return []
 }
 
 export const createPost = async (

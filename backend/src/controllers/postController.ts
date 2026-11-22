@@ -1,4 +1,4 @@
-import { idParamSchema } from "@transcendence/shared/schemas/common";
+import { idParamSchema, queryParamsSchema } from "@transcendence/shared/schemas/common";
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "../types/express/Request.js";
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "../errors/HttpErrors.ts";
@@ -130,23 +130,29 @@ const getPostById = async (req: AuthenticatedRequest, res: Response) => {
 
 const getPosts = async (req: AuthenticatedRequest, res: Response) => {
 
-
-	return res.status(200).json({
-			data:{}
+	const parsed = queryParamsSchema.safeParse(req.query)
+	if (!parsed.success)
+		if (parsed.error.message === 'INVALID_UUID')
+			throw new BadRequestError({
+				code: ErrorCodes.VALIDATION_ERROR,
+				message: 'Invalid UUID in route parameter',
+				details: formatZodErrors(parsed.error),
 		})
-		/*
-	try{
-		const post = await postService.getPublicPostById(parsedIdPost.data.id)
-		if (!post)
-			throw new NotFoundError({
-					message:'Post not found',
-					code:ErrorCodes.NOT_FOUND,
-				})
-
-	} catch(error){
-		throw error;
+		else
+			throw new BadRequestError({
+				code: ErrorCodes.VALIDATION_ERROR,
+				message: 'Invalid post query parameters',
+				details: formatZodErrors(parsed.error),
+		})
+	try {
+		const posts = await postService.getPosts(parsed.data)
+		return res.status(200).json({
+			data:posts
+	})
+	} catch (error) {
+		throw error
 	}
-*/
+
 }
 
 export { deletePost, uploadPost, updatePost, getPostById, getPosts}
