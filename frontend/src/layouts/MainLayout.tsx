@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { NavLink, Outlet, useNavigate } from "react-router";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import LanguageSelector from "../components/LanguageSelector";
 import { getCurrentUser, logout } from "../services/auth";
 import { useEffect, useRef, useState } from "react";
@@ -14,6 +14,7 @@ export default function MainLayout() {
     const { t } = useTranslation()
 
     const navigate = useNavigate()
+    const location = useLocation()
 
     const [isAuth, setIsAuth] = useState(false)
     const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -86,6 +87,16 @@ export default function MainLayout() {
 
                     { myUsername && (
                         <NavLink to={`/users/${myUsername}`} className="navlink">{ t("nav.profile") }</NavLink>
+                    )}
+
+                    { isAuth && (
+                        <Link to="/posts/new"
+                                state={{from: location.pathname}}
+                                className="rounded-md bg-cyan-400 px-4 py-2 text-sm
+                                            font-medium text-white hover:bg-cyan-300
+                                            transition-colors" >
+                            { t("nav.newPost") }
+                        </Link>
                     )}
 
                     { isAuth && (

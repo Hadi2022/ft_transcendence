@@ -22,3 +22,18 @@ export type PostDelete = Omit<Post,
     'updatedAt' |
     'user'
 >
+
+export type UpdatePostData = {
+    caption: string | null
+}
+
+export type ListPostsParams = {
+    limit: number;
+    offset: number;
+    userId?: string;
+}
+
+export type ListPostsResult = {
+    posts: Post[];
+    total: number;
+}

@@ -14,6 +14,12 @@ export const uploadPostSchema = z.object({
 	caption:captionField
 })
 
+export const captionFieldUpdate = z.string().trim().min(1, E.INVALID_VALUE).max(400, E.INVALID_VALUE).nullable()
+
+export const updatePostSchema = z.object({
+	caption:captionFieldUpdate
+}).strict()
+
 export const createPostSchema = z.object({
 	userId: userIdField,
 	multimediaUrl: multimediaUrlField,

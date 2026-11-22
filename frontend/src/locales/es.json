@@ -66,6 +66,7 @@
         "search": "Buscar",
         "messages": "Mensajes",
         "profile": "Perfil",
+        "newPost": "+ Publicar",
         "loggingOut": "Cerrando sesión...",
         "logout": "Cerrar sesión",
         "logoutError": "No se ha podido cerrar sesión. Inténtalo de nuevo."
@@ -79,6 +80,26 @@
         "joined": "Se unió en {{date}}",
         "editProfile": "Editar perfil",
         "follow": "Seguir"
+    },
+    "posts": {
+        "create": {
+            "title": "Crear publicación",
+            "subtitle": "Comparte una imagen con la comunidad",
+            "selectImage": "Elegir imagen",
+            "changeImage" : "Cambiar imagen",
+            "imageLabel": "Imagen",
+            "removeImage": "Quitar",
+            "imageHint": "JPG, PNG o WEBP · máx. 6 MB",
+            "caption": "Descripción",
+            "captionPlaceholder": "Escribe algo sobre tu imagen (opcional)",
+            "cancel": "Cancelar",
+            "publish": "Publicar",
+            "previewAlt": "Vista previa de la imagen",
+            "invalidType": "Formato no válido. Usa JPG, PNG o WEBP",
+            "tooLarge": "La imagen pesa más de 6 MB",
+            "tooManyPixels": "La imagen tiene demasiada resolución (máx. 25 megapíxeles)",
+            "invalidImage":"El archivo no es una imagen válida"
+        }
     },
     "settings": {
         "title": "Ajustes",

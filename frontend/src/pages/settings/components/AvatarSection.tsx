@@ -4,20 +4,11 @@ import { removeAvatar, uploadAvatar } from "../../../services/users"
 import { ApiError } from "../../../services/api"
 import { ErrorDetails } from "@transcendence/shared/errors/error-details"
 import { getCurrentUser } from "../../../services/auth"
+import canDecodeImage from "../../../utils/image"
 
 const DEFAULT_AVATAR="/img/default-avatar.svg"
 const AVATAR_MAX_SIZE = 2 * 1024 * 1024
 const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"]
-
-async function canDecodeImage(file: File): Promise<boolean>{
-    try {
-        const bitmap = await createImageBitmap(file)
-        bitmap.close()
-        return (true)
-    } catch {
-        return (false)
-    }
-}
 
 function getAvatarErrorKey(err: unknown, fallback: string): string {
     if (err instanceof TypeError)

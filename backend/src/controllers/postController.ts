@@ -5,8 +5,9 @@ import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from ".
 import { ErrorCodes } from "@transcendence/shared/errors/error-codes";
 import { formatZodErrors } from "../utils/zod.ts";
 import * as postService from '../services/postService.ts'
-import { ConflictPostError, ForbiddenAccessPostError, InternalPostError, PostNotFoundError } from "../errors/postErrors.ts";
-import { uploadPostSchema } from "@transcendence/shared/schemas/post";
+import { ConflictPostError, ForbiddenAccessPostError, PostNotFoundError } from "../errors/postErrors.ts";
+import { updatePostSchema, uploadPostSchema } from "@transcendence/shared/schemas/post";
+
 
 const deletePost = async (
 	req: AuthenticatedRequest,
@@ -38,6 +39,42 @@ const deletePost = async (
 
 }
 
+const updatePost = async (
+	req: AuthenticatedRequest,
+	res: Response) => {
+
+	const parsedIdPost = idParamSchema.safeParse(req.params)
+	if (!parsedIdPost.success)
+		throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			message: 'Invalid UUID in route parameter',
+			details: formatZodErrors(parsedIdPost.error),
+	})
+
+	const captionParse = updatePostSchema.safeParse(req.body);
+	if (!captionParse.success)
+				throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			message: 'Input contains invalid fields',
+			details: formatZodErrors(captionParse.error),
+	})
+
+	try {
+		const updatedPost = await postService.updatePost(parsedIdPost.data.id, req.user.id, req.body);
+		return res.status(200).json({
+			data:updatedPost
+		});
+
+	} catch (error) {
+		if (error instanceof ForbiddenAccessPostError)
+			throw new ForbiddenError({ message: error.message })
+		else if (error instanceof PostNotFoundError)
+			throw new NotFoundError({ message: error.message })
+
+		throw error;
+	}
+}
+
 const uploadPost = async (req: AuthenticatedRequest, res: Response) => {
 
 	const userId = req.user.id;
@@ -65,4 +102,30 @@ const uploadPost = async (req: AuthenticatedRequest, res: Response) => {
 	});
 }
 
-export { deletePost, uploadPost }
+const getPostById = async (req: AuthenticatedRequest, res: Response) => {
+
+	const parsedIdPost = idParamSchema.safeParse(req.params)
+	if (!parsedIdPost.success)
+		throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			message: 'Invalid UUID in route parameter',
+			details: formatZodErrors(parsedIdPost.error),
+	})
+	try{
+		const post = await postService.getPublicPostById(parsedIdPost.data.id)
+		if (!post)
+			throw new NotFoundError({
+					message:'Post not found',
+					code:ErrorCodes.NOT_FOUND,
+				})
+		return res.status(200).json({
+			data:post
+		})
+	} catch(error){
+		throw error;
+	}
+
+}
+
+
+export { deletePost, uploadPost, updatePost, getPostById }
