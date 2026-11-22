@@ -2,6 +2,7 @@
 import type { Socket, Server } from "socket.io";
 import type { User } from "../types/user.ts";
 import { userRoom, sessionRoom } from "../services/socketService.ts";
+import { findManyAcceptedById } from "../repositories/friendRepository.ts";
 
 const isAuthenticated = (socket: Socket) => {
 	if (!socket.data.user || !socket.data.session)
@@ -16,8 +17,7 @@ const	addUserConnection = (user: User, socket: Socket): number => {
 	const userSockets = connectedUsers.get(user.id)
 
 	if (!userSockets) {
-		const	newUserSockets = new Set<string>()
-		newUserSockets.add(socket.id)
+		const	newUserSockets = new Set([socket.id])
 		connectedUsers.set(user.id, newUserSockets)
 		return 1
 	}
@@ -44,14 +44,32 @@ const removeUserConnection = (user: User, socket: Socket): number => {
 	return userSocketAmount
 }
 
-const informSocket = (socket: Socket) => {
+const informSocket = async (socket: Socket) => {
+
+	const user = socket.data.user
 
 	socket.emit('user:online-list', {
-		userIds: [...connectedUsers.keys()],
+		userIds: await getOnlineFriends(user.id),
 	})
 }
 
-export const connectionHandler = (io: Server, socket: Socket) => {
+const getOnlineFriends = async (userId: string) => {
+
+	const relations = await findManyAcceptedById(userId)
+
+	const friendsList = relations.map((x): string => {
+		if (x.receiverId != userId)
+			return x.receiverId
+		return x.senderId
+	})
+
+	return friendsList.filter((x) => connectedUsers.has(x))
+
+}
+
+const getFriendRooms = async (userId: string) => (await getOnlineFriends(userId)).map(userRoom)
+
+export const connectionHandler = async (io: Server, socket: Socket) => {
 
 	if (!isAuthenticated(socket)) {
 		socket.disconnect(true)
@@ -68,19 +86,31 @@ export const connectionHandler = (io: Server, socket: Socket) => {
 	socket.join(userRoom(user.id))
 	socket.join(sessionRoom(session.id))
 
-	if (addUserConnection(user, socket) === 1)
-		socket.broadcast.emit('user:online', {
-			userId: user.id,
-		})
-
-	informSocket(socket)
-	
-	socket.on('disconnect', () => {
+	socket.on('disconnect', async () => {
 		clearTimeout(expiryTimer)
 		const connectionAmount = removeUserConnection(user, socket)
-		if (connectionAmount < 1)
-			socket.broadcast.emit('user:offline', {
+		if (connectionAmount < 1) {
+			const friendRooms = await getFriendRooms(user.id)
+
+			if (friendRooms.length == 0)
+				return
+
+			io.to(friendRooms).emit('user:offline', {
 				userId: user.id,
 			})
+		}
 	})
+
+	if (addUserConnection(user, socket) === 1) {
+		const friendRooms = await getFriendRooms(user.id)
+
+		if (friendRooms.length == 0)
+			return
+
+		io.to(friendRooms).emit('user:online', {
+			userId: user.id,
+		})
+	}
+
+	await informSocket(socket)
 }

@@ -46,6 +46,25 @@ export const findManyPendingByReceiver = async (receiver:string) => {
 	})
 }
 
+export const findManyAcceptedById = async (userId: string) => {
+
+	const order: Order = 'desc'
+
+	return prisma.friend.findMany({
+		where: {
+			status: 'accepted',
+			OR: [{
+					senderId: userId,
+				},
+				{
+					receiverId: userId,
+				},
+			]
+		},
+
+		orderBy: [{ createdAt: order }],
+	})
+}
 
 export const findOpenRequest = async (data: FriendRelation) => {
 
