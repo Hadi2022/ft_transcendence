@@ -21,6 +21,7 @@ export default function CreatePostPage() {
     const [caption, setCaption] = useState("")
 
     const inputRef = useRef<HTMLInputElement>(null)
+    const validationIdRef = useRef(0)
 
     const hintId = useId()
     const captionId = useId()
@@ -36,6 +37,7 @@ export default function CreatePostPage() {
         e.target.value = ""
         if (!file) return
 
+        const validationId = ++validationIdRef.current
         setImageError(null)
 
         if (!POST_IMAGE_TYPES.includes(file.type)) {
@@ -48,7 +50,10 @@ export default function CreatePostPage() {
             return
         }
 
-        if (!(await canDecodeImage(file))) {
+        const isValid = await canDecodeImage(file)
+        if (validationId !== validationIdRef.current) return
+
+        if (!isValid) {
             setImageError("posts.create.invalidImage")
             return
         }
@@ -62,6 +67,7 @@ export default function CreatePostPage() {
     }
 
     function handleRemoveImage() {
+        validationIdRef.current++
         setImage(null)
         setPreviewUrl(null)
         setImageError(null)
