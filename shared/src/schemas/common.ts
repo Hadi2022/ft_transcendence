@@ -7,7 +7,7 @@ export const orderSchema = z.enum(['asc', 'desc'], E.INVALID_ORDER);
 
 const limitParam = z.coerce.number().int().min(1).max(100).default(20);
 const offsetParam = z.coerce.number().int().min(0).default(0)
-const userIdParamSchema = z.uuid(E.INVALID_UUID).optional()
+const userIdParamSchema = z.uuid(E.INVALID_UUID)
 export const queryParamsSchema = z.object({
 	limit:limitParam,
 	offset:offsetParam,

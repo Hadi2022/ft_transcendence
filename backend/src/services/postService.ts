@@ -5,7 +5,7 @@ import path from 'node:path';
 import { promises as fs } from 'fs';
 import { UPLOAD_PUBLIC_PATH } from '../constants/imageUpload.ts';
 import { RecordNotFoundError } from '../errors/RepositoryErrors.ts';
-import type { Post, UpdatePostData } from '../types/post.ts';
+import type { ListPostsResult, Post, UpdatePostData } from '../types/post.ts';
 import type { ValidatedImage } from '../types/image.ts';
 import { validateImage } from '../utils/imageValidation.ts';
 
@@ -16,7 +16,7 @@ const IMAGE_FILENAME_PATTERN =
 interface queryParamsPosts {
 	limit: number ,
 	offset: number,
-	userId?: string | undefined
+	userId?: string
 }
 
 const activeDeletions = new Set<string>();
@@ -30,10 +30,9 @@ export const getPublicPostById = async (postId: string) => {
 }
 
 export const getPosts = async (
-	params: queryParamsPosts) : Promise<Post[]> =>{
+	params: queryParamsPosts) : Promise<ListPostsResult> =>{
 
-
-	return []
+	return await postRepository.listPosts(params)
 }
 
 export const createPost = async (
