@@ -93,7 +93,7 @@ export const connectionHandler = async (io: Server, socket: Socket) => {
 			try {
 				const friendRooms = await getFriendRooms(user.id)
 
-				if (friendRooms.length > 0)
+				if (friendRooms.length > 0 && !connectedUsers.has(user.id))
 					io.to(friendRooms).emit('user:offline', { userId: user.id })
 			} catch (err) {
 				console.error('Failed to emit user:offline', err)
