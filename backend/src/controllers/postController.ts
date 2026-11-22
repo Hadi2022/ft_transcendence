@@ -128,4 +128,25 @@ const getPostById = async (req: AuthenticatedRequest, res: Response) => {
 }
 
 
-export { deletePost, uploadPost, updatePost, getPostById }
+const getPosts = async (req: AuthenticatedRequest, res: Response) => {
+
+
+	return res.status(200).json({
+			data:{}
+		})
+		/*
+	try{
+		const post = await postService.getPublicPostById(parsedIdPost.data.id)
+		if (!post)
+			throw new NotFoundError({
+					message:'Post not found',
+					code:ErrorCodes.NOT_FOUND,
+				})
+
+	} catch(error){
+		throw error;
+	}
+*/
+}
+
+export { deletePost, uploadPost, updatePost, getPostById, getPosts}

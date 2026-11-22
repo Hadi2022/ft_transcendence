@@ -1,6 +1,6 @@
 import express from 'express'
 import { requireAuth } from '../../middleware/auth.ts'
-import { deletePost, getPostById, updatePost, uploadPost } from '../../controllers/postController.ts'
+import { deletePost, getPostById, getPosts, updatePost, uploadPost } from '../../controllers/postController.ts'
 import { authed } from '../../utils/authed.ts'
 import { imageUpload } from '../../middleware/imageUpload.ts'
 import { POST_MAX_SIZE } from '../../constants/imageUpload.ts'
@@ -23,6 +23,12 @@ router.get(
 	'/:id',
 	requireAuth,
 	authed(getPostById)
+)
+
+router.get(
+	'/',
+	requireAuth,
+	authed(getPosts)
 )
 
 router.post(
