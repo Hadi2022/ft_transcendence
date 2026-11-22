@@ -132,17 +132,10 @@ const getPosts = async (req: AuthenticatedRequest, res: Response) => {
 
 	const parsed = queryParamsSchema.safeParse(req.query)
 	if (!parsed.success)
-		if (parsed.error.message === 'INVALID_UUID')
-			throw new BadRequestError({
-				code: ErrorCodes.VALIDATION_ERROR,
-				message: 'Invalid UUID in route parameter',
-				details: formatZodErrors(parsed.error),
-		})
-		else
-			throw new BadRequestError({
-				code: ErrorCodes.VALIDATION_ERROR,
-				message: 'Invalid post query parameters',
-				details: formatZodErrors(parsed.error),
+		throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			message: 'Invalid post query parameters',
+			details: formatZodErrors(parsed.error),
 		})
 	try {
 		const posts = await postService.getPosts(parsed.data)
