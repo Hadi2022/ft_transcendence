@@ -92,24 +92,20 @@ export const connectionHandler = async (io: Server, socket: Socket) => {
 		if (connectionAmount < 1) {
 			const friendRooms = await getFriendRooms(user.id)
 
-			if (friendRooms.length == 0)
-				return
-
-			io.to(friendRooms).emit('user:offline', {
-				userId: user.id,
-			})
+			if (friendRooms.length > 0)
+				io.to(friendRooms).emit('user:offline', {
+					userId: user.id,
+				})
 		}
 	})
 
 	if (addUserConnection(user, socket) === 1) {
 		const friendRooms = await getFriendRooms(user.id)
 
-		if (friendRooms.length == 0)
-			return
-
-		io.to(friendRooms).emit('user:online', {
-			userId: user.id,
-		})
+		if (friendRooms.length > 0)
+			io.to(friendRooms).emit('user:online', {
+				userId: user.id,
+			})
 	}
 
 	await informSocket(socket)

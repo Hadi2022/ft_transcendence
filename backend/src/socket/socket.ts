@@ -13,10 +13,8 @@ export const initSocket = (server: http.Server) => {
 	io.use(loadSession)
 	io.use(requireAuth)
 
-	io.on('connection', (socket: Socket) => {
-
-		connectionHandler(io, socket)
-
+	io.on('connection', async (socket: Socket) => {
+		await connectionHandler(io, socket)
 	})
 
 }
