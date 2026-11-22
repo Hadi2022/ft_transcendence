@@ -1634,24 +1634,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/PostResponse'
               example:
-                id: "550e8400-e29b-41d4-a716-446655440000"
-                userId: "550e8400-e29b-41d4-a716-446655440001"
-                multimediaUrl: "/uploads/posts/550e8400-e29b-41d4-a716-446655440002.jpg"
-                caption: "My first post"
-                createdAt: "2026-11-17T22:00:00.000Z"
-                updatedAt: "2026-11-17T22:00:00.000Z"
-                user:
-                  id: "550e8400-e29b-41d4-a716-446655440001"
-                  username: "example_user"
-                  name: "Example User"
-                  biography: null
-                  avatarUrl: null
-                  isVerified: true
-                  createdAt: "2026-11-09T18:00:00.000Z"
+                data:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  userId: "550e8400-e29b-41d4-a716-446655440001"
+                  multimediaUrl: "/uploads/posts/550e8400-e29b-41d4-a716-446655440002.jpg"
+                  caption: "My first post"
+                  createdAt: "2026-11-17T22:00:00.000Z"
+                  updatedAt: "2026-11-17T22:00:00.000Z"
+                  user:
+                    id: "550e8400-e29b-41d4-a716-446655440001"
+                    username: "example_user"
+                    name: "Example User"
+                    biography: null
+                    avatarUrl: null
+                    isVerified: true
+                    createdAt: "2026-11-09T18:00:00.000Z"
         '400':
-          description: The route parameter `id` is not a valid UUID..
+          description: The route parameter `id` is not a valid UUID.
           content:
             application/json:
               schema:
@@ -1661,7 +1662,7 @@ paths:
                   code: VALIDATION_ERROR
                   message: Invalid UUID in route parameter
                   details:
-                    id: INVALID_VALUE
+                    id: INVALID_UUID
         '401':
           description: Unauthenticated user.
           content:
@@ -1684,12 +1685,14 @@ paths:
                   code: NOT_FOUND
                   message: Post not found
                   details: {}
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     patch:
       summary: Update the caption of a post
       description: >-
         Allows an authenticated author to update or delete
         (by setting it to `null`) the `caption` field of an existing post. All other fields are immutable.
-      operationId: updatePostCaption
+      operationId: updatePost
       tags:
         - Posts
       security:
@@ -1724,34 +1727,46 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                $ref: '#/components/schemas/PostResponse'
               example:
-                id: 550e8400-e29b-41d4-a716-446655440000
-                userId: 550e8400-e29b-41d4-a716-446655440001
-                multimediaUrl: /uploads/posts/550e8400-e29b-41d4-a716-446655440002.jpg
-                caption: Nueva descripción de la publicación
-                createdAt: '2026-11-17T10:00:00.000Z'
-                updatedAt: '2026-11-22T11:45:00.000Z'
-                user:
-                  id: 550e8400-e29b-41d4-a716-446655440001
-                  username: random_user
-                  name: Random User
-                  biography: null
-                  avatarUrl: null
-                  isVerified: true
-                  createdAt: '2026-11-09T10:00:00.000Z'
+                data:
+                  id: 550e8400-e29b-41d4-a716-446655440000
+                  userId: 550e8400-e29b-41d4-a716-446655440001
+                  multimediaUrl: /uploads/posts/550e8400-e29b-41d4-a716-446655440002.jpg
+                  caption: Nueva descripción de la publicación
+                  createdAt: '2026-11-17T10:00:00.000Z'
+                  updatedAt: '2026-11-22T11:45:00.000Z'
+                  user:
+                    id: 550e8400-e29b-41d4-a716-446655440001
+                    username: random_user
+                    name: Random User
+                    biography: null
+                    avatarUrl: null
+                    isVerified: true
+                    createdAt: '2026-11-09T10:00:00.000Z'
         '400':
-          description: Invalid `id` parameter or invalid request body (missing, out-of-range fields, or unknown properties).
+          description: Invalid route parameter or request body validation failed.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error:
-                  code: VALIDATION_ERROR
-                  message: Input contains invalid fields
-                  details:
-                    caption: INVALID_VALUE
+              examples:
+                invalidUuid:
+                  summary: Invalid UUID in route parameter
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid UUID in route parameter
+                      details:
+                        id: INVALID_UUID
+                captionTooLong:
+                  summary: Caption exceeds 400 characters
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Caption malformed
+                      details:
+                        caption: INVALID_VALUE
         '401':
           description: Unauthenticated user.
           content:
@@ -1785,6 +1800,10 @@ paths:
                   code: NOT_FOUND
                   message: Post not found
                   details: {}
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   securitySchemes:
     sessionCookie:
@@ -1962,6 +1981,13 @@ components:
         current:
           type: boolean
           description: Whether this is the current session
+    PostResponse:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          $ref: '#/components/schemas/Post'
     Post:
       type: object
       description: A post created by a user
@@ -2009,8 +2035,13 @@ components:
             - type: string
               minLength: 1
               maxLength: 400
+              pattern: '.*\S.*'
             - type: 'null'
-          description: New legend (1 to 400 characters) or `null` to remove it. An empty string (`""`) is not allowed.
+          description: >-
+            Caption text or null to remove it.
+            The backend trims leading and trailing whitespace before validation.
+            Empty or whitespace-only captions are rejected.
+            The maximum length is 400 characters after trimming.
     ErrorResponse:
       type: object
       required:
