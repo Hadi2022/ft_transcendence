@@ -32,3 +32,15 @@ export async function createPost(image: File, caption: string, signal?: AbortSig
     
     return (body.data)
 }
+
+export async function getPostById(id: string): Promise<Post> {
+    const res = await fetch(`/api/posts/${encodeURIComponent(id)}`, {
+        credentials: "include"
+    })
+
+    if (!res.ok) await throwApiError(res)
+
+    const body = await res.json()
+
+    return (body.data)
+}

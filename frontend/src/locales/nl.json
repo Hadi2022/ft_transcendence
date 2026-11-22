@@ -104,6 +104,14 @@
             "tooLarge": "The image is larger than 6 MB",
             "tooManyPixels": "The image resolution is too high (max. 25 megapixels)",
             "invalidImage":"The file is not a valid image"
+        },
+        "view": {
+            "created": "Posted!",
+            "imageAlt": "Post by {{username}}",
+            "notFoundTitle": "This post doesn't exist",
+            "notFoundText": "Maybe the link is broken or the post was deleted",
+            "backHome": "Back to home",
+            "loadError": "Couldn't load the post"
         }
     },
     "settings": {

@@ -104,6 +104,14 @@
             "tooLarge": "La imagen pesa más de 6 MB",
             "tooManyPixels": "La imagen tiene demasiada resolución (máx. 25 megapíxeles)",
             "invalidImage":"El archivo no es una imagen válida"
+        },
+        "view": {
+            "created": "¡Publicado!",
+            "imageAlt": "Publicación de {{username}}",
+            "notFoundTitle": "Esta publicación no existe",
+            "notFoundText": "Puede que el enlace esté roto o que se haya eliminado",
+            "backHome": "Volver al inicio",
+            "loadError": "No se ha podido cargar la publicación"
         }
     },
     "settings": {
