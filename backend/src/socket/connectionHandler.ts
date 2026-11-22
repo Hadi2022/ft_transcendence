@@ -44,12 +44,12 @@ const removeUserConnection = (user: User, socket: Socket): number => {
 	return userSocketAmount
 }
 
-const informSocket = async (socket: Socket) => {
+const informSocket = (socket: Socket, friendsList: string[]) => {
 
 	const user = socket.data.user
 
 	socket.emit('user:online-list', {
-		userIds: await getOnlineFriends(user.id),
+		userIds: friendsList,
 	})
 }
 
@@ -101,14 +101,14 @@ export const connectionHandler = async (io: Server, socket: Socket) => {
 		}
 	})
 
-	if (addUserConnection(user, socket) === 1) {
-		const friendRooms = await getFriendRooms(user.id)
+	const currentFriends = await getFriendRooms(user.id)
 
-		if (friendRooms.length > 0 && connectedUsers.has(user.id))
-			io.to(friendRooms).emit('user:online', {
+	if (addUserConnection(user, socket) === 1) {
+		if (currentFriends.length > 0 && connectedUsers.has(user.id))
+			io.to(currentFriends).emit('user:online', {
 				userId: user.id,
 			})
 	}
 
-	await informSocket(socket)
+	await informSocket(socket, currentFriends)
 }
