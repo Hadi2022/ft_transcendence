@@ -3,8 +3,8 @@ import type { UserProfile } from "../../../services/auth"
 import { useId, useState, type SubmitEvent } from "react"
 import InputComponent from "../../../components/InputComponent"
 import { updateCurrentUser, type UpdateProfileData } from "../../../services/users"
-
 import { updateUserSchema } from "@transcendence/shared/schemas/user"
+import { ApiError } from "../../../services/api"
 
 const NAME_MAX_LENGTH = 100
 const BIO_MAX_LENGTH = 1000
@@ -95,11 +95,36 @@ export default function ProfileTextForm({user, onSaved, disabled, onPendingChang
             setName(updated.name ?? "")
             setBiography(updated.biography ?? "")
             setSaveStatus("saved")
-        } catch {
-            setSaveStatus("error")
-        } finally {
-            onPendingChange(false)
-        }
+		} catch (err) {
+			if (err instanceof ApiError && err.status === 400) {
+				const errors: {
+					name?: string
+					biography?: string
+				} = {}
+
+				if (err.details.name) {
+					errors.name = t(`auth.fieldErrors.${err.details.name}`, {
+						defaultValue: t("auth.fieldErrors.INVALID_VALUE")
+					})
+				}
+
+				if (err.details.biography) {
+					errors.biography = t(`auth.fieldErrors.${err.details.biography}`, {
+						defaultValue: t("auth.fieldErrors.INVALID_VALUE")
+					})
+				}
+
+				if (errors.name || errors.biography) {
+					setFieldErrors(errors)
+					setSaveStatus("error")
+					return
+				}
+			}
+
+			setSaveStatus("error")
+		} finally {
+			onPendingChange(false)
+		}
     }
 
     function handleCancel() {
