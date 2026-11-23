@@ -67,7 +67,7 @@ const getOnlineFriends = async (userId: string) => {
 
 }
 
-const getFriendRooms = async (userId: string) => (await getOnlineFriends(userId)).map(userRoom)
+const getFriendRooms = async (onlineFriends: string[]) => onlineFriends.map(userRoom)
 
 export const connectionHandler = async (io: Server, socket: Socket) => {
 
@@ -91,7 +91,7 @@ export const connectionHandler = async (io: Server, socket: Socket) => {
 		const connectionAmount = removeUserConnection(user, socket)
 		if (connectionAmount < 1) {
 			try {
-				const friendRooms = await getFriendRooms(user.id)
+				const friendRooms = await getFriendRooms(await getOnlineFriends(user.id))
 
 				if (friendRooms.length > 0 && !connectedUsers.has(user.id))
 					io.to(friendRooms).emit('user:offline', { userId: user.id })
@@ -101,11 +101,13 @@ export const connectionHandler = async (io: Server, socket: Socket) => {
 		}
 	})
 
-	const currentFriends = await getFriendRooms(user.id)
+	const currentFriends = await getOnlineFriends(user.id)
 
 	if (addUserConnection(user, socket) === 1) {
-		if (currentFriends.length > 0 && connectedUsers.has(user.id))
-			io.to(currentFriends).emit('user:online', {
+		const friendRooms = await getFriendRooms(currentFriends)
+
+		if (friendRooms.length > 0 && connectedUsers.has(user.id))
+			io.to(friendRooms).emit('user:online', {
 				userId: user.id,
 			})
 	}
