@@ -94,11 +94,25 @@
             "captionPlaceholder": "Write something about your image (optional)",
             "cancel": "Cancel",
             "publish": "Publish",
+            "publishing": "Publishing...",
+            "network": "Couldn't connect to the server",
+            "sessionExpired": "Your session has expired. Please log in again",
+            "invalidCaption": "The caption is not valid",
+            "publishError": "Couldn't publish the post. Please try again",
             "previewAlt": "Image preview",
             "invalidType": "Invalid format. Use JPG, PNG or WEBP",
             "tooLarge": "The image is larger than 6 MB",
             "tooManyPixels": "The image resolution is too high (max. 25 megapixels)",
             "invalidImage":"The file is not a valid image"
+        },
+        "view": {
+            "created": "Posted!",
+            "imageAlt": "Post by {{username}}",
+            "notFoundTitle": "This post doesn't exist",
+            "notFoundText": "Maybe the link is broken or the post was deleted",
+            "backHome": "Back to home",
+            "loadError": "Couldn't load the post",
+            "imageError": "Couldn't load the image"
         }
     },
     "settings": {

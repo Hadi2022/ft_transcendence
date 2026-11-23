@@ -94,11 +94,25 @@
             "captionPlaceholder": "Escribe algo sobre tu imagen (opcional)",
             "cancel": "Cancelar",
             "publish": "Publicar",
+            "publishing": "Publicando...",
+            "network": "No se ha podido conectar con el servidor",
+            "sessionExpired": "Tu sesión ha caducado. Vuelve a iniciar sesión",
+            "invalidCaption": "La descripción no es válida",
+            "publishError": "No se ha podido publicar. Inténtalo de nuevo",
             "previewAlt": "Vista previa de la imagen",
             "invalidType": "Formato no válido. Usa JPG, PNG o WEBP",
             "tooLarge": "La imagen pesa más de 6 MB",
             "tooManyPixels": "La imagen tiene demasiada resolución (máx. 25 megapíxeles)",
             "invalidImage":"El archivo no es una imagen válida"
+        },
+        "view": {
+            "created": "¡Publicado!",
+            "imageAlt": "Publicación de {{username}}",
+            "notFoundTitle": "Esta publicación no existe",
+            "notFoundText": "Puede que el enlace esté roto o que se haya eliminado",
+            "backHome": "Volver al inicio",
+            "loadError": "No se ha podido cargar la publicación",
+            "imageError": "No se ha podido cargar la imagen"
         }
     },
     "settings": {

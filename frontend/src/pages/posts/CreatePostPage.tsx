@@ -2,11 +2,32 @@ import { useEffect, useId, useRef, useState, type ChangeEvent, type SubmitEvent 
 import { useTranslation } from "react-i18next"
 import { getImageSize } from "../../utils/image"
 import { useLocation, useNavigate } from "react-router"
+import { ApiError } from "../../services/api"
+import { ErrorDetails } from "@transcendence/shared/errors/error-details"
+import { createPost } from "../../services/posts"
 
 const POST_IMAGE_MAX_SIZE = 6 * 1024 * 1024
 const POST_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"]
 const CAPTION_MAX_LENGTH = 400
 const POST_IMAGE_MAX_PIXELS = 25_000_000 // same as backend MAX_IMAGE_PIXELS
+
+function getCreatePostErrorKey(err: unknown): string {
+    if (err instanceof TypeError)
+        return "posts.create.network"
+    if (!(err instanceof ApiError))
+        return "posts.create.publishError"
+    if (err.status === 401)
+        return "posts.create.sessionExpired"
+    if (err.status === 413 || err.details.image === ErrorDetails.IMAGE_TOO_LARGE)
+        return "posts.create.tooLarge"
+    if (err.details.image === ErrorDetails.IMAGE_INVALID_FORMAT)
+        return "posts.create.invalidType"
+    if (err.details.image === ErrorDetails.IMAGE_INVALID_CONTENT)
+        return "posts.create.invalidImage"
+    if (err.details.caption)
+        return "posts.create.invalidCaption"
+    return "posts.create.publishError"
+}
 
 export default function CreatePostPage() {
 
@@ -20,13 +41,20 @@ export default function CreatePostPage() {
     const [previewUrl, setPreviewUrl] = useState<string|null>(null)
     const [imageError, setImageError] = useState<string|null>(null)
     const [caption, setCaption] = useState("")
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [submitError, setSubmitError] = useState<string|null>(null)
 
     const inputRef = useRef<HTMLInputElement>(null)
     const validationIdRef = useRef(0)
+    const abortRef = useRef<AbortController|null>(null)
 
     const hintId = useId()
     const captionId = useId()
     const counterId = useId()
+
+    useEffect(() => {
+        return () => abortRef.current?.abort()
+    }, [])
 
     useEffect(() => {
         if (!previewUrl) return
@@ -40,6 +68,7 @@ export default function CreatePostPage() {
 
         const validationId = ++validationIdRef.current
         setImageError(null)
+        setSubmitError(null)
 
         if (!POST_IMAGE_TYPES.includes(file.type)) {
             setImageError("posts.create.invalidType")
@@ -83,10 +112,31 @@ export default function CreatePostPage() {
         navigate(from, {replace: true})
     }
 
-    function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+    async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
-        if (!image) return
-        // TODO: send image + caption to POST /api/posts
+        if (!image || isSubmitting) return
+
+        setSubmitError(null)
+        setImageError(null)
+        setIsSubmitting(true)
+
+        const controller = new AbortController()
+        abortRef.current = controller
+
+        try {
+            const post = await createPost(image, caption, controller.signal)
+            navigate(`/posts/${post.id}`, { replace: true, state: { created: true } })
+        } catch (err) {
+            if (controller.signal.aborted) return
+            const key = getCreatePostErrorKey(err)
+            if (err instanceof ApiError && err.details.image)
+                setImageError(key)
+            else
+                setSubmitError(key)
+        } finally {
+            if (!controller.signal.aborted)
+                setIsSubmitting(false)
+        }
     }
     
     return (
@@ -115,18 +165,24 @@ export default function CreatePostPage() {
 
                             <div className="absolute right-2 top-2 flex gap-2">
                                 <button type="button" onClick={openFilePicker}
+                                        disabled={isSubmitting}
                                         className="rounded-md bg-black/60 px-3 py-1.5 text-xs
                                                     font-medium text-white
                                                     hover:bg-black/80 transition-colors
-                                                    cursor-pointer">
+                                                    cursor-pointer 
+                                                    disabled:opacity-50 
+                                                    disabled:cursor-not-allowed">
                                     { t("posts.create.changeImage") }
                                 </button>
 
                                 <button type="button" onClick={handleRemoveImage}
+                                        disabled={isSubmitting}
                                         className="rounded-md bg-black/60 px-3 py-1.5 text-xs
                                                     font-medium text-white
                                                     hover:bg-danger transition-colors
-                                                    cursor-pointer">
+                                                    cursor-pointer
+                                                    disabled:opacity-50 
+                                                    disabled:cursor-not-allowed">
                                     { t("posts.create.removeImage") }
                                 </button>
                             </div>
@@ -164,6 +220,7 @@ export default function CreatePostPage() {
 
                     <textarea id={captionId}
                                 value={caption}
+                                disabled={isSubmitting}
                                 onChange={(e) => setCaption(e.target.value)}
                                 maxLength={CAPTION_MAX_LENGTH}
                                 rows={3} 
@@ -182,21 +239,26 @@ export default function CreatePostPage() {
                     </p>
                 </div>
 
+                { submitError && (
+                    <p role="alert" className="text-sm text-danger">{ t(submitError) }</p>
+                )}
+
                 <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                    <button type="button" onClick={handleCancel}
+                    <button type="button" onClick={handleCancel} disabled={isSubmitting}
                                 className="rounded-md bg-soft-text/20 px-4 py-2
                                             text-sm font-medium hover:bg-soft-text/30
-                                            transition-colors cursor-pointer">
+                                            transition-colors cursor-pointer
+                                            disabled:opacity-50 disabled:cursor-not-allowed">
                         { t("posts.create.cancel") }
                     </button>
 
-                    <button type="submit" disabled={!image}
+                    <button type="submit" disabled={!image || isSubmitting}
                                 className="rounded-md bg-cyan-400 px-4 py-2 text-sm
                                             font-medium text-white hover:bg-cyan-300
                                             transition-colors cursor-pointer
                                             disabled:opacity-50 disabled:cursor-not-allowed
                                             disabled:hover:bg-cyan-400">
-                        { t("posts.create.publish") }
+                        { isSubmitting ? t("posts.create.publishing") : t("posts.create.publish") }
                     </button>
                 </div>
 
