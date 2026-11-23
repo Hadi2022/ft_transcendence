@@ -118,16 +118,20 @@ export const connectionHandler = async (io: Server, socket: Socket) => {
 			try {
 				notifyFriends(io, socket, await getOnlineFriends(user.id))
 			} catch (err) {
-				console.error('Failed to emit user:offline', err)
+				console.error('[socket] Failed to emit user:offline', err)
 			}
 		}
 	})
 
-	const currentFriends = getOnlineFriends(user.id)
+	try {
+		const currentFriends = getOnlineFriends(user.id)
+		if (addUserConnection(user, socket) === 1)
+			notifyFriends(io, socket, await currentFriends)
 
-	if (addUserConnection(user, socket) === 1) {
-		notifyFriends(io, socket, await currentFriends)
+		informSocket(socket, await currentFriends)	
+	} catch (err) {
+		console.error("[socket] Failed to fetch friends")
 	}
 
-	informSocket(socket, await currentFriends)
+
 }

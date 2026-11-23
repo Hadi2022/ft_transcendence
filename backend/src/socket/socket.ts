@@ -15,7 +15,7 @@ export const initSocket = (server: http.Server) => {
 
 	io.on('connection', (socket: Socket) => {
 		connectionHandler(io, socket).catch((err) => {
-			console.error('connectionHandler failed:', err)
+			console.error('[socket] connectionHandler failed:', err)
 			socket.disconnect(true)
 		})
 	})
