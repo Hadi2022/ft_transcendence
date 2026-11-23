@@ -20,6 +20,7 @@ export default function PostPage() {
     const [justCreated] = useState(
         () => (location.state as {created?: boolean} | null)?.created === true
     )
+    const [failedImageUrl, setFailedImageUrl] = useState<string|null>(null)
     const [result, setResult] = useState<PostResult|null>(null)
     const lastRequest = useRef(0)
 
@@ -115,9 +116,23 @@ export default function PostPage() {
             <article className="grid gap-6 md:grid-cols-[minmax(0,1fr)_20rem]">
                 { /* Image */ }
                 <div className="flex items-center justify-center">
-                    <img src={post.multimediaUrl}
-                        alt={ t("posts.view.imageAlt", { username: post.user.username }) }
-                        className="block max-h-[80vh] w-auto max-w-full rounded-lg" />
+                    { failedImageUrl === post.multimediaUrl ? (
+                        <div className="flex aspect-square w-full flex-col items-center
+                                        justify-center gap-3 rounded-lg bg-surface text-soft-text">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
+                                className="size-10" aria-hidden="true">
+                                <rect x="3" y="4" width="18" height="16" rx="2" />
+                                <circle cx="9" cy="10" r="2" />
+                                <path d="m21 16-5-5-9 9" />
+                            </svg>
+                            <p className="text-sm">{ t("posts.view.imageError") }</p>
+                        </div>
+                    ) : (
+                        <img src={post.multimediaUrl}
+                            alt={ t("posts.view.imageAlt", { username: post.user.username }) }
+                            onError={() => setFailedImageUrl(post.multimediaUrl)}
+                            className="block max-h-[80vh] w-auto max-w-full rounded-lg" />
+                    )}
                 </div>
 
                 { /* Side panel */ }

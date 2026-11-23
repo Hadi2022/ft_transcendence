@@ -111,7 +111,8 @@
             "notFoundTitle": "Esta publicación no existe",
             "notFoundText": "Puede que el enlace esté roto o que se haya eliminado",
             "backHome": "Volver al inicio",
-            "loadError": "No se ha podido cargar la publicación"
+            "loadError": "No se ha podido cargar la publicación",
+            "imageError": "No se ha podido cargar la imagen"
         }
     },
     "settings": {

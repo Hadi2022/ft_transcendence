@@ -111,7 +111,8 @@
             "notFoundTitle": "This post doesn't exist",
             "notFoundText": "Maybe the link is broken or the post was deleted",
             "backHome": "Back to home",
-            "loadError": "Couldn't load the post"
+            "loadError": "Couldn't load the post",
+            "imageError": "Couldn't load the image"
         }
     },
     "settings": {
