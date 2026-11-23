@@ -5,6 +5,7 @@ import InputComponent from "../../../components/InputComponent"
 import { updateCurrentUser, type UpdateProfileData } from "../../../services/users"
 import { updateUserSchema } from "@transcendence/shared/schemas/user"
 import { ApiError } from "../../../services/api"
+import { Link } from "react-router"
 
 const NAME_MAX_LENGTH = 100
 const BIO_MAX_LENGTH = 1000
@@ -200,7 +201,15 @@ export default function ProfileTextForm({user, onSaved, disabled, onPendingChang
                 </div>
 
                 { saveStatus === "saved" && !isDirty && (
-                    <p role="status" className="text-sm text-success">{ t("settings.profile.saved") }</p>
+					<div className="flex flex-wrap items-center gap-4">
+	                    <p role="status" className="text-sm text-success">{ t("settings.profile.saved") }</p>
+						<Link
+							to={`/users/${encodeURIComponent(user.username)}`}
+							className="text-sm text-cyan-400 underline hover:text-cyan-300"
+						>
+							{ t("settings.profile.viewProfile") }
+						</Link>
+					</div>				
                 )}
 				
                 { saveStatus === "error" && !fieldErrors.name && !fieldErrors.biography && (  /* Avoid duplicating specific and generic errors */

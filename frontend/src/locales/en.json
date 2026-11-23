@@ -82,7 +82,8 @@
         "avatarAlt": "{{username}}'s avatar",
         "joined": "Joined {{date}}",
         "editProfile": "Edit profile",
-        "follow": "Follow"
+        "follow": "Follow",
+		"viewProfile": "View profile"
     },
     "posts": {
         "create": {

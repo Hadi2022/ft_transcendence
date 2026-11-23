@@ -133,7 +133,8 @@
             "saving": "Guardando...",
             "cancel": "Cancelar",
             "saved": "Cambios guardados",
-            "saveError": "No se han podido guardar los cambios"
+            "saveError": "No se han podido guardar los cambios",
+			"viewProfile": "Ver perfil"
         },
         "avatar": {
             "alt": "Tu avatar",
