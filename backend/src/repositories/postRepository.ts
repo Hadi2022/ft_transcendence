@@ -118,7 +118,7 @@ export async function listPosts(
     if (userId !== undefined)
         where.userId = userId;
 
-    const [posts, total] = await Promise.all([
+    const [data, total] = await Promise.all([
         prisma.post.findMany({
             where,
             orderBy: [
@@ -138,5 +138,5 @@ export async function listPosts(
         })
     ]);
 
-    return { posts, total };
+    return { data, pagination:{total} };
 }

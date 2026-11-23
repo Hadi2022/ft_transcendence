@@ -1,4 +1,4 @@
-import { idParamSchema } from "@transcendence/shared/schemas/common";
+import { idParamSchema, queryParamsSchema } from "@transcendence/shared/schemas/common";
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "../types/express/Request.js";
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from "../errors/HttpErrors.ts";
@@ -128,4 +128,22 @@ const getPostById = async (req: AuthenticatedRequest, res: Response) => {
 }
 
 
-export { deletePost, uploadPost, updatePost, getPostById }
+const getPosts = async (req: AuthenticatedRequest, res: Response) => {
+
+	const parsed = queryParamsSchema.safeParse(req.query)
+	if (!parsed.success)
+		throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			message: 'Invalid post query parameters',
+			details: formatZodErrors(parsed.error),
+		})
+	try {
+		const { data, pagination } = await postService.getPosts(parsed.data)
+		return res.status(200).json({data,pagination})
+	} catch (error) {
+		throw error
+	}
+
+}
+
+export { deletePost, uploadPost, updatePost, getPostById, getPosts}
