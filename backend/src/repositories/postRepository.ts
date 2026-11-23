@@ -138,5 +138,5 @@ export async function listPosts(
         })
     ]);
 
-    return { posts, total };
+    return { posts, pagination:{total} };
 }

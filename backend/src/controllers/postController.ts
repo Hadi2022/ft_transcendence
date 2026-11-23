@@ -138,10 +138,8 @@ const getPosts = async (req: AuthenticatedRequest, res: Response) => {
 			details: formatZodErrors(parsed.error),
 		})
 	try {
-		const posts = await postService.getPosts(parsed.data)
-		return res.status(200).json({
-			data:posts
-	})
+		const { posts, pagination } = await postService.getPosts(parsed.data)
+		return res.status(200).json({posts,pagination})
 	} catch (error) {
 		throw error
 	}

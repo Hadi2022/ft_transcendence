@@ -35,5 +35,8 @@ export type ListPostsParams = {
 
 export type ListPostsResult = {
     posts: Post[];
-    total: number;
+    pagination:{
+        total: number;
+    }
+
 }
