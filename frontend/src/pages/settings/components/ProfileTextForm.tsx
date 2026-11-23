@@ -4,6 +4,8 @@ import { useId, useState, type SubmitEvent } from "react"
 import InputComponent from "../../../components/InputComponent"
 import { updateCurrentUser, type UpdateProfileData } from "../../../services/users"
 
+import { updateUserSchema } from "@transcendence/shared/schemas/user"
+
 const NAME_MAX_LENGTH = 100
 const BIO_MAX_LENGTH = 1000
 
@@ -34,6 +36,11 @@ export default function ProfileTextForm({user, onSaved, disabled, onPendingChang
     const isDirty = name !== savedName || biography !== savedBio
     const isSaving = saveStatus === "saving"
 
+	const [fieldErrors, setFieldErrors] = useState<{
+		name?: string
+		biography?: string
+	}>({})
+
     async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault()
         if (!isDirty || isSaving || disabled) return
@@ -48,13 +55,41 @@ export default function ProfileTextForm({user, onSaved, disabled, onPendingChang
         if (Object.keys(changes).length === 0) {
             setName(savedName)
             setBiography(savedBio)
+			setFieldErrors({})	/* Ensure a clean form if the user enters only spaces. */
+			setSaveStatus("idle")
             return
         }
+
+		setFieldErrors({})
+
+		const validation = updateUserSchema.safeParse(changes)
+
+		if (!validation.success) {
+			const errors: {
+				name?: string
+				biography?: string
+			} = {}
+
+			for (const issue of validation.error.issues) {
+				const message = t(`auth.fieldErrors.${issue.message}`, {
+					defaultValue: t("auth.fieldErrors.INVALID_VALUE")
+				})
+				if (issue.path[0] === "name")
+					errors.name = message
+
+				if (issue.path[0] === "biography")
+					errors.biography = message
+			}
+
+			setFieldErrors(errors)
+			setSaveStatus("error")
+			return
+		}
 
         setSaveStatus("saving")
         onPendingChange(true)
         try {
-            const updated = await updateCurrentUser(changes)
+            const updated = await updateCurrentUser(validation.data)
 
             onSaved(updated)
             setName(updated.name ?? "")
@@ -70,6 +105,7 @@ export default function ProfileTextForm({user, onSaved, disabled, onPendingChang
     function handleCancel() {
         setName(savedName)
         setBiography(savedBio)
+		setFieldErrors({})
         setSaveStatus("idle")
     }
 
@@ -78,8 +114,13 @@ export default function ProfileTextForm({user, onSaved, disabled, onPendingChang
             <fieldset disabled={isSaving} className="flex flex-col gap-4">
                 <InputComponent label={ t("settings.profile.name") }
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                maxLength={NAME_MAX_LENGTH} />
+                                onChange={(e) => {
+									setName(e.target.value)
+									setFieldErrors(prev => ({ ...prev, name: undefined })) 
+    								setSaveStatus("idle")
+								}}
+                                maxLength={NAME_MAX_LENGTH}
+								error={fieldErrors.name} />
 
                 <div className="space-y-1">
                     <label htmlFor={bioId}
@@ -89,12 +130,23 @@ export default function ProfileTextForm({user, onSaved, disabled, onPendingChang
 
                     <textarea id={bioId}
                             value={biography}
-                            onChange={(e) => setBiography(e.target.value)}
+                            onChange={(e) => {
+								setBiography(e.target.value)
+								setFieldErrors(prev => ({ ...prev, biography: undefined }))
+								setSaveStatus("idle")
+							}}
                             maxLength={BIO_MAX_LENGTH}
                             rows={5}
                             aria-describedby={counterId}
                             className="w-full resize-y rounded-md bg-white px-3 py-2
                                         text-zinc-800 focus:outline-none" />
+		
+					{/* Biography validation error */}
+					{ fieldErrors.biography && (
+						<p role="alert" className="text-sm text-danger">
+							{ fieldErrors.biography }
+						</p>
+					)}
 
                     <p id={counterId}
                         className={`text-right text-xs ${
@@ -125,8 +177,8 @@ export default function ProfileTextForm({user, onSaved, disabled, onPendingChang
                 { saveStatus === "saved" && !isDirty && (
                     <p role="status" className="text-sm text-success">{ t("settings.profile.saved") }</p>
                 )}
-
-                { saveStatus === "error" && (
+				
+                { saveStatus === "error" && !fieldErrors.name && !fieldErrors.biography && (  /* Avoid duplicating specific and generic errors */
                     <p role="alert" className="text-sm text-danger">{ t("settings.profile.saveError") }</p>
                 )}
             </fieldset>
