@@ -11,6 +11,7 @@ const isAuthenticated = (socket: Socket) => {
 }
 
 const	connectedUsers = new Map<string, Set<string>>()
+const	announcedOnline = new Set<string>()
 
 const	addUserConnection = (user: User, socket: Socket): number => {
 
@@ -46,8 +47,6 @@ const removeUserConnection = (user: User, socket: Socket): number => {
 
 const informSocket = (socket: Socket, friendsList: string[]) => {
 
-	const user = socket.data.user
-
 	socket.emit('user:online-list', {
 		userIds: friendsList,
 	})
@@ -67,7 +66,33 @@ const getOnlineFriends = async (userId: string) => {
 
 }
 
-const getFriendRooms = (onlineFriends: string[]) => onlineFriends.map(userRoom)
+const syncPresence = (socket: Socket): string | null => {
+
+	const userId = socket.data.user.id
+
+	const online = connectedUsers.has(userId)
+
+	if (online === announcedOnline.has(userId))
+		return null
+
+	if (online)
+		announcedOnline.add(userId)
+	else
+		announcedOnline.delete(userId)
+
+	return online ? 'user:online' : 'user:offline'
+
+}
+
+const notifyFriends = (io: Server, socket: Socket, friends: string[]) => {
+
+	const userId = socket.data.user.id
+	const friendRooms = friends.map(userRoom)
+	const state = syncPresence(socket)
+
+	if (friendRooms.length > 0 && state)
+		io.to(friendRooms).emit(state, { userId })
+}
 
 export const connectionHandler = async (io: Server, socket: Socket) => {
 
@@ -91,10 +116,7 @@ export const connectionHandler = async (io: Server, socket: Socket) => {
 		const connectionAmount = removeUserConnection(user, socket)
 		if (connectionAmount < 1) {
 			try {
-				const friendRooms = getFriendRooms(await getOnlineFriends(user.id))
-
-				if (friendRooms.length > 0 && !connectedUsers.has(user.id))
-					io.to(friendRooms).emit('user:offline', { userId: user.id })
+				notifyFriends(io, socket, await getOnlineFriends(user.id))
 			} catch (err) {
 				console.error('Failed to emit user:offline', err)
 			}
@@ -104,14 +126,8 @@ export const connectionHandler = async (io: Server, socket: Socket) => {
 	const currentFriends = getOnlineFriends(user.id)
 
 	if (addUserConnection(user, socket) === 1) {
-		
-		const friendRooms = getFriendRooms(await currentFriends)
-
-		if (friendRooms.length > 0 && connectedUsers.has(user.id))
-			io.to(friendRooms).emit('user:online', {
-				userId: user.id,
-			})
+		notifyFriends(io, socket, await currentFriends)
 	}
 
-	await informSocket(socket, await currentFriends)
+	informSocket(socket, await currentFriends)
 }
