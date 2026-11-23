@@ -2,6 +2,7 @@
 import type { Socket, Server } from "socket.io";
 import type { User } from "../types/user.ts";
 import { userRoom, sessionRoom } from "../services/socketService.ts";
+import { findManyAcceptedById } from "../repositories/friendRepository.ts";
 
 const isAuthenticated = (socket: Socket) => {
 	if (!socket.data.user || !socket.data.session)
@@ -10,14 +11,14 @@ const isAuthenticated = (socket: Socket) => {
 }
 
 const	connectedUsers = new Map<string, Set<string>>()
+const	announcedOnline = new Set<string>()
 
 const	addUserConnection = (user: User, socket: Socket): number => {
 
 	const userSockets = connectedUsers.get(user.id)
 
 	if (!userSockets) {
-		const	newUserSockets = new Set<string>()
-		newUserSockets.add(socket.id)
+		const	newUserSockets = new Set([socket.id])
 		connectedUsers.set(user.id, newUserSockets)
 		return 1
 	}
@@ -44,14 +45,56 @@ const removeUserConnection = (user: User, socket: Socket): number => {
 	return userSocketAmount
 }
 
-const informSocket = (socket: Socket) => {
+const informSocket = (socket: Socket, friendsList: string[]) => {
 
 	socket.emit('user:online-list', {
-		userIds: [...connectedUsers.keys()],
+		userIds: friendsList,
 	})
 }
 
-export const connectionHandler = (io: Server, socket: Socket) => {
+const getOnlineFriends = async (userId: string) => {
+
+	const relations = await findManyAcceptedById(userId)
+
+	const friendsList = relations.map((x): string => {
+		if (x.receiverId != userId)
+			return x.receiverId
+		return x.senderId
+	})
+
+	return friendsList.filter((x) => connectedUsers.has(x))
+
+}
+
+const syncPresence = (socket: Socket): string | null => {
+
+	const userId = socket.data.user.id
+
+	const online = connectedUsers.has(userId)
+
+	if (online === announcedOnline.has(userId))
+		return null
+
+	if (online)
+		announcedOnline.add(userId)
+	else
+		announcedOnline.delete(userId)
+
+	return online ? 'user:online' : 'user:offline'
+
+}
+
+const notifyFriends = (io: Server, socket: Socket, friends: string[]) => {
+
+	const userId = socket.data.user.id
+	const friendRooms = friends.map(userRoom)
+	const state = syncPresence(socket)
+
+	if (friendRooms.length > 0 && state)
+		io.to(friendRooms).emit(state, { userId })
+}
+
+export const connectionHandler = async (io: Server, socket: Socket) => {
 
 	if (!isAuthenticated(socket)) {
 		socket.disconnect(true)
@@ -68,19 +111,27 @@ export const connectionHandler = (io: Server, socket: Socket) => {
 	socket.join(userRoom(user.id))
 	socket.join(sessionRoom(session.id))
 
-	if (addUserConnection(user, socket) === 1)
-		socket.broadcast.emit('user:online', {
-			userId: user.id,
-		})
-
-	informSocket(socket)
-	
-	socket.on('disconnect', () => {
+	socket.on('disconnect', async () => {
 		clearTimeout(expiryTimer)
 		const connectionAmount = removeUserConnection(user, socket)
-		if (connectionAmount < 1)
-			socket.broadcast.emit('user:offline', {
-				userId: user.id,
-			})
+		if (connectionAmount < 1) {
+			try {
+				notifyFriends(io, socket, await getOnlineFriends(user.id))
+			} catch (err) {
+				console.error('[socket] Failed to emit user:offline', err)
+			}
+		}
 	})
+
+	try {
+		const currentFriends = getOnlineFriends(user.id)
+		if (addUserConnection(user, socket) === 1)
+			notifyFriends(io, socket, await currentFriends)
+
+		informSocket(socket, await currentFriends)	
+	} catch (err) {
+		console.error("[socket] Failed to fetch friends")
+	}
+
+
 }
