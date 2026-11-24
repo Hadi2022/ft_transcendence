@@ -45,7 +45,10 @@
             "PASSWORD_REQUIRED": "Password is required",
             "PASSWORD_TOO_SHORT": "Password must be at least 6 characters",
             "PASSWORD_TOO_LONG": "Password can't be longer than 128 characters",
-            "PASSWORD_NO_SPECIAL_CHAR": "Password must contain at least one special character"
+            "PASSWORD_NO_SPECIAL_CHAR": "Password must contain at least one special character",
+			"NAME_TOO_LONG": "Name cannot exceed 100 characters",
+			"BIOGRAPHY_TOO_LONG": "Biography cannot exceed 1000 characters",
+			"INVALID_VALUE": "The entered value is invalid"
         },
         "googleButton": "Continue with Google",
         "googleErrors": {
@@ -56,7 +59,7 @@
             "MISSING_AUTHORIZATION_CODE": "Google did not complete the sign in, try again",
             "EMAIL_CONFLICT": "An account with this email already exists",
             "CONFLICT": "You are already logged in",
-            "BAD_REQUEST": "We could not process your Google accoutn data",
+            "BAD_REQUEST": "We could not process your Google account data",
             "INTERNAL_SERVER_ERROR": "Server error, please try again later",
             "default": "It was not possible to sign in with Google."
         }
@@ -130,7 +133,8 @@
             "saving": "Saving...",
             "cancel": "Cancel",
             "saved": "Changes saved",
-            "saveError": "Couldn't save your changes"
+            "saveError": "Couldn't save your changes",
+			"viewProfile": "View profile"
         },
         "avatar": {
             "alt": "Your avatar",

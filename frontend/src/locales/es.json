@@ -5,7 +5,7 @@
         "emailPlaceholder": "tu@correo.es",
         "password": "Contraseña",
         "username": "Nombre de usuario",
-        "usernameHint": "Solo letras, numeros y guion bajo (_)",
+        "usernameHint": "Solo letras, números y guion bajo (_)",
 
         "showField": "Mostrar",
         "hideField": "Ocultar",
@@ -30,7 +30,7 @@
             "usernameInUse": "Este nombre de usuario ya existe",
             "sessionExists": "Ya hay una sesión abierta",
             "invalidFields": "Hay campos inválidos",
-            "invalidCredentials": "Credenciales inválidos",
+            "invalidCredentials": "Credenciales inválidas",
             "unexpected": "Error inesperado, inténtalo más tarde",
             "sessionCheck": "No se ha podido verificar tu sesión"
         },
@@ -45,7 +45,10 @@
             "PASSWORD_REQUIRED": "La contraseña es obligatoria",
             "PASSWORD_TOO_SHORT": "La contraseña debe tener al menos 6 caracteres",
             "PASSWORD_TOO_LONG": "La contraseña no puede tener más de 128 caracteres",
-            "PASSWORD_NO_SPECIAL_CHAR": "La contraseña debe tener al menos un carácter especial"
+            "PASSWORD_NO_SPECIAL_CHAR": "La contraseña debe tener al menos un carácter especial",
+			"NAME_TOO_LONG": "El nombre no puede superar los 100 caracteres",
+			"BIOGRAPHY_TOO_LONG": "La biografía no puede superar los 1000 caracteres",
+			"INVALID_VALUE": "El valor introducido no es válido"
         },
         "googleButton": "Continuar con Google",
         "googleErrors": {
@@ -74,7 +77,7 @@
     "profile": {
         "notFoundTitle": "Este perfil no existe",
         "notFoundText": "Puede que el enlace esté roto o que el usuario haya cambiado su nombre",
-        "backHome": "Volver a inicio",
+        "backHome": "Volver al inicio",
         "loadError": "No se ha podido cargar el perfil",
         "avatarAlt": "Avatar de {{username}}",
         "joined": "Se unió en {{date}}",
@@ -130,7 +133,8 @@
             "saving": "Guardando...",
             "cancel": "Cancelar",
             "saved": "Cambios guardados",
-            "saveError": "No se han podido guardar los cambios"
+            "saveError": "No se han podido guardar los cambios",
+			"viewProfile": "Ver perfil"
         },
         "avatar": {
             "alt": "Tu avatar",
