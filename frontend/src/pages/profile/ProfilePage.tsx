@@ -6,6 +6,7 @@ import type { UserProfile } from "../../services/auth"
 import ProfileSkeleton from "./components/ProfileSkeleton"
 import { useTranslation } from "react-i18next"
 import ProfileHeader, { type ProfileRelation } from "./components/ProfileHeader"
+import ProfilePosts from "./components/ProfilePosts"
 import type { MainLayoutContext } from "../../layouts/MainLayout"
 
 type ProfileResult =
@@ -84,7 +85,10 @@ export default function ProfilePage() {
                                         : "other"
     return (
         <>
-            <ProfileHeader profile={result.profile} relation={relation} />
+			<div className="flex flex-col gap-10">
+				<ProfileHeader profile={result.profile} relation={relation} />
+				<ProfilePosts userId={result.profile.id} />
+			</div>
         </>
     )
 }
