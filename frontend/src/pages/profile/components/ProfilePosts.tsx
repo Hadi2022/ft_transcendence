@@ -2,13 +2,15 @@ import { useCallback, useEffect, useState } from "react"
 import { getPosts, type Post } from "../../../services/posts"
 import PostCard from "../../../components/posts/PostCard"
 
+const PAGE_SIZE = 12
+
 type ProfilePostsProps = {
     userId: string
 }
 
 type PostsResult =
     | { status: "loading" }
-    | { status: "ready", posts: Post[] }
+    | { status: "ready", posts: Post[], total: number }
     | { status: "error" }
 
 export default function ProfilePosts({ userId }: ProfilePostsProps) {
@@ -16,6 +18,7 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 	const [result, setResult] = useState<PostsResult>({
     	status: "loading"
 	})
+	const [page, setPage] = useState(0)
 
 	const loadPosts = useCallback(async () => {
 		setResult({ status: "loading" })
@@ -23,19 +26,20 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 		try {
 			const response = await getPosts({
 				userId,
-				limit: 12,
-				offset: 0
+				limit: PAGE_SIZE,
+				offset: page * PAGE_SIZE
 			})
 
 			setResult({
 				status: "ready",
-				posts: response.data
+				posts: response.data,
+				total: response.pagination.total
 			})
 
 		} catch {
 			setResult({ status: "error" })
 		}
-	}, [userId])
+	}, [userId, page])
 
 	useEffect(() => {
 		void loadPosts()
@@ -44,7 +48,7 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 	if (result.status === "loading")
 		return (
 			<section className="grid grid-cols-3 gap-2 animate-pulse">
-				{Array.from({ length: 12 }, (_, index) => (
+				{Array.from({ length: PAGE_SIZE }, (_, index) => (
 					<div
 						key={index}
 						className="aspect-square rounded-lg bg-soft-text/20"
@@ -78,6 +82,8 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 			</section>
 		)
 
+	const totalPages = Math.ceil(result.total / PAGE_SIZE)
+
     return (
         <section>
             <div className="grid grid-cols-3 gap-2">
@@ -89,6 +95,40 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
                     />
                 ))}
             </div>
+
+            {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-4 mt-6">
+
+                    <button
+                        type="button"
+                        onClick={() => setPage(page - 1)}
+                        disabled={page === 0}
+                        className="rounded-md bg-soft-text/20 px-4 py-2
+                                   text-sm font-medium hover:bg-soft-text/30
+                                   disabled:opacity-50 disabled:cursor-not-allowed
+                                   cursor-pointer transition-colors"
+                    >
+                        Previous
+                    </button>
+
+                    <span className="text-sm text-soft-text">
+                        {page + 1} / {totalPages}
+                    </span>
+
+                    <button
+                        type="button"
+                        onClick={() => setPage(page + 1)}
+                        disabled={page >= totalPages - 1}
+                        className="rounded-md bg-soft-text/20 px-4 py-2
+                                   text-sm font-medium hover:bg-soft-text/30
+                                   disabled:opacity-50 disabled:cursor-not-allowed
+                                   cursor-pointer transition-colors"
+                    >
+                        Next
+                    </button>
+
+                </div>
+            )}				
         </section>
     )
 }
