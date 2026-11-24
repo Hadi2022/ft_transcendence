@@ -82,8 +82,7 @@
         "avatarAlt": "{{username}}'s avatar",
         "joined": "Joined {{date}}",
         "editProfile": "Edit profile",
-        "follow": "Follow",
-		"viewProfile": "View profile"
+        "follow": "Follow"
     },
     "posts": {
         "create": {
@@ -134,7 +133,8 @@
             "saving": "Saving...",
             "cancel": "Cancel",
             "saved": "Changes saved",
-            "saveError": "Couldn't save your changes"
+            "saveError": "Couldn't save your changes",
+			"viewProfile": "View profile"
         },
         "avatar": {
             "alt": "Your avatar",

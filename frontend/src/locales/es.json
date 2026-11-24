@@ -5,7 +5,7 @@
         "emailPlaceholder": "tu@correo.es",
         "password": "Contraseña",
         "username": "Nombre de usuario",
-        "usernameHint": "Solo letras, numeros y guion bajo (_)",
+        "usernameHint": "Solo letras, números y guion bajo (_)",
 
         "showField": "Mostrar",
         "hideField": "Ocultar",
@@ -30,7 +30,7 @@
             "usernameInUse": "Este nombre de usuario ya existe",
             "sessionExists": "Ya hay una sesión abierta",
             "invalidFields": "Hay campos inválidos",
-            "invalidCredentials": "Credenciales inválidos",
+            "invalidCredentials": "Credenciales inválidas",
             "unexpected": "Error inesperado, inténtalo más tarde",
             "sessionCheck": "No se ha podido verificar tu sesión"
         },
@@ -77,7 +77,7 @@
     "profile": {
         "notFoundTitle": "Este perfil no existe",
         "notFoundText": "Puede que el enlace esté roto o que el usuario haya cambiado su nombre",
-        "backHome": "Volver a inicio",
+        "backHome": "Volver al inicio",
         "loadError": "No se ha podido cargar el perfil",
         "avatarAlt": "Avatar de {{username}}",
         "joined": "Se unió en {{date}}",
