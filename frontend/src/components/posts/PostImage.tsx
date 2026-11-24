@@ -10,9 +10,15 @@ type PostImageProps = {
 export default function PostImage({ src, alt, className = "" }: PostImageProps) {
 
     const { t } = useTranslation()
-    const [failedSrc, setFailedSrc] = useState<string|null>(null)
+    const [failed, setFailed] = useState(false)
+    const [prevSrc, setPrevSrc] = useState(src)
 
-    if (failedSrc === src)
+    if (src !== prevSrc) {
+        setPrevSrc(src)
+        setFailed(false)
+    }
+
+    if (failed)
         return (
             <div role="img" aria-label={t("posts.view.imageError")}
                     className={`flex flex-col items-center justify-center gap-2
@@ -32,7 +38,7 @@ export default function PostImage({ src, alt, className = "" }: PostImageProps) 
                 alt={alt}
                 loading="lazy"
                 decoding="async"
-                onError={() => setFailedSrc(src)}
+                onError={() => setFailed(true)}
                 className={`block ${className}`} />
     )
 
