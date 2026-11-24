@@ -30,6 +30,8 @@ export default function PostImage({ src, alt, className = "" }: PostImageProps) 
     return (
         <img src={src}
                 alt={alt}
+                loading="lazy"
+                decoding="async"
                 onError={() => setFailedSrc(src)}
                 className={`block ${className}`} />
     )
