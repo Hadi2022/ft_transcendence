@@ -43,7 +43,7 @@ model User {
 
   // Relaciones auto-referenciales para seguidores / seguidos
   followers      Follow_up[] @relation("Followers")
-  following      Follow_up[] @relation("Followed")
+  following      Follow_up[] @relation("Continued")
 
   friendRequestsSent     Friend[] @relation("FriendSender")
   friendRequestsReceived Friend[] @relation("FriendReceiver")
@@ -85,15 +85,15 @@ model Session {
 
 model Follow_up {
   followerId   String   @map("follower_id") @db.Uuid
-  followedId  String   @map("followed_id") @db.Uuid
+  continuedId  String   @map("continued_id") @db.Uuid
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
 
   // Relaciones
   follower   User  @relation("Followers", fields: [followerId], references: [id], onDelete: Cascade)
-  followed  User  @relation("Followed", fields: [followedId], references: [id], onDelete: Cascade)
+  continued  User  @relation("Continued", fields: [continuedId], references: [id], onDelete: Cascade)
 
-  @@id([followerId, followedId])
-  @@index([followedId])
+  @@id([followerId, continuedId])
+  @@index([continuedId])
   @@map("follow-ups")
 }
 /*

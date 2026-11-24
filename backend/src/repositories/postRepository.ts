@@ -1,9 +1,10 @@
 import { prisma } from "../db/prisma/prisma.ts";
-import type { NewPostData, Post, PostDelete, ListPostsParams, ListPostsResult } from "../types/post.ts";
+import type { NewPostData, Post, PostDelete, ListPostsResult } from "../types/post.ts";
 import { Prisma } from '@prisma/client';
 import { userProfileOmit } from "./userRepository.ts";
 import { UserNotFoundError } from "../errors/userErrors.ts";
 import { GenericConstraintError, RecordNotFoundError } from "../errors/RepositoryErrors.ts";
+import type { ListParams } from "../types/query.ts";
 
 
 export async function createPost(
@@ -110,7 +111,7 @@ export async function updatePost(
 }
 
 export async function listPosts(
-    { limit, offset, userId }: ListPostsParams
+    { limit, offset, userId }: ListParams
 ): Promise<ListPostsResult> {
 
     const where: Prisma.PostWhereInput = {};

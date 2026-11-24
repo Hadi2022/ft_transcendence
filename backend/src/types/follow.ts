@@ -1,10 +1,20 @@
+import type { UserProfile } from "./user.ts";
+
 export type NewFollowData = {
     followerId: string;
-    followedId: string;
+    continuedId: string;
 };
 
 export type Follow = {
     followerId: string;
-    followedId: string;
+    continuedId: string;
     createdAt: Date;
+}
+
+export type ListFollowResult = {
+    data: UserProfile[];
+    pagination:{
+        total: number;
+    }
+
 }
