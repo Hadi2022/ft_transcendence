@@ -4,6 +4,7 @@ import PostCard from "../../components/posts/PostCard"
 import PostsPagination from "../../components/posts/PostsPagination"
 
 const PAGE_SIZE = 12
+const SKELETON_COUNT = 3
 
 export default function FeedPage() {
 
@@ -24,7 +25,7 @@ export default function FeedPage() {
 		return (
 			<section className="mx-auto w-full max-w-lg
 								flex flex-col gap-6 animate-pulse">
-				{Array.from({ length: PAGE_SIZE }, (_, index) => (
+				{Array.from({ length: SKELETON_COUNT }, (_, index) => (
 					<div
 						key={index}
 						className="overflow-hidden rounded-xl bg-surface"

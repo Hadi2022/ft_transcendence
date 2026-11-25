@@ -13,7 +13,14 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 
 	const { t } = useTranslation()
 
-	const {result, page, totalPages, isLoading, handleRetry, handlePageChange } = usePaginatedPosts({
+	const {
+		result,
+		page,
+		totalPages,
+		isLoading,
+		handleRetry,
+		handlePageChange
+	} = usePaginatedPosts({
 		pageSize: PAGE_SIZE,
 		userId
 	})
