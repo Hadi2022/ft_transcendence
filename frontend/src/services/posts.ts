@@ -68,7 +68,7 @@ export async function getPosts(
         offset: String(offset)
     })
 
-	/*  If a user identifier is provided, we add it to the query. 
+	/*  If a user identifier is provided, we add it to the query.
 		Otherwise, we retrieve posts from all authors. */
     if (userId !== undefined)
         params.set("userId", userId)

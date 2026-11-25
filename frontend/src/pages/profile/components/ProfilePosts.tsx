@@ -19,7 +19,7 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 	const { t } = useTranslation()
 
 	const [result, setResult] = useState<PostsResult>({
-    	status: "loading"
+		status: "loading"
 	})
 	const [page, setPage] = useState(0)
 	const [retryCount, setRetryCount] = useState(0)
@@ -154,7 +154,7 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
                     </button>
 
                 </div>
-            )}				
+            )}
         </section>
     )
 }
