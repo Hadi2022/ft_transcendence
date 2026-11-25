@@ -87,7 +87,9 @@ export default function ProfilePage() {
         <>
 			<div className="flex flex-col gap-10">
 				<ProfileHeader profile={result.profile} relation={relation} />
-				<ProfilePosts key={result.profile.id} userId={result.profile.id} />
+				{relation !== "guest" && (
+					<ProfilePosts key={result.profile.id} userId={result.profile.id} />
+				)}
 			</div>
         </>
     )
