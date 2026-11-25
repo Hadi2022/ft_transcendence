@@ -169,12 +169,8 @@ export async function createGoogleUser(
     _data: NewUserDataGoogle
 ): Promise<UserProfile | null> {
 
-    let username_base;
-    try {
-        username_base = generateBaseUsername(_data.email);
-    } catch (error) {
-        throw error;
-    }
+    const username_base = generateBaseUsername();
+
     let randomSuffix = 0;
     let attemps = 0;
     let limit = 15;
