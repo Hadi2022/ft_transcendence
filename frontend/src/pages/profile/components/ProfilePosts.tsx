@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { getPosts, type Post } from "../../../services/posts"
+import { useTranslation } from "react-i18next"
 import PostCard from "../../../components/posts/PostCard"
 
 const PAGE_SIZE = 12
@@ -14,6 +15,8 @@ type PostsResult =
     | { status: "error" }
 
 export default function ProfilePosts({ userId }: ProfilePostsProps) {
+
+	const { t } = useTranslation()
 
 	const [result, setResult] = useState<PostsResult>({
     	status: "loading"
@@ -84,7 +87,7 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 		return (
 			<section className="flex flex-col items-center gap-4 py-10">
 				<p className="text-sm text-danger">
-					Could not load posts.
+					{t("posts.list.loadError")}
 				</p>
 
 				<button
@@ -93,7 +96,7 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 							text-sm font-medium hover:bg-soft-text/30
 							transition-colors cursor-pointer"
 				>
-					Retry
+					{t("retry")}
 				</button>
 			</section>
 		)
@@ -101,7 +104,7 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 	if (result.posts.length === 0)
 		return (
 			<section className="py-10 text-center text-soft-text">
-				No posts yet.
+				{t("posts.list.empty")}
 			</section>
 		)
 
@@ -131,7 +134,7 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
                                    disabled:opacity-50 disabled:cursor-not-allowed
                                    cursor-pointer transition-colors"
                     >
-                        Previous
+                        {t("posts.list.previous")}
                     </button>
 
                     <span className="text-sm text-soft-text">
@@ -147,7 +150,7 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
                                    disabled:opacity-50 disabled:cursor-not-allowed
                                    cursor-pointer transition-colors"
                     >
-                        Next
+                        {t("posts.list.next")}
                     </button>
 
                 </div>

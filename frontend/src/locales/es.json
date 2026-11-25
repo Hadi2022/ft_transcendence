@@ -116,7 +116,13 @@
             "backHome": "Volver al inicio",
             "loadError": "No se ha podido cargar la publicación",
             "imageError": "No se ha podido cargar la imagen"
-        }
+        },
+		"list": {
+			"loadError": "No se pudieron cargar las publicaciones.",
+			"empty": "Todavía no hay publicaciones.",
+			"previous": "Anterior",
+			"next": "Siguiente"
+		}
     },
     "settings": {
         "title": "Ajustes",
