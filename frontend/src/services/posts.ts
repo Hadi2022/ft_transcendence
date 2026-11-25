@@ -11,6 +11,19 @@ export type Post = {
     user: UserProfile
 }
 
+export type ListPostsResponse = {
+    data: Post[]
+    pagination: {
+        total: number
+    }
+}
+
+export type ListPostsParams = {
+    limit: number
+    offset: number
+    userId?: string
+}
+
 export async function createPost(image: File, caption: string, signal?: AbortSignal): Promise<Post> {
     const formData = new FormData()
     formData.append("image", image)
@@ -43,4 +56,31 @@ export async function getPostById(id: string): Promise<Post> {
     const body = await res.json()
 
     return (body.data)
+}
+
+export async function getPosts(
+    { limit, offset, userId }: ListPostsParams,
+	signal?: AbortSignal
+): Promise<ListPostsResponse> {
+
+    const params = new URLSearchParams({
+        limit: String(limit),
+        offset: String(offset)
+    })
+
+	/*  If a user identifier is provided, we add it to the query.
+		Otherwise, we retrieve posts from all authors. */
+    if (userId !== undefined)
+        params.set("userId", userId)
+
+    const res = await fetch(`/api/posts?${params.toString()}`, {
+        credentials: "include",
+		signal
+    })
+
+    if (!res.ok) await throwApiError(res)
+
+    const body = await res.json()
+
+    return body
 }
