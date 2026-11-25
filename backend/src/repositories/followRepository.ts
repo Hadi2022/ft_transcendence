@@ -74,7 +74,7 @@ export async function getFollowers(
       },
       orderBy: [
         { createdAt: "desc" },
-        { followerId: "asc" },
+        { followerId: "desc" },
       ],
       take: limit,
       skip: offset,
@@ -99,13 +99,13 @@ export async function getFollowings(
     prisma.follow_up.findMany({
       where,
       select: {
-        follower: {
+        continued: {
           select: userProfileSelect,
         },
       },
       orderBy: [
         { createdAt: "desc" },
-        { followerId: "asc" },
+        { continuedId: "desc" },
       ],
       take: limit,
       skip: offset,
@@ -114,7 +114,7 @@ export async function getFollowings(
   ]);
 
   return {
-    data: rows.map((row) => row.follower),
+    data: rows.map((row) => row.continued),
     pagination: { total },
   };
 
