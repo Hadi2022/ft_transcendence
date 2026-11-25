@@ -73,7 +73,7 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 
 	if (result.status === "loading")
 		return (
-			<section className="grid grid-cols-3 gap-2 animate-pulse">
+			<section className="grid grid-cols-2 sm:grid-cols-3 gap-2 animate-pulse">
 				{Array.from({ length: PAGE_SIZE }, (_, index) => (
 					<div
 						key={index}
@@ -112,7 +112,7 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 
     return (
         <section>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
 				{result.posts.map((post) => (
                     <PostCard
                         key={post.id}
