@@ -19,7 +19,10 @@ export default function PostCard({ post, variant = "feed" }: PostCardProps) {
             <Link to={`/posts/${post.id}`}
                     className="block overflow-hidden rounded-md
                                 focus-visible:outline-2 focus-visible:outline-offset-2
-                                focus-visible:outline-blue-400">
+                                focus-visible:outline-blue-400
+								cursor-pointer transition-all duration-200 ease-out
+								motion-safe:hover:scale-[0.96] hover:brightness-90
+								motion-safe:active:scale-95">
                 <PostImage src={post.multimediaUrl} alt={imageAlt}
                             className="aspect-square w-full object-cover" />
             </Link>
