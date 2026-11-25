@@ -1,8 +1,6 @@
-import { useEffect, useState } from "react"
-import { getPosts, type Post } from "../../../services/posts"
 import { useTranslation } from "react-i18next"
 import PostCard from "../../../components/posts/PostCard"
-import { useSearchParams } from "react-router"
+import { usePaginatedPosts } from "../../../hooks/usePaginatedPosts"
 
 const PAGE_SIZE = 12
 
@@ -10,98 +8,16 @@ type ProfilePostsProps = {
     userId: string
 }
 
-type PostsResult =
-    | { status: "loading" }
-    | { status: "ready", posts: Post[], total: number, page: number }
-    | { status: "error", page: number }
-
 export default function ProfilePosts({ userId }: ProfilePostsProps) {
 
 	const { t } = useTranslation()
 
-	const [result, setResult] = useState<PostsResult>({
-		status: "loading"
+	const {result, page, totalPages, isLoading, handleRetry, handlePageChange } = usePaginatedPosts({
+		pageSize: PAGE_SIZE,
+		userId
 	})
-	const [searchParams, setSearchParams] = useSearchParams()
 
-	const requestedPage = Number(searchParams.get("page") ?? "1")
-
-	const page = Number.isSafeInteger(requestedPage)
-		&& requestedPage > 0
-		&& requestedPage <= Math.floor(Number.MAX_SAFE_INTEGER / PAGE_SIZE)
-		? requestedPage - 1
-		: 0
-
-	const [retryCount, setRetryCount] = useState(0)
-
-	useEffect(() => {
-
-		const controller = new AbortController()
-
-		async function loadPosts() {
-			try {
-				const response = await getPosts({
-					userId,
-					limit: PAGE_SIZE,
-					offset: page * PAGE_SIZE
-				}, controller.signal)
-
-				if (controller.signal.aborted)
-					return
-
-				const totalPages = Math.ceil(response.pagination.total / PAGE_SIZE)
-				const lastValidPage = Math.max(0, totalPages - 1)
-
-				if (page > lastValidPage) {
-					setResult({ status: "loading" })
-
-					setSearchParams(prev => {
-						const params = new URLSearchParams(prev)
-						params.set("page", String(lastValidPage + 1))
-						return params
-					}, { replace: true })
-
-					return
-				}
-
-				setResult({
-					status: "ready",
-					posts: response.data,
-					total: response.pagination.total,
-					page: page
-				})
-
-			} catch {
-				if (controller.signal.aborted)
-					return
-
-				setResult({ status: "error", page: page })
-			}
-		}
-
-		void loadPosts()
-
-		return () => {
-			controller.abort()
-		}
-
-	}, [userId, page, retryCount, setSearchParams])
-
-	function handleRetry() {
-		setResult({ status: "loading" })
-		setRetryCount(count => count + 1)
-	}
-
-	function handlePageChange(newPage: number) {
-		setResult({ status: "loading" })
-		setSearchParams(prev => {
-			const params = new URLSearchParams(prev)
-			params.set("page", String(newPage + 1))
-			return params
-		})
-	}
-
-	if (result.status === "loading" || result.page !== page)
+	if (isLoading || result.status === "loading")
 		return (
 			<section className="grid grid-cols-2 sm:grid-cols-3 gap-2 animate-pulse">
 				{Array.from({ length: PAGE_SIZE }, (_, index) => (
@@ -137,8 +53,6 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 				{t("posts.list.empty")}
 			</section>
 		)
-
-	const totalPages = Math.ceil(result.total / PAGE_SIZE)
 
     return (
         <section>
