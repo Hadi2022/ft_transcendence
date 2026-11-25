@@ -59,8 +59,7 @@ const userProfileSelect = {
 
 export async function getFollowers(
   userId: string,
-  limit = 20,
-  offset = 0,
+  { limit, offset }: ListParams
 ): Promise<ListFollowResult> {
   
   const where = { continuedId: userId } satisfies Prisma.Follow_upWhereInput;
@@ -119,4 +118,39 @@ export async function getFollowings(
     pagination: { total },
   };
 
+}
+
+export async function countFollowers(
+    userId: string
+): Promise<number> {
+  return await prisma.follow_up.count({
+    where: { continuedId: userId } ,
+  });
+}
+
+export async function countFollowings(
+    userId: string
+): Promise<number> {
+  return await prisma.follow_up.count({
+    where: { followerId: userId } ,
+  });
+}
+
+export async function isFollowing(
+    followerId: string,
+    continuedId: string
+): Promise<boolean> {
+    const follow = await prisma.follow_up.findUnique({
+        where: {
+            followerId_continuedId: {
+                followerId,
+                continuedId
+            }
+        },
+        select: {
+            followerId: true,
+        }
+
+    });
+    return follow !== null;
 }
