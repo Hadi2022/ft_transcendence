@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { getPosts, type Post } from "../../../services/posts"
 import PostCard from "../../../components/posts/PostCard"
 
@@ -19,31 +19,54 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
     	status: "loading"
 	})
 	const [page, setPage] = useState(0)
-
-	const loadPosts = useCallback(async () => {
-		setResult({ status: "loading" })
-
-		try {
-			const response = await getPosts({
-				userId,
-				limit: PAGE_SIZE,
-				offset: page * PAGE_SIZE
-			})
-
-			setResult({
-				status: "ready",
-				posts: response.data,
-				total: response.pagination.total
-			})
-
-		} catch {
-			setResult({ status: "error" })
-		}
-	}, [userId, page])
+	const [retryCount, setRetryCount] = useState(0)
 
 	useEffect(() => {
+
+		const controller = new AbortController()
+
+		async function loadPosts() {
+			try {
+				const response = await getPosts({
+					userId,
+					limit: PAGE_SIZE,
+					offset: page * PAGE_SIZE
+				}, controller.signal)
+
+				if (controller.signal.aborted)
+					return
+
+				setResult({
+					status: "ready",
+					posts: response.data,
+					total: response.pagination.total
+				})
+
+			} catch {
+				if (controller.signal.aborted)
+					return
+
+				setResult({ status: "error" })
+			}
+		}
+
 		void loadPosts()
-	}, [loadPosts])
+
+		return () => {
+			controller.abort()
+		}
+
+	}, [userId, page, retryCount])
+
+	function handleRetry() {
+		setResult({ status: "loading" })
+		setRetryCount(count => count + 1)
+	}
+
+	function handlePageChange(newPage: number) {
+		setResult({ status: "loading" })
+		setPage(newPage)
+	}
 
 	if (result.status === "loading")
 		return (
@@ -65,7 +88,7 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 				</p>
 
 				<button
-					onClick={() => void loadPosts()}
+					onClick={handleRetry}
 					className="rounded-md bg-soft-text/20 px-4 py-2
 							text-sm font-medium hover:bg-soft-text/30
 							transition-colors cursor-pointer"
@@ -101,7 +124,7 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 
                     <button
                         type="button"
-                        onClick={() => setPage(page - 1)}
+                        onClick={() => handlePageChange(page - 1)}
                         disabled={page === 0}
                         className="rounded-md bg-soft-text/20 px-4 py-2
                                    text-sm font-medium hover:bg-soft-text/30
@@ -117,7 +140,7 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 
                     <button
                         type="button"
-                        onClick={() => setPage(page + 1)}
+                        onClick={() => handlePageChange(page + 1)}
                         disabled={page >= totalPages - 1}
                         className="rounded-md bg-soft-text/20 px-4 py-2
                                    text-sm font-medium hover:bg-soft-text/30

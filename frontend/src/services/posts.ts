@@ -59,7 +59,8 @@ export async function getPostById(id: string): Promise<Post> {
 }
 
 export async function getPosts(
-    { limit, offset, userId }: ListPostsParams
+    { limit, offset, userId }: ListPostsParams,
+	signal?: AbortSignal
 ): Promise<ListPostsResponse> {
 
     const params = new URLSearchParams({
@@ -73,7 +74,8 @@ export async function getPosts(
         params.set("userId", userId)
 
     const res = await fetch(`/api/posts?${params.toString()}`, {
-        credentials: "include"
+        credentials: "include",
+		signal
     })
 
     if (!res.ok) await throwApiError(res)
