@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next"
 import PostCard from "../../../components/posts/PostCard"
 import { usePaginatedPosts } from "../../../hooks/usePaginatedPosts"
+import PostsPagination from "../../../components/posts/PostsPagination"
 
 const PAGE_SIZE = 12
 
@@ -66,39 +67,11 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
                 ))}
             </div>
 
-            {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-4 mt-6">
-
-                    <button
-                        type="button"
-                        onClick={() => handlePageChange(page - 1)}
-                        disabled={page === 0}
-                        className="rounded-md bg-soft-text/20 px-4 py-2
-                                   text-sm font-medium hover:bg-soft-text/30
-                                   disabled:opacity-50 disabled:cursor-not-allowed
-                                   cursor-pointer transition-colors"
-                    >
-                        {t("posts.list.previous")}
-                    </button>
-
-                    <span className="text-sm text-soft-text">
-                        {page + 1} / {totalPages}
-                    </span>
-
-                    <button
-                        type="button"
-                        onClick={() => handlePageChange(page + 1)}
-                        disabled={page >= totalPages - 1}
-                        className="rounded-md bg-soft-text/20 px-4 py-2
-                                   text-sm font-medium hover:bg-soft-text/30
-                                   disabled:opacity-50 disabled:cursor-not-allowed
-                                   cursor-pointer transition-colors"
-                    >
-                        {t("posts.list.next")}
-                    </button>
-
-                </div>
-            )}
+			<PostsPagination
+				page={page}
+				totalPages={totalPages}
+				onPageChange={handlePageChange}
+			/>
         </section>
     )
 }
