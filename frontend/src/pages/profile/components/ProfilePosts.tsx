@@ -39,6 +39,15 @@ export default function ProfilePosts({ userId }: ProfilePostsProps) {
 				if (controller.signal.aborted)
 					return
 
+				const totalPages = Math.ceil(response.pagination.total / PAGE_SIZE)
+				const lastValidPage = Math.max(0, totalPages - 1)
+
+				if (page > lastValidPage) {
+					setResult({ status: "loading" })
+					setPage(lastValidPage)
+					return
+				}
+
 				setResult({
 					status: "ready",
 					posts: response.data,
