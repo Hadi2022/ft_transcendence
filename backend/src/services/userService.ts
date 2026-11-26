@@ -156,16 +156,10 @@ async function createGoogleUser(profile: ProfileGoogle) {
 
 			if (error.field === 'username')
 				throw new ConflictError({
-					message: 'The username is already in use.',
+					message: 'A unique username could not be generated after several attempts.',
 					details: { username: ErrorDetails.USERNAME_IN_USE }
 				});
 		}
-
-		if (error instanceof UserNameConflictError)
-			throw new ConflictError({
-				message: 'A unique username could not be generated after several attempts.',
-				details: { username: ErrorDetails.USERNAME_IN_USE }
-			});
 
 		throw error;
 	}

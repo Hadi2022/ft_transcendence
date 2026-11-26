@@ -4,7 +4,6 @@ import type { NewUserData, UpdateUserData, User, UserProfile, OwnProfile, UserOr
 import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts';
 import type { Order } from '../types/query.ts';
 import { generateBaseUsername } from '../utils/username.ts';
-import { UserNameConflictError } from '../errors/userErrors.ts';
 
 export const ownProfileOmit = {
     googleId: true,
@@ -189,7 +188,7 @@ export async function createGoogleUser(
             break ;
     }
     if (attemps == 15)
-        throw new UserNameConflictError('A unique username could not be generated after several attempts due to high concurrency.')
+        throw new UniqueConstraintError('A unique username could not be generated after several attempts due to high concurrency.', 'username');
 
     while (attemps < limit) {
         try {
@@ -232,8 +231,8 @@ export async function createGoogleUser(
         }
     }
 
-    throw new UserNameConflictError(
-        'A unique username could not be generated after several attempts.'
+    throw new UniqueConstraintError(
+        'A unique username could not be generated after several attempts.', 'username'
     );
 }
 
