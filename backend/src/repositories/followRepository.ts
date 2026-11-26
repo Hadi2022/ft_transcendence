@@ -3,6 +3,7 @@ import { prisma } from "../db/prisma/prisma.ts";
 import { RecordNotFoundError, UniqueConstraintError } from "../errors/RepositoryErrors.ts";
 import type { Follow, ListFollowResult, NewFollowData } from "../types/follow.ts";
 import type { ListParams } from "../types/query.ts";
+import { userProfileOmit } from "./userRepository.ts";
 
 export async function createFollow(
     data: NewFollowData): Promise<Follow> {
@@ -46,16 +47,6 @@ export async function deleteFollow(
     }
 }
 
-const userProfileSelect = {
-  id: true,
-  username: true,
-  name: true,
-  biography: true,
-  avatarUrl: true,
-  isVerified: true,
-  createdAt: true,
-} satisfies Prisma.UserSelect;
-
 export async function getFollowers(
   userId: string,
   { limit, offset }: ListParams
@@ -68,7 +59,7 @@ export async function getFollowers(
       where,
       select: {
         follower: {
-          select: userProfileSelect,
+          omit: userProfileOmit,
         },
       },
       orderBy: [
@@ -99,7 +90,7 @@ export async function getFollowings(
       where,
       select: {
         continued: {
-          select: userProfileSelect,
+          omit: userProfileOmit,
         },
       },
       orderBy: [
