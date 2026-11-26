@@ -1,4 +1,4 @@
-import * as postRepository from '../repositories/postRepository.ts'
+import * as postRepository from '../repositories/postRepository.ts';
 import { PostNotFoundError, ForbiddenAccessPostError, InternalPostError, ConflictPostError, BadRequestPostsError } from '../errors/postErrors.ts';
 import { deleteImage, getStorageDirectory, saveImage } from '../utils/imageStorage.ts';
 import path from 'node:path';
@@ -9,7 +9,6 @@ import type { ListPostsResult, Post, UpdatePostData } from '../types/post.ts';
 import type { ValidatedImage } from '../types/image.ts';
 import { validateImage } from '../utils/imageValidation.ts';
 import { UserNotFoundError } from '../errors/userErrors.ts';
-
 
 const IMAGE_FILENAME_PATTERN =
 	/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png|webp)$/
@@ -183,4 +182,3 @@ export const updatePost = async (postId: string, userId: string, data: UpdatePos
 	}
 
 }
-

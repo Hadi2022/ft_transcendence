@@ -1,13 +1,13 @@
-import type { User, NewUserData, UpdateUserData, OwnProfile, UserProfile, UserOrderBy } from '../types/user.ts'
-import { UserNameConflictError, UserEmailConflictError, UserNotFoundError, UserConcurrencyError } from '../errors/userErrors.ts'
-import { hashPassword, verifyPassword } from './passwordService.ts'
-import * as userRepository from '../repositories/userRepository.ts'
-import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts'
-import type { Order } from '../types/query.ts'
-import { ConflictError, BadRequestError, UnauthorizedError } from '../errors/HttpErrors.ts'
-import { ErrorDetails } from '@transcendence/shared/errors/error-details'
-import type { ValidatedImage } from '../types/image.ts'
-import { deleteImage, saveImage } from '../utils/imageStorage.ts'
+import type { User, NewUserData, UpdateUserData, OwnProfile, UserProfile, UserOrderBy } from '../types/user.ts';
+import { UserNameConflictError, UserEmailConflictError, UserNotFoundError, UserConcurrencyError } from '../errors/userErrors.ts';
+import { hashPassword, verifyPassword } from './passwordService.ts';
+import * as userRepository from '../repositories/userRepository.ts';
+import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts';
+import type { Order } from '../types/query.ts';
+import { ConflictError, BadRequestError, UnauthorizedError } from '../errors/HttpErrors.ts';
+import { ErrorDetails } from '@transcendence/shared/errors/error-details';
+import type { ValidatedImage } from '../types/image.ts';
+import { deleteImage, saveImage } from '../utils/imageStorage.ts';
 
 type CreateUserInput = {
     username: string
@@ -146,23 +146,23 @@ async function createGoogleUser(profile: ProfileGoogle) {
         });
     try {
         return await userRepository.createGoogleUser(profile);
-	} catch (error) {
-		if (error instanceof UniqueConstraintError) {
-			if (error.field === 'email')
-				throw new ConflictError({
-					message: 'The email address is already registered.',
-					details: { email: ErrorDetails.EMAIL_IN_USE }
-				});
+    } catch (error) {
+        if (error instanceof UniqueConstraintError) {
+            if (error.field === 'email')
+                throw new ConflictError({
+                    message: 'The email address is already registered.',
+                    details: { email: ErrorDetails.EMAIL_IN_USE }
+                });
 
-			if (error.field === 'username')
-				throw new ConflictError({
-					message: 'A unique username could not be generated after several attempts.',
-					details: { username: ErrorDetails.USERNAME_IN_USE }
-				});
-		}
+            if (error.field === 'username')
+                throw new ConflictError({
+                    message: 'A unique username could not be generated after several attempts.',
+                    details: { username: ErrorDetails.USERNAME_IN_USE }
+                });
+        }
 
-		throw error;
-	}
+        throw error;
+    }
 }
 
 const saveAvatar = async (image: ValidatedImage, user: User) => {
