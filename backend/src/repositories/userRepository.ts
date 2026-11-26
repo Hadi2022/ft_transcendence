@@ -131,7 +131,7 @@ export async function updateUser(
     try {
         return await prisma.user.update({
             where: { id: _id },
-			// Omit undefined fields to satisfy Prisma's strict optional property types.
+            // Omit undefined fields to satisfy Prisma's strict optional property types.
             data: {
                 ...(_data.name !== undefined && { name: _data.name }),
                 ...(_data.biography !== undefined && { biography: _data.biography }),
@@ -180,7 +180,7 @@ export async function createGoogleUser(
         });
         if (check != null)
         {
-			randomSuffix = Math.floor(1000 + Math.random() * 9000); // 4 random digits
+            randomSuffix = Math.floor(1000 + Math.random() * 9000); // 4 random digits
             username_atempt = `${username_base}_${randomSuffix}`;
             attemps++;
         }
@@ -213,12 +213,12 @@ export async function createGoogleUser(
                 if (target.includes('users_email_key'))
                     throw new UniqueConstraintError('Unique constraint violation: record already exists', 'email');
 
-				if (target.includes('googleId') || target.includes('users_google_id_key')) {
-					const existingUser = await findUserByGoogleId(_data.googleId);
-					if (existingUser)
-						return existingUser;
-					throw error;
-				}
+                if (target.includes('googleId') || target.includes('users_google_id_key')) {
+                    const existingUser = await findUserByGoogleId(_data.googleId);
+                    if (existingUser)
+                        return existingUser;
+                    throw error;
+                }
 
                 if (target.includes('username') || target.includes('users_username_key')) {
                     randomSuffix = Math.floor(1000 + Math.random() * 9000);
