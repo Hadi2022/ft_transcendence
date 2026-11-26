@@ -1,61 +1,47 @@
-import { Prisma } from '@prisma/client'
-import { prisma } from '../db/prisma/prisma.ts'
-import { ErrorSessionCleanup } from "../errors/sessionErrors.ts";
+import { prisma } from '../db/prisma/prisma.ts';
 
 type CreateSessionData = {
-	userId: string
-	tokenHash: string
-	expiresAt: Date
-	ipOrigin?: string | null
-	userAgent?: string | null
-}
+    userId: string;
+    tokenHash: string;
+    expiresAt: Date;
+    ipOrigin?: string | null;
+    userAgent?: string | null;
+};
 
 export const create = async (data: CreateSessionData) => {
-	return prisma.session.create({ data })
-}
+    return prisma.session.create({ data });
+};
 
 export const findActiveByUserId = async (userId: string) => {
-	return prisma.session.findMany({
-		where: { 
-			userId,
-			expiresAt: {
-				gt: new Date(),
-			},
-		},
-		omit: { tokenHash: true },
-	})
-}
+    return prisma.session.findMany({
+        where: {
+            userId,
+            expiresAt: {
+                gt: new Date(),
+            },
+        },
+        omit: { tokenHash: true },
+    });
+};
 
 export const findByTokenHash = async (tokenHash: string) => {
-	return prisma.session.findUnique({ where: { tokenHash } })
-}
+    return prisma.session.findUnique({ where: { tokenHash } });
+};
 
 export const deleteByIdAndUserId = async ({ userId, sessionId }: { userId: string; sessionId: string }) => {
-	return prisma.session.deleteMany({ where: { id: sessionId, userId } })
-}
+    return prisma.session.deleteMany({ where: { id: sessionId, userId } });
+};
 
 export const deleteByUserId = async (userId: string) => {
-	return prisma.session.deleteMany({ where: { userId } })
-}
+    return prisma.session.deleteMany({ where: { userId } });
+};
 
 export const purgeExpired = async () => {
-	try {
-		const result = await prisma.session.deleteMany(
-			{
-				where: {
-					expiresAt: {
-						lte: new Date()
-					}
-				}
-			}
-		);
-		return result;
-	}catch (error:unknown) {
-		if (error instanceof Prisma.PrismaClientKnownRequestError){
-			throw new ErrorSessionCleanup(error.message);
-		}
-		throw error;
-	}
-}
-
-
+    return prisma.session.deleteMany({
+        where: {
+            expiresAt: {
+                lte: new Date()
+            }
+        }
+    });
+};

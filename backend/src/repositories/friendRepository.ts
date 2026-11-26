@@ -1,123 +1,110 @@
-
-import { prisma } from '../db/prisma/prisma.ts'
-import type { Friend, FriendRelation, FriendshipStatus } from '../types/friend.ts'
-import { UniqueConstraintError,GenericConstraintError } from '../errors/RepositoryErrors.ts'
-import { Prisma } from '@prisma/client'
-import type { Order } from '../types/query.ts'
-import { userProfileOmit } from './userRepository.ts'
+import { prisma } from '../db/prisma/prisma.ts';
+import type { Friend, FriendRelation, FriendshipStatus } from '../types/friend.ts';
+import { UniqueConstraintError, GenericConstraintError } from '../errors/RepositoryErrors.ts';
+import { Prisma } from '@prisma/client';
+import type { Order } from '../types/query.ts';
+import { userProfileOmit } from './userRepository.ts';
 
 export const create = async (data: FriendRelation) => {
+    let friend;
 
-	let friend
+    try {
+        friend = await prisma.friend.create({
+            data
+        });
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2002')
+            throw new UniqueConstraintError('Friend status exists');
+        else if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2004')
+            throw new GenericConstraintError('Constraint violation');
 
-	try {
-		friend = await prisma.friend.create({
-			data
-		})
-	} catch (error) {
+        throw error;
+    }
 
-		if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2002')
-			throw new UniqueConstraintError('Friend status exists')
+    return friend;
+};
 
-		else if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2004')
-			throw new GenericConstraintError('Constraint violation')
+export const findManyPendingByReceiver = async (receiver: string) => {
+    const order: Order = 'desc';
 
-		throw error
-	}
-
-	return friend
-}
-
-export const findManyPendingByReceiver = async (receiver:string) => {
-
-	const order: Order = 'desc'
-
-	return prisma.friend.findMany({
-		where: {
-			receiverId: receiver,
-			status: 'pending',
-		},
-		orderBy: [{ createdAt: order }],
-		include: {
-			sender: {
-				omit: userProfileOmit
-			},
-		},
-	})
-}
+    return prisma.friend.findMany({
+        where: {
+            receiverId: receiver,
+            status: 'pending',
+        },
+        orderBy: [{ createdAt: order }],
+        include: {
+            sender: {
+                omit: userProfileOmit
+            },
+        },
+    });
+};
 
 export const findManyAcceptedById = async (userId: string) => {
+    const order: Order = 'desc';
 
-	const order: Order = 'desc'
-
-	return prisma.friend.findMany({
-		where: {
-			status: 'accepted',
-			OR: [{
-					senderId: userId,
-				},
-				{
-					receiverId: userId,
-				},
-			]
-		},
-
-		orderBy: [{ createdAt: order }],
-	})
-}
+    return prisma.friend.findMany({
+        where: {
+            status: 'accepted',
+            OR: [
+                {
+                    senderId: userId,
+                },
+                {
+                    receiverId: userId,
+                },
+            ]
+        },
+        orderBy: [{ createdAt: order }],
+    });
+};
 
 export const findOpenRequest = async (data: FriendRelation) => {
-
-	return prisma.friend.findUnique({
-		where: {
-			senderId_receiverId: {...data},
-			status: 'pending',
-		}
-	})
-}
+    return prisma.friend.findUnique({
+        where: {
+            senderId_receiverId: { ...data },
+            status: 'pending',
+        }
+    });
+};
 
 export const findBidirectional = async (data: FriendRelation): Promise<Friend | null> => {
-	return await prisma.friend.findUnique({
-		where: {
-				senderId_receiverId: {...data},
-		}
-	})
-	??
-	await prisma.friend.findUnique({
-		where: {
-				senderId_receiverId: {senderId: data.receiverId, receiverId: data.senderId},
-		}
-	})
-}
+    return await prisma.friend.findUnique({
+        where: {
+            senderId_receiverId: { ...data },
+        }
+    }) ?? await prisma.friend.findUnique({
+        where: {
+            senderId_receiverId: { senderId: data.receiverId, receiverId: data.senderId },
+        }
+    });
+};
 
 export const findAcceptedBidirectional = async (data: FriendRelation): Promise<Friend | null> => {
-	return await prisma.friend.findUnique({
-		where: {
-				senderId_receiverId: {...data},
-				status: 'accepted',
-		}
-	})
-	??
-	await prisma.friend.findUnique({
-		where: {
-				senderId_receiverId: {senderId: data.receiverId, receiverId: data.senderId},
-				status: 'accepted',
-		}
-	})
-}
+    return await prisma.friend.findUnique({
+        where: {
+            senderId_receiverId: { ...data },
+            status: 'accepted',
+        }
+    }) ?? await prisma.friend.findUnique({
+        where: {
+            senderId_receiverId: { senderId: data.receiverId, receiverId: data.senderId },
+            status: 'accepted',
+        }
+    });
+};
 
 export const updateStatus = async (id: string, status: FriendshipStatus): Promise<Friend> => {
-
-	return prisma.friend.update({
-		where: {
-			id: id,
-		},
-		data: {
-			status
-		}
-	})
-
-}
+    return prisma.friend.update({
+        where: {
+            id: id,
+        },
+        data: {
+            status
+        }
+    });
+};
 
 export const deletePendingReceivedRequest = async (
     requestId: string,
@@ -129,16 +116,15 @@ export const deletePendingReceivedRequest = async (
             receiverId,
             status: 'pending'
         }
-    })
+    });
 
-    return result.count > 0
-}
+    return result.count > 0;
+};
 
 export const acceptPendingReceivedRequest = async (
     requestId: string,
     receiverId: string
 ): Promise<Friend | null> => {
-
     const result = await prisma.friend.updateMany({
         where: {
             id: requestId,
@@ -148,15 +134,14 @@ export const acceptPendingReceivedRequest = async (
         data: {
             status: 'accepted'
         }
-    })
+    });
 
     if (result.count === 0)
-        return null
+        return null;
 
     return prisma.friend.findUnique({
         where: {
             id: requestId
         }
-    })
-}
-
+    });
+};

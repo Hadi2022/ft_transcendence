@@ -1,4 +1,4 @@
-import * as postRepository from '../repositories/postRepository.ts'
+import * as postRepository from '../repositories/postRepository.ts';
 import { PostNotFoundError, ForbiddenAccessPostError, InternalPostError, ConflictPostError, BadRequestPostsError } from '../errors/postErrors.ts';
 import { deleteImage, getStorageDirectory, saveImage } from '../utils/imageStorage.ts';
 import path from 'node:path';
@@ -8,7 +8,7 @@ import { RecordNotFoundError } from '../errors/RepositoryErrors.ts';
 import type { ListPostsResult, Post, UpdatePostData } from '../types/post.ts';
 import type { ValidatedImage } from '../types/image.ts';
 import { validateImage } from '../utils/imageValidation.ts';
-
+import { UserNotFoundError } from '../errors/userErrors.ts';
 
 const IMAGE_FILENAME_PATTERN =
 	/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(jpg|png|webp)$/
@@ -60,6 +60,9 @@ export const createPost = async (
 				filePath: multimediaUrl
 			});
 		}
+
+        if (error instanceof RecordNotFoundError)
+            throw new UserNotFoundError(error.message);
 
 		throw error;
 	}
@@ -124,9 +127,9 @@ export const deletePost = async (postId: string, userId: string) => {
 					throw new InternalPostError({ message: 'Failed to restore media file for rollback' })
 				}
 			}
-			if ((error instanceof RecordNotFoundError) || (error && typeof error === 'object' && 'code' in error && error.code === 'P2025')) {
-				throw new PostNotFoundError('Post not found');
-			}
+            if (error instanceof RecordNotFoundError) {
+                throw new PostNotFoundError('Post not found');
+            }
 			throw error;
 
 		}
@@ -171,12 +174,11 @@ export const updatePost = async (postId: string, userId: string, data: UpdatePos
 	try {
 		return await postRepository.updatePost(postId, data.caption);
 	} catch (error) {
-		if ((error instanceof RecordNotFoundError) || (error && typeof error === 'object' && 'code' in error && error.code === 'P2025')) {
-			throw new PostNotFoundError('Post not found');
-		}
+        if (error instanceof RecordNotFoundError) {
+            throw new PostNotFoundError('Post not found');
+        }
 		throw error;
 
 	}
 
 }
-
