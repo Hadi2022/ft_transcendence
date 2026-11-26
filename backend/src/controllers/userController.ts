@@ -207,6 +207,11 @@ const clearAvatar = async (req: AuthenticatedRequest, res: Response) => {
 
 }
 
+const getFollowings = async (req:AuthenticatedRequest, res: Response) => {
+    
+    return res.status(200).json({ message: "Get followings route" });
+}
+
 export { 
     registerUser,
     getUsers,
@@ -216,4 +221,5 @@ export {
     updateCurrentUser,
     setAvatar,
     clearAvatar,
+    getFollowings,
 }
