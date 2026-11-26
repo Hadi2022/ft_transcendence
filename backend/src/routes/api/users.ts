@@ -1,5 +1,5 @@
 import express from 'express'
-import { registerUser, getUsers, getCurrentUser, getUserById, getUserByUsername, updateCurrentUser, setAvatar, clearAvatar } from '../../controllers/userController.ts'
+import { registerUser, getUsers, getCurrentUser, getUserById, getUserByUsername, updateCurrentUser, setAvatar, clearAvatar, followUser} from '../../controllers/userController.ts'
 import { requireAuth } from '../../middleware/auth.ts'
 import { loadUser } from '../../middleware/loadUser.ts'
 import { authed } from '../../utils/authed.ts'
@@ -16,5 +16,6 @@ router.put('/me/avatar', requireAuth, imageUpload('avatar', AVATAR_MAX_SIZE), au
 router.delete('/me/avatar', requireAuth, authed(clearAvatar))
 router.get('/by-username/:username', getUserByUsername)
 router.get('/:id', loadUser, getUserById)
+router.post('/:id/followers', loadUser, authed(followUser))
 
 export default router
