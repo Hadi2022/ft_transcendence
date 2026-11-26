@@ -60,7 +60,7 @@ const updatePost = async (
 	})
 
 	try {
-		const updatedPost = await postService.updatePost(parsedIdPost.data.id, req.user.id, req.body);
+		const updatedPost = await postService.updatePost(parsedIdPost.data.id, req.user.id, captionParse.data);
 		return res.status(200).json({
 			data:updatedPost
 		});

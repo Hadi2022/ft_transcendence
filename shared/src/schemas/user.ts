@@ -21,11 +21,15 @@ export const passwordField = z.string({ error: E.PASSWORD_REQUIRED })
     )
 
 export const nameField = z.string(E.INVALID_VALUE)
+	.trim()
     .max(100, E.NAME_TOO_LONG)
+	.transform(value => value === "" ? null : value)
     .nullable().optional()
 
 export const biographyField = z.string(E.INVALID_VALUE)
+	.trim()
     .max(1000, E.BIOGRAPHY_TOO_LONG)
+	.transform(value => value === "" ? null : value)
     .nullable().optional()
 
 export const registerUserSchema = z.object({

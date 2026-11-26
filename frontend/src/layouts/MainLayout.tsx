@@ -82,7 +82,7 @@ export default function MainLayout() {
                     sticky top-0 z-50">
                 <h1>Transcendence</h1>
                 <nav className="flex flex-row gap-4 items-center">
-                    <NavLink to="#" className="navlink">{ t("nav.feed") }</NavLink>
+                    <NavLink to="/feed" className="navlink">{ t("nav.feed") }</NavLink>
                     <NavLink to="#" className="navlink">{ t("nav.messages") }</NavLink>
 
                     { myUsername && (
@@ -91,7 +91,7 @@ export default function MainLayout() {
 
                     { isAuth && (
                         <Link to="/posts/new"
-                                state={{from: location.pathname}}
+                                state={{from: location.pathname + location.search}}
                                 className="rounded-md bg-cyan-400 px-4 py-2 text-sm
                                             font-medium text-white hover:bg-cyan-300
                                             transition-colors" >
