@@ -8,6 +8,7 @@ import { RecordNotFoundError } from '../errors/RepositoryErrors.ts';
 import type { ListPostsResult, Post, UpdatePostData } from '../types/post.ts';
 import type { ValidatedImage } from '../types/image.ts';
 import { validateImage } from '../utils/imageValidation.ts';
+import { UserNotFoundError } from '../errors/userErrors.ts';
 
 
 const IMAGE_FILENAME_PATTERN =
@@ -60,6 +61,9 @@ export const createPost = async (
 				filePath: multimediaUrl
 			});
 		}
+
+        if (error instanceof RecordNotFoundError)
+            throw new UserNotFoundError(error.message);
 
 		throw error;
 	}
@@ -124,9 +128,9 @@ export const deletePost = async (postId: string, userId: string) => {
 					throw new InternalPostError({ message: 'Failed to restore media file for rollback' })
 				}
 			}
-			if ((error instanceof RecordNotFoundError) || (error && typeof error === 'object' && 'code' in error && error.code === 'P2025')) {
-				throw new PostNotFoundError('Post not found');
-			}
+            if (error instanceof RecordNotFoundError) {
+                throw new PostNotFoundError('Post not found');
+            }
 			throw error;
 
 		}
@@ -171,9 +175,9 @@ export const updatePost = async (postId: string, userId: string, data: UpdatePos
 	try {
 		return await postRepository.updatePost(postId, data.caption);
 	} catch (error) {
-		if ((error instanceof RecordNotFoundError) || (error && typeof error === 'object' && 'code' in error && error.code === 'P2025')) {
-			throw new PostNotFoundError('Post not found');
-		}
+        if (error instanceof RecordNotFoundError) {
+            throw new PostNotFoundError('Post not found');
+        }
 		throw error;
 
 	}
