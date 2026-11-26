@@ -1,6 +1,4 @@
-import { Prisma } from '@prisma/client'
 import { prisma } from '../db/prisma/prisma.ts'
-import { ErrorSessionCleanup } from "../errors/sessionErrors.ts";
 
 type CreateSessionData = {
 	userId: string
@@ -39,23 +37,11 @@ export const deleteByUserId = async (userId: string) => {
 }
 
 export const purgeExpired = async () => {
-	try {
-		const result = await prisma.session.deleteMany(
-			{
-				where: {
-					expiresAt: {
-						lte: new Date()
-					}
-				}
-			}
-		);
-		return result;
-	}catch (error:unknown) {
-		if (error instanceof Prisma.PrismaClientKnownRequestError){
-			throw new ErrorSessionCleanup(error.message);
-		}
-		throw error;
-	}
+    return prisma.session.deleteMany({
+        where: {
+            expiresAt: {
+                lte: new Date()
+            }
+        }
+    });
 }
-
-

@@ -1,8 +1,8 @@
 import { hashToken, generateToken } from "../utils/hash.ts"
 import * as sessionRepository from '../repositories/sessionRepository.ts'
 import * as sessionConstants from '../constants/session.ts'
-import { getIo } from "../socket/socket.ts"
-import { disconnectSession, disconnectUser, userRoom } from "./socketService.ts"
+import { disconnectSession, disconnectUser } from "./socketService.ts"
+import { ErrorSessionCleanup } from "../errors/sessionErrors.ts";
 
 type CreateSessionMeta = {
 	ipOrigin?: string | null
@@ -51,11 +51,13 @@ export const closeAllUserSessions = async (userId: string) => {
 	disconnectUser(userId)
 }
 
-export const purgeExpiredSessionsJob = async()=>{
-	try {
-		const deletedSessions = await sessionRepository.purgeExpired();
-		return deletedSessions;
-	} catch (error) {
-		throw error;
-	}
+export const purgeExpiredSessionsJob = async () =>{
+    try {
+        return await sessionRepository.purgeExpired();
+    } catch (error: unknown) {
+        if (error instanceof Error)
+            throw new ErrorSessionCleanup(error.message);
+
+        throw error;
+    }
 }
