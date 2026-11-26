@@ -11,6 +11,7 @@ import EditProfilePage from "../pages/settings/EditProfilePage";
 import SettingsLayout from "../layouts/SettingsLayout";
 import CreatePostPage from "../pages/posts/CreatePostPage";
 import PostPage from "../pages/posts/PostPage";
+import FeedPage from "../pages/feed/FeedPage";
 
 export const router = createBrowserRouter([
     {
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
             {
                 element: <ProtectedRoute />,
                 children: [
+					{ path: "feed", element: <FeedPage /> },
                     { path: "posts/new", element: <CreatePostPage /> },
                     { path: "posts/:id", element: <PostPage /> },
                     { path: "settings", element: <SettingsLayout />,
