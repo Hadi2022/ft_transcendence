@@ -1,7 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../db/prisma/prisma.ts";
-import { RecordNotFoundError } from "../errors/RepositoryErrors.ts";
-import { FollowRelationshipError } from "../errors/followError.ts";
+import { RecordNotFoundError, UniqueConstraintError } from "../errors/RepositoryErrors.ts";
 import type { Follow, ListFollowResult, NewFollowData } from "../types/follow.ts";
 import type { ListParams } from "../types/query.ts";
 
@@ -18,7 +17,7 @@ export async function createFollow(
                 throw new RecordNotFoundError('Follower or followed user not found');
             }
             if (error.code === 'P2002') {
-                throw new FollowRelationshipError();
+                throw new UniqueConstraintError('Follow relationship already exists');
             }
         }
         throw error;
@@ -39,7 +38,7 @@ export async function deleteFollow(
         })
     } catch (error: unknown) {
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
-            if (error.code === 'P2025' || error.code === 'P2003') {
+            if (error.code === 'P2025') {
                 throw new RecordNotFoundError('Follow relationship not found');
             }
         }
