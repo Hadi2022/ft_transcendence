@@ -1098,11 +1098,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Follow'
+                type: object
+                required:
+                  - data
+                properties: 
+                  data:
+                    $ref: '#/components/schemas/Follow'
               example:
-                followerId: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
-                continuedId: 2c5e3619-cbed-4a02-a1e3-9807f0b2989c
-                createdAt: '2026-11-27T12:00:00.000Z'
+                data:
+                  followerId: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
+                  continuedId: 2c5e3619-cbed-4a02-a1e3-9807f0b2989c
+                  createdAt: '2026-11-27T12:00:00.000Z'
 
         '400':
           description: Invalid user ID
