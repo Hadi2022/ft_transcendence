@@ -232,9 +232,7 @@ const followUser = async (req: AuthenticatedRequest, res: Response) => {
         if (err instanceof UserNotFoundError)
             throw new NotFoundError()
         if (err instanceof AlreadyFollowingError)
-            throw new ConflictError({
-                code: ErrorCodes.ALREADY_FOLLOWING
-            })
+            throw new ConflictError()
         throw err
     }
 

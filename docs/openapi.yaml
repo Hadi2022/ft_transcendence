@@ -1156,7 +1156,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 error:
-                  code: ALREADY_FOLLOWING
+                  code: CONFLICT
                   message: Conflict
                   details: {}
 
@@ -2345,7 +2345,6 @@ components:
         - GOOGLE_PROVIDER_ERROR
         - EMAIL_CONFLICT
         - ALREADY_FRIENDS
-        - ALREADY_FOLLOWING
       x-enumDescriptions:
         VALIDATION_ERROR: Request body, query or route parameters failed validation. See details for the offending fields.
         BAD_REQUEST: The request could not be processed (for example, malformed JSON).
@@ -2365,7 +2364,6 @@ components:
         GOOGLE_PROVIDER_ERROR: Google authentication provider failed.
         EMAIL_CONFLICT: The email address conflicts with an existing account.
         ALREADY_FRIENDS: The two users are already friends.
-        ALREADY_FOLLOWING: The user already follows the target user.
 
     ErrorDetail:
       type: string
