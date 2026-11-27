@@ -1,5 +1,5 @@
 import express from 'express'
-import { registerUser, getUsers, getCurrentUser, getUserById, getUserByUsername, updateCurrentUser, setAvatar, clearAvatar, getFollowings } from '../../controllers/userController.ts'
+import { registerUser, getUsers, getCurrentUser, getUserById, getUserByUsername, updateCurrentUser, setAvatar, clearAvatar, getFollowings, followUser} from '../../controllers/userController.ts'
 import { requireAuth } from '../../middleware/auth.ts'
 import { loadUser } from '../../middleware/loadUser.ts'
 import { authed } from '../../utils/authed.ts'
@@ -17,5 +17,6 @@ router.delete('/me/avatar', requireAuth, authed(clearAvatar))
 router.get('/by-username/:username', getUserByUsername)
 router.get('/:id', loadUser, getUserById)
 router.get('/:id/following', loadUser ,requireAuth, authed(getFollowings))
+router.post('/:id/followers', requireAuth, loadUser, authed(followUser))
 
 export default router

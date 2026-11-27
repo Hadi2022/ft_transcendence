@@ -11,6 +11,9 @@ import { ErrorCodes } from '@transcendence/shared/errors/error-codes'
 import { ErrorDetails } from '@transcendence/shared/errors/error-details'
 import { validateImage } from '../utils/imageValidation.ts'
 import { queryParamsSchema } from '@transcendence/shared/schemas/common'
+import type { Follow } from '../types/follow.ts'
+import { AlreadyFollowingError } from '../errors/followError.ts'
+import { createFollow } from '../services/followService.ts'
 
 async function registerUser(req: Request, res: Response): Promise<void> {
     const parsed = registerUserSchema.safeParse(req.body)
@@ -219,7 +222,45 @@ const getFollowings = async (req:AuthenticatedRequest, res: Response) => {
 	})
     
     const followings = await getFollowingFromService(req.userResource!.id,  parsed_pagination.data)
+
     return res.status(200).json(followings);
+    
+}
+const followUser = async (req: AuthenticatedRequest, res: Response) => {
+
+    const followerId = req.user.id
+    const continuedId = req.userResource.id
+
+    if (followerId == continuedId)
+        throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			details: { followingId: ErrorDetails.CANNOT_TARGET_SELF }
+		})
+
+    let newFollow: Follow
+
+    try {
+        newFollow = await createFollow({
+            followerId,
+            continuedId,
+        })
+    } catch (err) {
+        if (err instanceof UserNotFoundError)
+            throw new NotFoundError()
+        if (err instanceof AlreadyFollowingError)
+            throw new ConflictError({
+                code: ErrorCodes.ALREADY_FOLLOWING
+            })
+        throw err
+    }
+
+    res.status(201).json({
+        data: {
+            followerId: newFollow.followerId,
+            followingId: newFollow.continuedId,
+            createdAt: newFollow.createdAt
+        }
+    })
 }
 
 export { 
@@ -232,4 +273,5 @@ export {
     setAvatar,
     clearAvatar,
     getFollowings,
+    followUser,
 }
