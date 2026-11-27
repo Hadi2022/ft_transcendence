@@ -1162,6 +1162,83 @@ paths:
 
         '500':
           $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Users
+      summary: Unfollow a user
+      description: >-
+        Removes the follow relationship between the logged in user and the user
+        identified by the route parameter. Fails with 404 if the user does not
+        exist or if the logged in user is not following them.
+      operationId: unfollowUser
+      security:
+        - sessionCookie: []
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the user to unfollow
+          schema:
+            type: string
+            format: uuid
+
+      responses:
+        '204':
+          description: Follow relationship removed
+
+        '400':
+          description: Invalid user ID, or the logged in user targeted themselves
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidId:
+                  summary: The ID is not a valid UUID
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid user ID
+                      details:
+                        id: INVALID_UUID
+                selfTarget:
+                  summary: The logged in user tried to unfollow themselves
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Bad request
+                      details:
+                        followingId: CANNOT_TARGET_SELF
+
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+        '404':
+          description: The user does not exist, or is not followed by the logged in user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                userNotFound:
+                  summary: No user with the given ID
+                  value:
+                    error:
+                      code: NOT_FOUND
+                      message: User not found
+                      details: {}
+                notFollowing:
+                  summary: The logged in user does not follow this user
+                  value:
+                    error:
+                      code: NOT_FOUND
+                      message: Resource not found
+                      details: {}
+
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
 
   /friend-requests:
     post:
