@@ -8,6 +8,6 @@ export class FollowRelationshipError extends Error {
 export class AlreadyFollowingError extends FollowRelationshipError {
     constructor(message = 'Follow relationship error') {
         super(message);
-        this.name = 'FollowRelationshipError';
+        this.name = 'AlreadyFollowingError';
     }
 }
