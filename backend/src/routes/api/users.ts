@@ -16,6 +16,6 @@ router.put('/me/avatar', requireAuth, imageUpload('avatar', AVATAR_MAX_SIZE), au
 router.delete('/me/avatar', requireAuth, authed(clearAvatar))
 router.get('/by-username/:username', getUserByUsername)
 router.get('/:id', loadUser, getUserById)
-router.get('/:id/following',requireAuth, authed(getFollowings))
+router.get('/:id/following', loadUser ,requireAuth, authed(getFollowings))
 
 export default router
