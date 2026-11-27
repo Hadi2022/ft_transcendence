@@ -2,7 +2,7 @@ import type { Request, Response } from 'express'
 
 import { registerUserSchema, updateUserSchema, usernameSchema } from '@transcendence/shared/schemas/user'
 import { listUsersQuerySchema } from '../schemas/user.ts'
-import { createUser, listUserProfiles, findUserOwnProfileById, updateUser, findUserProfileByUsername, saveAvatar, deleteAvatar } from '../services/userService.ts'
+import { createUser, listUserProfiles, findUserOwnProfileById, updateUser, findUserProfileByUsername, saveAvatar, deleteAvatar, } from '../services/userService.ts'
 import { BadRequestError, ConflictError, NotFoundError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'
 import { UserConcurrencyError, UserEmailConflictError, UserNameConflictError, UserNotFoundError } from '../errors/userErrors.ts'
@@ -12,7 +12,7 @@ import { ErrorDetails } from '@transcendence/shared/errors/error-details'
 import { validateImage } from '../utils/imageValidation.ts'
 import type { Follow } from '../types/follow.ts'
 import { AlreadyFollowingError } from '../errors/followError.ts'
-import { createFollow } from '../services/followService.ts'
+import { createFollow, deleteFollow } from '../services/followService.ts'
 
 async function registerUser(req: Request, res: Response): Promise<void> {
     const parsed = registerUserSchema.safeParse(req.body)
@@ -247,6 +247,31 @@ const followUser = async (req: AuthenticatedRequest, res: Response) => {
     })
 }
 
+const unfollowUser = async (req: AuthenticatedRequest, res: Response) => {
+
+    const followerId = req.user.id
+    const continuedId = req.userResource.id
+
+    if (followerId == continuedId)
+        throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			details: { followingId: ErrorDetails.CANNOT_TARGET_SELF }
+		})
+
+    try {
+        await deleteFollow({
+            followerId,
+            continuedId,
+        })
+    } catch (err) {
+        if (err instanceof UserNotFoundError)
+            throw new NotFoundError()
+        throw err
+    }
+
+    res.status(204).send()
+}
+
 export { 
     registerUser,
     getUsers,
@@ -257,4 +282,5 @@ export {
     setAvatar,
     clearAvatar,
     followUser,
+    unfollowUser,
 }

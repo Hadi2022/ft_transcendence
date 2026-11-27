@@ -17,3 +17,15 @@ export const createFollow = async (data: NewFollowData): Promise<Follow> => {
 	}
 
 }
+
+export const deleteFollow = async (data: NewFollowData): Promise<Follow> => {
+
+	try {
+		return await followRepository.deleteFollow(data.followerId, data.continuedId)
+	} catch (err) {
+		if (err instanceof RecordNotFoundError)
+			throw new UserNotFoundError('User could not be found')
+        throw err
+	}
+
+}
