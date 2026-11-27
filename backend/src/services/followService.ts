@@ -12,7 +12,7 @@ export const createFollow = async (data: NewFollowData): Promise<Follow> => {
 		if (err instanceof UniqueConstraintError)
 			throw new AlreadyFollowingError()
 		if (err instanceof RecordNotFoundError)
-			throw new UserNotFoundError('Does it matter what i put here?')
+			throw new UserNotFoundError('User could not be found')
         throw err
 	}
 
