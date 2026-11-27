@@ -3,7 +3,7 @@ import { UserNameConflictError, UserEmailConflictError, UserNotFoundError, UserC
 import { hashPassword, verifyPassword } from './passwordService.ts';
 import * as userRepository from '../repositories/userRepository.ts';
 import { UniqueConstraintError, RecordNotFoundError } from '../errors/RepositoryErrors.ts';
-import type { ListParams, Order } from '../types/query.ts';
+import type { Order } from '../types/query.ts';
 import { ConflictError, BadRequestError, UnauthorizedError } from '../errors/HttpErrors.ts';
 import { ErrorDetails } from '@transcendence/shared/errors/error-details';
 import type { ValidatedImage } from '../types/image.ts';

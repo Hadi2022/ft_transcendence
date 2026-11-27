@@ -9,7 +9,7 @@ import type { AuthenticatedRequest } from '../types/express/Request.js'
 import { ErrorCodes } from '@transcendence/shared/errors/error-codes'
 import { ErrorDetails } from '@transcendence/shared/errors/error-details'
 import { validateImage } from '../utils/imageValidation.ts'
-import { queryParamsPaginationSchema } from '@transcendence/shared/schemas/common'
+import { pathParamsSchema } from '@transcendence/shared/schemas/common'
 import type { Follow } from '../types/follow.ts'
 import { AlreadyFollowingError, FollowNotFoundError } from '../errors/followError.ts'
 import { createFollow, deleteFollow, getFollowings as getFollowingsFromService } from '../services/followService.ts'
@@ -212,7 +212,7 @@ const clearAvatar = async (req: AuthenticatedRequest, res: Response) => {
 
 const getFollowings = async (req:AuthenticatedRequest, res: Response) => {
 
-    const parsed_pagination = queryParamsPaginationSchema.safeParse(req.query)
+    const parsed_pagination = pathParamsSchema.safeParse(req.query)
     if (!parsed_pagination.success)
 		throw new BadRequestError({
 			code: ErrorCodes.VALIDATION_ERROR,

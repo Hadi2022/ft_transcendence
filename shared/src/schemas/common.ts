@@ -15,6 +15,12 @@ const unsignedIntParam = (defaultValue: number) =>
 const limitParam = unsignedIntParam(20).pipe(z.number().min(1).max(100))
 const offsetParam = unsignedIntParam(0).pipe(z.number().min(0))
 const userIdParamSchema = z.uuid(E.INVALID_UUID).optional()
+
+export const pathParamsSchema = z.object({
+limit:limitParam,
+	offset:offsetParam,
+}).strict()
+
 export const queryParamsSchema = z.object({
 	limit:limitParam,
 	offset:offsetParam,

@@ -1087,7 +1087,7 @@ paths:
         - name: limit
           in: query
           required: false
-          description: Maximum number of posts to return (between 1 and 100).
+          description: Maximum number of users to return (between 1 and 100).
           schema:
             type: integer
             minimum: 1
@@ -1097,7 +1097,7 @@ paths:
         - name: offset
           in: query
           required: false
-          description: Number of posts to skip before starting to return results.
+          description: Number of users to skip before starting to return results.
           schema:
             type: integer
             minimum: 0
