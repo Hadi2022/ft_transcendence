@@ -238,7 +238,13 @@ const followUser = async (req: AuthenticatedRequest, res: Response) => {
         throw err
     }
 
-    res.status(201).json(newFollow)
+    res.status(201).json({
+        data: {
+            followerId: newFollow.followerId,
+            followingId: newFollow.continuedId,
+            createdAt: newFollow.createdAt
+        }
+    })
 }
 
 export { 
