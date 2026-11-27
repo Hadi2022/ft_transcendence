@@ -1,9 +1,5 @@
 import express from 'express'
-<<<<<<< HEAD
-import { registerUser, getUsers, getCurrentUser, getUserById, getUserByUsername, updateCurrentUser, setAvatar, clearAvatar, getFollowings, followUser} from '../../controllers/userController.ts'
-=======
-import { registerUser, getUsers, getCurrentUser, getUserById, getUserByUsername, updateCurrentUser, setAvatar, clearAvatar, followUser, unfollowUser} from '../../controllers/userController.ts'
->>>>>>> develop
+import { registerUser, getUsers, getCurrentUser, getUserById, getUserByUsername, updateCurrentUser, setAvatar, clearAvatar, getFollowings, followUser , unfollowUser} from '../../controllers/userController.ts'
 import { requireAuth } from '../../middleware/auth.ts'
 import { loadUser } from '../../middleware/loadUser.ts'
 import { authed } from '../../utils/authed.ts'
