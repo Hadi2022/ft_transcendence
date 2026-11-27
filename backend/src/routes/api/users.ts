@@ -1,5 +1,5 @@
 import express from 'express'
-import { registerUser, getUsers, getCurrentUser, getUserById, getUserByUsername, updateCurrentUser, setAvatar, clearAvatar, followUser, unfollowUser} from '../../controllers/userController.ts'
+import { registerUser, getUsers, getCurrentUser, getUserById, getUserByUsername, updateCurrentUser, setAvatar, clearAvatar, getFollowings, followUser , unfollowUser} from '../../controllers/userController.ts'
 import { requireAuth } from '../../middleware/auth.ts'
 import { loadUser } from '../../middleware/loadUser.ts'
 import { authed } from '../../utils/authed.ts'
@@ -16,6 +16,7 @@ router.put('/me/avatar', requireAuth, imageUpload('avatar', AVATAR_MAX_SIZE), au
 router.delete('/me/avatar', requireAuth, authed(clearAvatar))
 router.get('/by-username/:username', getUserByUsername)
 router.get('/:id', loadUser, getUserById)
+router.get('/:id/following', requireAuth, loadUser, authed(getFollowings))
 router.post('/:id/followers', requireAuth, loadUser, authed(followUser))
 router.delete('/:id/followers', requireAuth, loadUser, authed(unfollowUser))
 
