@@ -212,12 +212,21 @@ const clearAvatar = async (req: AuthenticatedRequest, res: Response) => {
 
 const followUser = async (req: AuthenticatedRequest, res: Response) => {
 
+    const followerId = req.user.id
+    const continueId = req.userResource.id
+
+    if (followerId == continueId)
+        throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			details: { followingId: ErrorDetails.CANNOT_TARGET_SELF }
+		})
+
     let newFollow: Follow
 
     try {
         newFollow = await createFollow({
-            followerId: req.user.id,
-            continuedId: req.userResource.id
+            followerId,
+            continuedId,
         })
     } catch (err) {
         if (err instanceof UserNotFoundError)
