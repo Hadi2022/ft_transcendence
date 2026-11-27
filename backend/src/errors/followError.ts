@@ -11,3 +11,10 @@ export class AlreadyFollowingError extends FollowRelationshipError {
         this.name = 'AlreadyFollowingError';
     }
 }
+
+export class FollowNotFoundError extends FollowRelationshipError {
+    constructor(message = 'Follow relationship error') {
+        super(message);
+        this.name = 'FollowNotFoundError';
+    }
+}
