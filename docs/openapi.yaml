@@ -1374,7 +1374,7 @@ paths:
         Returns how many users follow the user identified by the route
         parameter, how many users that user follows, and whether the logged in
         user follows them. A session is optional. Without a valid session,
-        isFollowing is null. Checking your own ID returns isFollowing null.
+        isFollowing is null. Checking your own ID returns isFollowing false.
       operationId: getUserFollowInfo
       security:
         - {}

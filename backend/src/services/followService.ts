@@ -38,4 +38,3 @@ export const deleteFollow = async (data: NewFollowData): Promise<Follow> => {
 export const isFollowing = followRepository.isFollowing
 export const countFollowers = followRepository.countFollowers
 export const countFollowing = followRepository.countFollowings
-// I did so much work here...
