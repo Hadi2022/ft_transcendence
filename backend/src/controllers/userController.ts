@@ -1,8 +1,7 @@
 import type { Request, Response } from 'express'
-
 import { registerUserSchema, updateUserSchema, usernameSchema } from '@transcendence/shared/schemas/user'
 import { listUsersQuerySchema } from '../schemas/user.ts'
-import { createUser, listUserProfiles, findUserOwnProfileById, updateUser, findUserProfileByUsername, saveAvatar, deleteAvatar, } from '../services/userService.ts'
+import { createUser, listUserProfiles, findUserOwnProfileById, updateUser, findUserProfileByUsername, saveAvatar, deleteAvatar} from '../services/userService.ts'
 import { BadRequestError, ConflictError, NotFoundError } from '../errors/HttpErrors.ts'
 import { formatZodErrors } from '../utils/zod.ts'
 import { UserConcurrencyError, UserEmailConflictError, UserNameConflictError, UserNotFoundError } from '../errors/userErrors.ts'
@@ -10,9 +9,10 @@ import type { AuthenticatedRequest } from '../types/express/Request.js'
 import { ErrorCodes } from '@transcendence/shared/errors/error-codes'
 import { ErrorDetails } from '@transcendence/shared/errors/error-details'
 import { validateImage } from '../utils/imageValidation.ts'
+import { queryParamsPaginationSchema } from '@transcendence/shared/schemas/common'
 import type { Follow } from '../types/follow.ts'
 import { AlreadyFollowingError, FollowNotFoundError } from '../errors/followError.ts'
-import { isFollowing, countFollowers, countFollowing, createFollow, deleteFollow } from '../services/followService.ts'
+import { isFollowing, countFollowers, countFollowing, createFollow, deleteFollow, getFollowings as getFollowingsFromService } from '../services/followService.ts'
 
 async function registerUser(req: Request, res: Response): Promise<void> {
     const parsed = registerUserSchema.safeParse(req.body)
@@ -210,6 +210,22 @@ const clearAvatar = async (req: AuthenticatedRequest, res: Response) => {
 
 }
 
+const getFollowings = async (req:AuthenticatedRequest, res: Response) => {
+
+    const parsed_pagination = queryParamsPaginationSchema.safeParse(req.query)
+    if (!parsed_pagination.success)
+		throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			message: 'Invalid pagination query parameters',
+			details: formatZodErrors(parsed_pagination.error),
+	})
+    
+    const followings = await getFollowingsFromService (req.userResource!.id,  parsed_pagination.data)
+
+    return res.status(200).json(followings);
+    
+}
+
 const followUser = async (req: AuthenticatedRequest, res: Response) => {
 
     const followerId = req.user.id
@@ -301,6 +317,7 @@ export {
     updateCurrentUser,
     setAvatar,
     clearAvatar,
+    getFollowings,
     followUser,
     unfollowUser,
     followInfo,
