@@ -11,7 +11,7 @@ import { ErrorCodes } from '@transcendence/shared/errors/error-codes'
 import { ErrorDetails } from '@transcendence/shared/errors/error-details'
 import { validateImage } from '../utils/imageValidation.ts'
 import type { Follow } from '../types/follow.ts'
-import { AlreadyFollowingError } from '../errors/followError.ts'
+import { AlreadyFollowingError, FollowNotFoundError } from '../errors/followError.ts'
 import { createFollow, deleteFollow } from '../services/followService.ts'
 
 async function registerUser(req: Request, res: Response): Promise<void> {
@@ -262,7 +262,7 @@ const unfollowUser = async (req: AuthenticatedRequest, res: Response) => {
             continuedId,
         })
     } catch (err) {
-        if (err instanceof UserNotFoundError)
+        if (err instanceof FollowNotFoundError)
             throw new NotFoundError()
         throw err
     }
