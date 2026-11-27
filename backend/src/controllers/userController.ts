@@ -12,7 +12,7 @@ import { validateImage } from '../utils/imageValidation.ts'
 import { queryParamsPaginationSchema } from '@transcendence/shared/schemas/common'
 import type { Follow } from '../types/follow.ts'
 import { AlreadyFollowingError, FollowNotFoundError } from '../errors/followError.ts'
-import { createFollow, deleteFollow, getFollowings as getFollowingsFromService } from '../services/followService.ts'
+import { isFollowing, countFollowers, countFollowing, createFollow, deleteFollow, getFollowings as getFollowingsFromService } from '../services/followService.ts'
 
 async function registerUser(req: Request, res: Response): Promise<void> {
     const parsed = registerUserSchema.safeParse(req.body)
@@ -225,6 +225,7 @@ const getFollowings = async (req:AuthenticatedRequest, res: Response) => {
     return res.status(200).json(followings);
     
 }
+
 const followUser = async (req: AuthenticatedRequest, res: Response) => {
 
     const followerId = req.user.id
@@ -285,6 +286,28 @@ const unfollowUser = async (req: AuthenticatedRequest, res: Response) => {
     res.status(204).send()
 }
 
+const followInfo = async (req: Request, res: Response) => {
+
+    const userId = req.userResource.id
+    let follows: null | boolean = false
+
+    if (!req.user)
+        follows = null
+    else if (await isFollowing(req.user.id, userId))
+        follows = true
+
+    const followersCount = await countFollowers(userId)
+    const followingCount = await countFollowing(userId)
+
+    res.status(200).json({
+        data: {
+            followersCount,
+            followingCount,
+            isFollowing: follows
+        }
+    })
+}
+
 export { 
     registerUser,
     getUsers,
@@ -297,4 +320,5 @@ export {
     getFollowings,
     followUser,
     unfollowUser,
+    followInfo,
 }

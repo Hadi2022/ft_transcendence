@@ -4,8 +4,6 @@ import type { Follow, NewFollowData } from '../types/follow.ts'
 import * as followRepository from '../repositories/followRepository.ts'
 import { UserNotFoundError } from '../errors/userErrors.ts'
 import type { ListParams } from '../types/query.ts'
-import {getFollowings as getFollowingsFromRepository} from '../repositories/followRepository.ts'
-
 
 export const createFollow = async (data: NewFollowData): Promise<Follow> => {
 	
@@ -22,8 +20,9 @@ export const createFollow = async (data: NewFollowData): Promise<Follow> => {
 }
 
  export const getFollowings = async (userId: string, pagination: ListParams) => {
-    return await getFollowingsFromRepository(userId, pagination);
+    return await followRepository.getFollowings(userId, pagination);
 }
+
 export const deleteFollow = async (data: NewFollowData): Promise<Follow> => {
 
 	try {
@@ -35,3 +34,7 @@ export const deleteFollow = async (data: NewFollowData): Promise<Follow> => {
 	}
 
 }
+
+export const isFollowing = followRepository.isFollowing
+export const countFollowers = followRepository.countFollowers
+export const countFollowing = followRepository.countFollowings

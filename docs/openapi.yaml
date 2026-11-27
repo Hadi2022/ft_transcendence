@@ -1365,6 +1365,93 @@ paths:
           $ref: '#/components/responses/InternalServerError'
 
 
+  /users/{id}/follow-info:
+    get:
+      tags:
+        - Users
+      summary: Get follow information for a user
+      description: >-
+        Returns how many users follow the user identified by the route
+        parameter, how many users that user follows, and whether the logged in
+        user follows them. A session is optional. Without a valid session,
+        isFollowing is null. Checking your own ID returns isFollowing false.
+      operationId: getUserFollowInfo
+      security:
+        - {}
+        - sessionCookie: []
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID of the user to get follow information for
+          schema:
+            type: string
+            format: uuid
+
+      responses:
+        '200':
+          description: Follow information returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/FollowInfo'
+              examples:
+                following:
+                  summary: Logged in user follows this user
+                  value:
+                    data:
+                      followersCount: 12
+                      followingCount: 5
+                      isFollowing: true
+                notFollowing:
+                  summary: Logged in user does not follow this user
+                  value:
+                    data:
+                      followersCount: 12
+                      followingCount: 5
+                      isFollowing: false
+                anonymous:
+                  summary: Request without a session
+                  value:
+                    data:
+                      followersCount: 12
+                      followingCount: 5
+                      isFollowing: null
+
+        '400':
+          description: Invalid user ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: VALIDATION_ERROR
+                  message: Invalid user ID
+                  details:
+                    id: INVALID_UUID
+
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: User not found
+                  details: {}
+
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
   /friend-requests:
     post:
       tags:
@@ -2380,6 +2467,28 @@ components:
         createdAt:
           type: string
           format: date-time
+
+    FollowInfo:
+      type: object
+      description: Follow statistics of a user, from the point of view of the requester
+      required:
+        - followersCount
+        - followingCount
+        - isFollowing
+      properties:
+        followersCount:
+          type: integer
+          minimum: 0
+          description: Number of users who follow this user
+        followingCount:
+          type: integer
+          minimum: 0
+          description: Number of users this user follows
+        isFollowing:
+          type: [boolean, 'null']
+          description: >-
+            Whether the logged in user follows this user. Null when the
+            request has no valid session
 
     Session:
       type: object
