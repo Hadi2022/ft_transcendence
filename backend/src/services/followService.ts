@@ -3,6 +3,9 @@ import { UniqueConstraintError, RecordNotFoundError } from '../errors/Repository
 import type { Follow, NewFollowData } from '../types/follow.ts'
 import * as followRepository from '../repositories/followRepository.ts'
 import { UserNotFoundError } from '../errors/userErrors.ts'
+import type { ListParams } from '../types/query.ts'
+import {getFollowings as getFollowingsFromRepository} from '../repositories/followRepository.ts'
+
 
 export const createFollow = async (data: NewFollowData): Promise<Follow> => {
 	
@@ -16,4 +19,8 @@ export const createFollow = async (data: NewFollowData): Promise<Follow> => {
         throw err
 	}
 
+}
+
+ export const getFollowings = async (userId: string, pagination: ListParams) => {
+    return await getFollowingsFromRepository(userId, pagination);
 }

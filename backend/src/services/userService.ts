@@ -8,7 +8,6 @@ import { ConflictError, BadRequestError, UnauthorizedError } from '../errors/Htt
 import { ErrorDetails } from '@transcendence/shared/errors/error-details';
 import type { ValidatedImage } from '../types/image.ts';
 import { deleteImage, saveImage } from '../utils/imageStorage.ts';
-import {getFollowings as getFollowingsFromRepository} from '../repositories/followRepository.ts'
 
 type CreateUserInput = {
     username: string
@@ -220,10 +219,6 @@ const deleteAvatar = async (user: User) => {
 
 }
 
-const getFollowings = async (userId: string, pagination: ListParams) => {
-    return await getFollowingsFromRepository(userId, pagination);
-}
-
 export {
     prepareUser,
     createUser,
@@ -237,5 +232,4 @@ export {
     createGoogleUser,
     saveAvatar,
 	deleteAvatar,
-    getFollowings
 }

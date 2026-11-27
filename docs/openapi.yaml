@@ -1074,8 +1074,11 @@ paths:
         - Users
       summary: Get the list of users followed by a user
       description: >-
-        Returns the list of users that the specified user is following. The
-        authenticated user is matched against the followerId field.
+        Returns the paginated list of public user profiles (`UserProfile`)
+        followed by the user specified in the `id` path parameter (matched
+        against `followerId`). Requires an active session. Results are ordered
+        by `createdAt` descending and then `continuedId` descending. Unknown,
+        invalid, or duplicate query parameters are rejected with 400.
       operationId: getUserFollowing
       security:
         - sessionCookie: []
@@ -1148,7 +1151,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
               examples:
                 invalidUserId:
                   summary: Invalid user ID
