@@ -213,9 +213,9 @@ const clearAvatar = async (req: AuthenticatedRequest, res: Response) => {
 const followUser = async (req: AuthenticatedRequest, res: Response) => {
 
     const followerId = req.user.id
-    const continueId = req.userResource.id
+    const continuedId = req.userResource.id
 
-    if (followerId == continueId)
+    if (followerId == continuedId)
         throw new BadRequestError({
 			code: ErrorCodes.VALIDATION_ERROR,
 			details: { followingId: ErrorDetails.CANNOT_TARGET_SELF }
