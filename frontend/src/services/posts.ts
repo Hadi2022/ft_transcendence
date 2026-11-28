@@ -84,3 +84,13 @@ export async function getPosts(
 
     return body
 }
+
+export async function deletePost(id: string, signal?: AbortSignal): Promise<void> {
+    const res = await fetch(`/api/posts/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        credentials: "include",
+        signal
+    })
+
+    if (!res.ok) await throwApiError(res)
+}
