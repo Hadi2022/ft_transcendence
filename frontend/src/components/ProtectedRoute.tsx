@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getCurrentUser } from "../services/auth";
 import { ApiError } from "../services/api";
-import { Navigate, Outlet } from "react-router";
+import { Navigate, Outlet, useOutletContext } from "react-router";
 
 export default function ProtectedRoute() {
+
+    const outletContext = useOutletContext()
     const { t } = useTranslation()
 
     const [status, setStatus] = useState<"loading"|"auth"|"guest"|"error">("loading")
@@ -64,5 +66,5 @@ export default function ProtectedRoute() {
 
         )
 
-    return <Outlet />
+    return <Outlet context={outletContext}/>
 }
