@@ -117,6 +117,17 @@
             "loadError": "No se ha podido cargar la publicación",
             "imageError": "No se ha podido cargar la imagen"
         },
+        "menu": {
+            "options": "Opciones"
+        },
+        "delete": {
+            "title": "Eliminar publicación",
+            "button": "Eliminar",
+            "confirm": "¿Estás seguro de que quieres eliminarla? No se puede deshacer",
+            "deleting": "Eliminando...",
+            "network": "No se ha podido conectar con el servidor",
+            "error": "No se ha podido eliminar la publicación. Inténtalo de nuevo"
+        },
 		"list": {
 			"loadError": "No se pudieron cargar las publicaciones.",
 			"empty": "Todavía no hay publicaciones.",
@@ -160,5 +171,6 @@
             "network": "No se ha podido conectar con el servidor"
         }
     },
+    "cancel": "Cancelar",
     "retry": "Reintentar"
 }
