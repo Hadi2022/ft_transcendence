@@ -13,7 +13,7 @@ const unsignedIntParam = (defaultValue: number) =>
     .default(defaultValue)
 
 const limitParam = unsignedIntParam(20).pipe(z.number().min(1).max(100))
-const offsetParam = unsignedIntParam(0).pipe(z.number().min(0))
+const offsetParam = unsignedIntParam(0).pipe(z.number().int().min(0).max(2147483647))
 const userIdParamSchema = z.uuid(E.INVALID_UUID).optional()
 
 export const queryParamsPaginationSchema = z.object({
