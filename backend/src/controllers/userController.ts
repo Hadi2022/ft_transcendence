@@ -12,7 +12,7 @@ import { validateImage } from '../utils/imageValidation.ts'
 import { queryParamsPaginationSchema } from '@transcendence/shared/schemas/common'
 import type { Follow } from '../types/follow.ts'
 import { AlreadyFollowingError, FollowNotFoundError } from '../errors/followError.ts'
-import { isFollowing, countFollowers, countFollowing, createFollow, deleteFollow, getFollowings as getFollowingsFromService } from '../services/followService.ts'
+import { isFollowing, countFollowers, countFollowing, createFollow, deleteFollow, getFollowings as getFollowingsFromService, getFollowers as getFollowersFromService } from '../services/followService.ts'
 
 async function registerUser(req: Request, res: Response): Promise<void> {
     const parsed = registerUserSchema.safeParse(req.body)
@@ -226,6 +226,22 @@ const getFollowings = async (req:AuthenticatedRequest, res: Response) => {
     
 }
 
+const getFollowers = async (req:AuthenticatedRequest, res: Response) => {
+
+    const parsed_pagination = queryParamsPaginationSchema.safeParse(req.query)
+    if (!parsed_pagination.success)
+		throw new BadRequestError({
+			code: ErrorCodes.VALIDATION_ERROR,
+			message: 'Invalid pagination query parameters',
+			details: formatZodErrors(parsed_pagination.error),
+	})
+    
+    const followings = await getFollowersFromService (req.userResource!.id,  parsed_pagination.data)
+
+    return res.status(200).json(followings);
+    
+}
+
 const followUser = async (req: AuthenticatedRequest, res: Response) => {
 
     const followerId = req.user.id
@@ -318,6 +334,7 @@ export {
     setAvatar,
     clearAvatar,
     getFollowings,
+    getFollowers,
     followUser,
     unfollowUser,
     followInfo,
