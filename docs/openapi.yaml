@@ -1193,7 +1193,6 @@ paths:
 
         '500':
           $ref: '#/components/responses/InternalServerError'
-
   /users/{id}/followers:
     post:
       tags:
@@ -1363,7 +1362,129 @@ paths:
 
         '500':
           $ref: '#/components/responses/InternalServerError'
+    get:
+      tags:
+        - Users
+      summary: Get the list of users who follow a given user.
+      description: >-
+        Returns the paginated list of public user profiles (UserProfile)
+        who follow the user specified by the id path parameter
+        (matched against continuedId). Requires an active session. Results are ordered by
+        createdAt descending and followerId descending.
+      operationId: getUserFollowers
+      security:
+        - sessionCookie: []
 
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of users to return (between 1 and 100).
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          example: 20
+        - name: offset
+          in: query
+          required: false
+          description: Number of users to skip before starting to return results.
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          example: 0
+        - name: id
+          in: path
+          required: true
+          description: ID of the user whose list of followers is to be retrieved.
+          schema:
+            type: string
+            format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440001
+
+      responses:
+        '200':
+          description: List of followers returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowListResponse'
+              examples:
+                withUsers:
+                  summary: List of followers returned
+                  value:
+                    data:
+                      - id: 2c5e3619-cbed-4a02-a1e3-9807f0b2989c
+                        username: testuser1
+                        name: null
+                        biography: null
+                        avatarUrl: null
+                        isVerified: false
+                        createdAt: '2026-11-12T10:00:00.000Z'
+                      - id: 3f9c2b7e-5d1a-4c8b-9e2f-7a6b1d0c4e83
+                        username: testuser2
+                        name: null
+                        biography: null
+                        avatarUrl: null
+                        isVerified: false
+                        createdAt: '2026-11-12T10:05:00.000Z'
+                    pagination:
+                      total: 2
+                withoutUsers:
+                  summary: The user has no followers
+                  value:
+                    data: []
+                    pagination:
+                      total: 0
+        '400':
+          description: Invalid user ID or invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidUserId:
+                  summary: Invalid user ID
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid user ID
+                      details:
+                        id: INVALID_UUID
+                invalidLimit:
+                  summary: Limit is not a number or out of range
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid query parameters
+                      details:
+                        limit: INVALID_VALUE
+                invalidOffset:
+                  summary: Offset is not a number or negative
+                  value:
+                    error:
+                      code: VALIDATION_ERROR
+                      message: Invalid query parameters
+                      details:
+                        offset: INVALID_VALUE
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error:
+                  code: NOT_FOUND
+                  message: User not found
+                  details: {}
+
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /users/{id}/follow-info:
     get:

@@ -23,6 +23,11 @@ export const createFollow = async (data: NewFollowData): Promise<Follow> => {
     return await followRepository.getFollowings(userId, pagination);
 }
 
+ export const getFollowers = async (userId: string, pagination: ListParams) => {
+    return await followRepository.getFollowers(userId, pagination);
+}
+
+
 export const deleteFollow = async (data: NewFollowData): Promise<Follow> => {
 
 	try {
