@@ -236,9 +236,9 @@ const getFollowers = async (req:AuthenticatedRequest, res: Response) => {
 			details: formatZodErrors(parsed_pagination.error),
 	})
     
-    const followings = await getFollowersFromService (req.userResource!.id,  parsed_pagination.data)
+    const followers = await getFollowersFromService (req.userResource!.id,  parsed_pagination.data)
 
-    return res.status(200).json(followings);
+    return res.status(200).json(followers);
     
 }
 

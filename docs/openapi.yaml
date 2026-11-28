@@ -1367,12 +1367,11 @@ paths:
         - Users
       summary: Get the list of users who follow a given user.
       description: >-
-        Returns a paginated list of public user profiles (`UserProfile`) 
-        followed by the user specified in the `id` path parameter (referred to as `followerId`).
-        An active session is required. Results are sorted by `createdAt` in descending order,
-        followed by `followerId` in descending order. 
-        Unknown, invalid, or duplicate query parameters will result in a 400 error.
-      operationId: getUserFollowing
+        Returns the paginated list of public user profiles (UserProfile)
+        who follow the user specified by the id path parameter
+        (matched against continuedId). Requires an active session. Results are ordered by
+        createdAt descending and followerId descending.
+      operationId: getUserFollowers
       security:
         - sessionCookie: []
 
@@ -1407,7 +1406,7 @@ paths:
 
       responses:
         '200':
-          description: List of followed users returned
+          description: List of followers returned
           content:
             application/json:
               schema:
