@@ -3,13 +3,16 @@ import type { Post } from "../../services/posts"
 import { Link } from "react-router"
 import PostImage from "./PostImage"
 import UserAvatar from "./UserAvatar"
+import PostMenu from "./PostMenu"
 
 type PostCardProps = {
     post: Post
     variant?: "feed" | "profile"
+    isOwner?: boolean
+    onDeleted?: () => void
 }
 
-export default function PostCard({ post, variant = "feed" }: PostCardProps) {
+export default function PostCard({ post, variant = "feed", isOwner = false, onDeleted }: PostCardProps) {
 
     const { t, i18n } = useTranslation()
     const imageAlt = t("posts.view.imageAlt", { username: post.user.username })
@@ -42,6 +45,9 @@ export default function PostCard({ post, variant = "feed" }: PostCardProps) {
                     className="min-w-0 truncate font-semibold hover:underline">
                     { post.user.username }
                 </Link>
+                { isOwner && onDeleted && (
+                    <PostMenu postId={post.id} onDeleted={onDeleted} />
+                )}
             </header>
 
             <PostImage src={post.multimediaUrl} alt={imageAlt}

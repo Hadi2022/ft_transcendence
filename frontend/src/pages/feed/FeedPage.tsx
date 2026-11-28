@@ -2,6 +2,8 @@ import { useTranslation } from "react-i18next"
 import { usePaginatedPosts } from "../../hooks/usePaginatedPosts"
 import PostCard from "../../components/posts/PostCard"
 import PostsPagination from "../../components/posts/PostsPagination"
+import { useOutletContext } from "react-router"
+import type { MainLayoutContext } from "../../layouts/MainLayout"
 
 const PAGE_SIZE = 12
 const SKELETON_COUNT = 3
@@ -9,6 +11,7 @@ const SKELETON_COUNT = 3
 export default function FeedPage() {
 
 	const { t } = useTranslation()
+	const { myUsername } = useOutletContext<MainLayoutContext>()
 
 	const {
 		result,
@@ -80,6 +83,8 @@ export default function FeedPage() {
 						key={post.id}
 						post={post}
 						variant="feed"
+						isOwner={post.user.username === myUsername}
+						onDeleted={handleRetry}
 					/>
 				))}
 			</div>
