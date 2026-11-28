@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useLocation, useNavigate, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useOutletContext, useParams } from "react-router";
 import { getPostById, type Post } from "../../services/posts";
 import { ApiError } from "../../services/api";
+import PostMenu from "../../components/posts/PostMenu";
+import type { MainLayoutContext } from "../../layouts/MainLayout";
 
 const DEFAULT_AVATAR = "/img/default-avatar.svg"
 
@@ -23,6 +25,8 @@ export default function PostPage() {
     const [failedImageUrl, setFailedImageUrl] = useState<string|null>(null)
     const [result, setResult] = useState<PostResult|null>(null)
     const lastRequest = useRef(0)
+
+    const { myUsername } = useOutletContext<MainLayoutContext>()
 
     useEffect(() => {
         if (justCreated)
@@ -153,6 +157,10 @@ export default function PostPage() {
                                 { createdDate }
                             </time>
                         </div>
+                        { post.user.username === myUsername && (
+                            <PostMenu postId={post.id}
+                                        onDeleted={() => navigate(`/users/${post.user.username}`, { replace: true })} />
+                        )}
                     </header>
 
                     { post.caption && (
