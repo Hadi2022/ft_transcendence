@@ -10,7 +10,7 @@ export const emailField = z.string({ error: E.EMAIL_REQUIRED })
     .trim()
     .toLowerCase()
     .max(254, E.EMAIL_TOO_LONG)
-    .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, E.EMAIL_INVALID_FORMAT)
+    .pipe(z.email(E.EMAIL_INVALID_FORMAT))
 
 export const passwordField = z.string({ error: E.PASSWORD_REQUIRED })
     .min(6, E.PASSWORD_TOO_SHORT)
